@@ -1,0 +1,21 @@
+# ==============================================================================
+# โครงสร้างคอนฟิกูเรชันแอปพลิเคชัน Arduino App Lab
+# รายวิชา: การพัฒนาปัญญาประดิษฐ์บนอุปกรณ์ขอบ (Edge AI Development)
+# บทที่ 9: การนำโมเดล FOMO ไปใช้งานและการควบคุมอุปกรณ์ขับเคลื่อน (Actuator)
+# ==============================================================================
+name: "FOMO Object Detection & Actuator Sorter"
+description: "ระบบตรวจจับตำแหน่งวัตถุด้วยโมเดล FOMO และควบคุมอุปกรณ์ขับเคลื่อนคัดแยกชิ้นงานตามพิกัดจุดกึ่งกลาง"
+ports:
+  - 7000:7000
+
+bricks:
+  - arduino:video_object_detection:
+      variables:
+        EI_OBJ_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/fomo_sorter.eim"
+        CONFIDENCE_THRESHOLD: "0.65"
+  - arduino:web_ui: {}
+  - arduino:actuator_control:
+      variables:
+        SERVO_PIN: "9"
+        RELAY_PIN: "7"
+        SORT_DELAY_MS: "350"

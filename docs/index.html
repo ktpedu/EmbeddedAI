@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว | KT-Edu Digital Learning Platform</title>
+
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved;
+    })();
+  </script>
+
+  <!-- Favicon: KT-Edu Logo -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+  <link rel="apple-touch-icon" href="images/logo/logo_kt_edu.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Supabase JS Client for Realtime Cloud Database -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- KT-Edu & depa CI Custom Styling -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+  <!-- ============================================================== -->
+  <!-- 1. TOP ACCESSIBILITY & UTILITY BAR                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Platform
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">ระบบการจัดการเรียนรู้ออนไลน์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai - ชัดเจน อ่านง่าย สบายตา สไตล์ Google">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt - โมเดิร์น ทันสมัย">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ - ทางการ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Language selector -->
+        <div class="flex items-center space-x-1 font-bold">
+          <span class="text-[#fff200] cursor-pointer">TH</span>
+          <span class="text-white/30">/</span>
+          <span class="text-slate-400 hover:text-white cursor-pointer">EN</span>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Social links -->
+        <div class="flex items-center space-x-2.5 text-slate-300">
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="hover:text-yellow-300" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://youtube.com/@Thanaud" target="_blank" class="hover:text-red-400" title="ช่องสอน Arduino UNO Q"><i class="fa-brands fa-youtube"></i></a>
+          <a href="https://line.me" target="_blank" class="hover:text-emerald-400"><i class="fa-brands fa-line"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER & NAVBAR (depa THEME)                           -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Course Branding -->
+        <div class="flex items-center space-x-3.5 cursor-pointer" onclick="switchTab('lessons')">
+          <div class="flex items-center space-x-3">
+            <!-- KT-Edu Official Logo -->
+            <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5 transition hover:scale-105">
+            <div class="h-9 w-px bg-white/20 hidden sm:block"></div>
+          </div>
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight flex items-center gap-2">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Switcher & User Profile -->
+        <div class="flex items-center space-x-3">
+          <!-- Role Indicator Badge -->
+          <div id="roleBadge" class="hidden sm:flex items-center px-3.5 py-1.5 rounded-full text-xs font-black bg-[#fff200] text-[#173b6b] shadow-md border border-yellow-400">
+            <i class="fa-solid fa-user-graduate mr-1.5"></i>
+            <span id="roleText">นักเรียน (Student Mode)</span>
+          </div>
+
+          <!-- Student Profile / Login Button -->
+          <div id="studentProfileArea" class="flex items-center">
+            <!-- Case A: Not logged in -->
+            <button id="studentLoginBtn" onclick="openStudentLoginModal()" class="flex items-center space-x-1.5 bg-[#fff200] hover:bg-yellow-300 text-[#173b6b] px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition shadow-md">
+              <i class="fa-solid fa-right-to-bracket text-[#173b6b]"></i>
+              <span class="hidden sm:inline">เข้าสู่ระบบนักเรียน</span>
+              <span class="sm:hidden">Login</span>
+            </button>
+
+            <!-- Case B: Logged in (shown dynamically via JS) -->
+            <div id="studentLoggedInInfo" class="hidden items-center space-x-2 sm:space-x-3 bg-white/15 px-3 py-1.5 rounded-xl border border-white/25 shadow-sm">
+              <div class="w-7 h-7 rounded-full bg-[#fff200] text-[#173b6b] flex items-center justify-center font-black text-xs shadow shrink-0">
+                <i class="fa-solid fa-id-card"></i>
+              </div>
+              <div class="text-left text-xs leading-tight">
+                <div class="font-bold text-white flex items-center gap-1.5">
+                  <span id="navStudentId" class="text-yellow-300 font-mono font-bold"></span>
+                  <span id="navStudentName" class="truncate max-w-[90px] sm:max-w-[130px]"></span>
+                </div>
+                <div id="navStudentClass" class="text-[10px] text-slate-300 font-medium">ห้อง ม.5/12</div>
+              </div>
+              <!-- Prominent Red Logout Button -->
+              <button onclick="logoutStudent()" class="ml-1 sm:ml-2 px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs flex items-center gap-1.5 shadow transition-all duration-150 cursor-pointer border border-red-400/40 hover:scale-105 shrink-0" title="ออกจากระบบนักเรียน">
+                <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                <span class="hidden sm:inline">ออกจากระบบ</span>
+                <span class="sm:hidden">ออก</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Role Toggle Button -->
+          <div class="relative">
+            <button id="roleSwitchBtn" onclick="toggleRoleDropdown()" class="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-3.5 py-2 rounded-xl border border-white/20 text-xs sm:text-sm font-bold transition focus:outline-none shadow">
+              <i class="fa-solid fa-arrows-rotate text-[#fff200]"></i>
+              <span class="hidden md:inline">สลับบทบาท</span>
+              <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="roleDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl py-2 z-50 border border-slate-200 text-slate-800">
+              <div class="px-4 py-2 border-b border-slate-100 text-xs text-slate-500 font-bold uppercase tracking-wider">
+                เลือกบทบาทการเข้าใช้งานระบบ
+              </div>
+              <button onclick="setRoleToGuest()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 flex items-center space-x-3 transition border-b border-slate-100">
+                <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-sm">
+                  <i class="fa-solid fa-globe"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900">ผู้เข้าชมทั่วไป (Guest)</div>
+                  <div class="text-xs text-slate-500">ดูบทเรียนออนไลน์เสรี (ไม่ต้องล็อกอิน)</div>
+                </div>
+              </button>
+              <button onclick="onSelectStudentRole()" class="w-full text-left px-4 py-3 text-sm hover:bg-yellow-50/70 flex items-center space-x-3 transition">
+                <div class="w-9 h-9 rounded-full bg-yellow-100 text-[#173b6b] flex items-center justify-center font-bold text-sm">
+                  <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900">นักเรียน (Student)</div>
+                  <div class="text-xs text-slate-500">ทำข้อสอบ ส่งใบงาน ตรวจสอบคะแนน</div>
+                </div>
+              </button>
+              <button onclick="requestAdminRole()" class="w-full text-left px-4 py-3 text-sm hover:bg-blue-50/70 flex items-center space-x-3 transition">
+                <div class="w-9 h-9 rounded-full bg-blue-100 text-[#173b6b] flex items-center justify-center font-bold text-sm">
+                  <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span>ครูผู้สอน / Admin</span>
+                    <i class="fa-solid fa-lock text-[10px] text-amber-500"></i>
+                  </div>
+                  <div class="text-xs text-slate-500">ต้องยืนยันรหัสผ่านเพื่อเข้าถึงสิทธิ์ CRUD</div>
+                </div>
+              </button>
+
+              <!-- Option to logout student if logged in -->
+              <div id="studentLogoutDropdownItem" class="hidden border-t border-slate-100 my-1 pt-1">
+                <button onclick="logoutStudent()" class="w-full text-left px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 flex items-center space-x-3 transition font-bold group">
+                  <div class="w-8 h-8 rounded-full bg-red-100 group-hover:bg-red-200 text-red-600 flex items-center justify-center flex-shrink-0 transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                  </div>
+                  <div>
+                    <div class="font-bold text-red-600">ออกจากระบบนักเรียน (Logout)</div>
+                    <div class="text-[11px] text-slate-400 font-normal">สลับบัญชีหรือออกจากเซสชัน</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Navigation Tabs (depa style) -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 overflow-x-auto no-scrollbar">
+      <nav class="flex items-center space-x-1 sm:space-x-1.5 max-w-7xl mx-auto py-1 text-xs sm:text-sm font-semibold whitespace-nowrap">
+        <button onclick="switchTab('lessons')" id="tabBtn-lessons" class="nav-tab active flex items-center px-3.5 sm:px-4 py-2.5 rounded-t-xl text-[#fff200] bg-[#173b6b] whitespace-nowrap shrink-0">
+          <i class="fa-solid fa-book-open mr-2"></i>บทเรียนออนไลน์
+        </button>
+        <button onclick="switchTab('worksheets')" id="tabBtn-worksheets" class="nav-tab flex items-center px-3.5 sm:px-4 py-2.5 rounded-t-xl text-slate-200 hover:text-white whitespace-nowrap shrink-0">
+          <i class="fa-solid fa-flask-vial mr-2"></i>ใบงาน & ข้อสอบปฏิบัติ
+        </button>
+        <button onclick="switchTab('quizzes')" id="tabBtn-quizzes" class="nav-tab flex items-center px-3.5 sm:px-4 py-2.5 rounded-t-xl text-slate-200 hover:text-white whitespace-nowrap shrink-0">
+          <i class="fa-solid fa-clipboard-check mr-2"></i>ศูนย์ทดสอบออนไลน์
+        </button>
+        <button onclick="switchTab('code')" id="tabBtn-code" class="nav-tab flex items-center px-3.5 sm:px-4 py-2.5 rounded-t-xl text-slate-200 hover:text-white whitespace-nowrap shrink-0">
+          <i class="fa-solid fa-code mr-2"></i>คลังโค้ด & SQL Logger
+        </button>
+        <button onclick="switchTab('media')" id="tabBtn-media" class="nav-tab flex items-center px-3.5 sm:px-4 py-2.5 rounded-t-xl text-slate-200 hover:text-white whitespace-nowrap shrink-0">
+          <i class="fa-solid fa-folder-open mr-2"></i>สื่อการสอน & Dataset
+        </button>
+        <button onclick="switchTab('scores')" id="tabBtn-scores" class="nav-tab flex items-center px-3.5 sm:px-4 py-2.5 rounded-t-xl text-slate-200 hover:text-white whitespace-nowrap shrink-0">
+          <i class="fa-solid fa-square-poll-vertical mr-2"></i>สมุดบันทึกคะแนน
+        </button>
+        <!-- Admin CMS Tab (Only visible in admin mode) -->
+        <button onclick="switchTab('admin')" id="tabBtn-admin" style="display: none !important;" class="nav-tab items-center px-3.5 sm:px-4 py-2.5 rounded-t-xl text-yellow-300 hover:text-white bg-white/10 border border-yellow-300/30 whitespace-nowrap shrink-0">
+          <i class="fa-solid fa-screwdriver-wrench mr-2 text-[#fff200]"></i>จัดการระบบ (Admin CMS)
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. HERO IMAGE CAROUSEL / SLIDER (สไลด์รูปภาพแบนเนอร์ depa)      -->
+  <!-- ============================================================== -->
+  <section class="slider-container bg-[#0d2342] shadow-2xl relative" id="heroSliderSection">
+    
+    <!-- Slider Track -->
+    <div class="slider-track" id="sliderTrack">
+
+      <!-- Slide 1: General Curriculum & Platform Intro -->
+      <div class="slide-item h-[380px] sm:h-[450px] lg:h-[500px]">
+        <img src="images/banners/slide1_arduino_edgeai.jpg" alt="Arduino UNO Q Embedded AI" class="w-full h-full object-cover">
+        <div class="absolute inset-0 slide-overlay flex items-center">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-white">
+            <div class="max-w-2xl space-y-2.5 sm:space-y-3">
+              <span class="inline-flex items-center gap-2 bg-[#fff200] text-[#173b6b] text-xs font-black px-3.5 py-1 rounded-full shadow-lg">
+                <i class="fa-solid fa-microchip"></i> KT-Edu Innovation • พัฒนากำลังคนดิจิทัลด้านสมองกลฝังตัว
+              </span>
+              <h2 class="text-lg sm:text-2xl lg:text-3xl font-black font-heading leading-snug sm:leading-normal tracking-tight text-white drop-shadow-md">
+                ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว
+                <span class="block mt-1 sm:mt-1.5 text-base sm:text-lg lg:text-xl text-[#fff200] font-bold">(Embedded Artificial Intelligence)</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-100 leading-relaxed drop-shadow max-w-xl">
+                เรียนรู้การประมวลผลโมเดล AI บนอุปกรณ์ปลายทางด้วยบอร์ด <strong>Arduino UNO Q</strong> สถาปัตยกรรม Dragonwing QRB2210 ร่วมกับแพลตฟอร์ม <strong>Edge Impulse Studio</strong>
+              </p>
+              <div class="flex flex-wrap gap-3 pt-1">
+                <button onclick="switchTab('lessons')" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+                  <i class="fa-solid fa-book-open"></i> เข้าสู่บทเรียน
+                </button>
+                <a href="https://youtube.com/playlist?list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU" target="_blank" class="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition">
+                  <i class="fa-brands fa-youtube text-red-500 text-base"></i> สื่อวีดิทัศน์การสอน
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Edge Impulse Studio & Model Training -->
+      <div class="slide-item h-[380px] sm:h-[450px] lg:h-[500px]">
+        <img src="images/banners/slide2_edgeimpulse_vision.jpg" alt="Edge Impulse Machine Learning Studio" class="w-full h-full object-cover">
+        <div class="absolute inset-0 slide-overlay flex items-center">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-white">
+            <div class="max-w-2xl space-y-2.5 sm:space-y-3">
+              <span class="inline-flex items-center gap-2 bg-emerald-400 text-slate-900 text-xs font-black px-3.5 py-1 rounded-full shadow-lg">
+                <i class="fa-solid fa-brain"></i> Machine Learning Pipeline • ฝึกสอนโมเดลระดับวิศวกรรม
+              </span>
+              <h2 class="text-lg sm:text-2xl lg:text-3xl font-black font-heading leading-snug sm:leading-normal tracking-tight text-white drop-shadow-md">
+                การฝึกสอนโมเดล AI บน Edge Impulse
+                <span class="block mt-1 sm:mt-1.5 text-base sm:text-lg lg:text-xl text-[#fff200] font-bold">ทั้งระบบการมองเห็น (Vision) และสัญญาณเสียง (Audio)</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-100 leading-relaxed drop-shadow max-w-xl">
+                ครบครัน 4 สถาปัตยกรรมหลัก: Visual Anomaly (FOMO-AD), FOMO Object Detection, Image Classification และ Keyword Spotting (KWS) คำสั่งเสียงภาษาไทย
+              </p>
+              <div class="flex flex-wrap gap-3 pt-1">
+                <button onclick="switchTab('quizzes')" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+                  <i class="fa-solid fa-clipboard-check"></i> ทำข้อสอบออนไลน์
+                </button>
+                <a href="https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu" target="_blank" class="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition">
+                  <i class="fa-solid fa-cloud-arrow-down text-yellow-300"></i> ดาวน์โหลด Dataset & Slides
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3: Database-SQL Brick & Native Deployment -->
+      <div class="slide-item h-[380px] sm:h-[450px] lg:h-[500px]">
+        <img src="images/banners/slide3_database_deployment.jpg" alt="Database-SQL Brick & .eim Deployment" class="w-full h-full object-cover">
+        <div class="absolute inset-0 slide-overlay flex items-center">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-white">
+            <div class="max-w-2xl space-y-2.5 sm:space-y-3">
+              <span class="inline-flex items-center gap-2 bg-[#fff200] text-[#173b6b] text-xs font-black px-3.5 py-1 rounded-full shadow-lg">
+                <i class="fa-solid fa-database"></i> Hardware & Database • บันทึกประวัติ AI อัจฉริยะ
+              </span>
+              <h2 class="text-lg sm:text-2xl lg:text-3xl font-black font-heading leading-snug sm:leading-normal tracking-tight text-white drop-shadow-md">
+                การติดตั้งและประมวลผลโมเดล .eim บนบอร์ดจริง
+                <span class="block mt-1 sm:mt-1.5 text-base sm:text-lg lg:text-xl text-[#fff200] font-bold">บันทึกข้อมูลลง Database-SQL Brick</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-100 leading-relaxed drop-shadow max-w-xl">
+                คอมไพล์เป็นไฟล์โมเดลเนทีฟ Linux AArch64 ประมวลผลร่วมกับกล้องเว็บแคมหรือไมโครโฟน และจัดเก็บบันทึกประวัติการทำนายผล (Inference Event Logs) ลงฐานข้อมูลในตัวบอร์ดแบบเรียลไทม์
+              </p>
+              <div class="flex flex-wrap gap-3 pt-1">
+                <button onclick="switchTab('code')" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+                  <i class="fa-solid fa-code"></i> เปิดคลังโค้ด & SQL Logger
+                </button>
+                <button onclick="switchTab('worksheets')" class="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition">
+                  <i class="fa-solid fa-flask-vial text-yellow-300"></i> ดูใบงานปฏิบัติการ
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: Online Assessment & Teacher CMS -->
+      <div class="slide-item h-[380px] sm:h-[450px] lg:h-[500px]">
+        <img src="images/banners/slide4_assessment_innovation.jpg" alt="Edge AI STEM Innovation Workshop" class="w-full h-full object-cover">
+        <div class="absolute inset-0 slide-overlay flex items-center">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-white">
+            <div class="max-w-2xl space-y-2.5 sm:space-y-3">
+              <span class="inline-flex items-center gap-2 bg-indigo-400 text-slate-900 text-xs font-black px-3.5 py-1 rounded-full shadow-lg">
+                <i class="fa-solid fa-chart-line"></i> Assessment & CMS • ระบบวัดผลมาตรฐาน สพฐ.
+              </span>
+              <h2 class="text-lg sm:text-2xl lg:text-3xl font-black font-heading leading-snug sm:leading-normal tracking-tight text-white drop-shadow-md">
+                ศูนย์ทดสอบวัดผลออนไลน์
+                <span class="block mt-1 sm:mt-1.5 text-base sm:text-lg lg:text-xl text-[#fff200] font-bold">พร้อมระบบบริหารจัดการบทเรียนสำหรับครูผู้สอน</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-100 leading-relaxed drop-shadow">
+                ข้อสอบปรนัยรายบท 120 ข้อ กลางภาค 20 ข้อ ปลายภาค 20 ข้อ และข้อสอบปฏิบัติ 12 ข้อ พร้อมตรวจคะแนนแบบ Real-time เฉลยละเอียด และระบบออกรายงานผลการเรียน
+              </p>
+              <div class="flex flex-wrap gap-3 pt-2">
+                <button onclick="switchTab('quizzes')" class="btn-depa-yellow px-5 py-3 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+                  <i class="fa-solid fa-pen-nib"></i> เริ่มทำข้อสอบทันที
+                </button>
+                <button onclick="requestAdminRole()" class="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition">
+                  <i class="fa-solid fa-screwdriver-wrench text-yellow-300"></i> แผงควบคุมครู (Admin CMS)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Slider Controls: Previous & Next Arrows -->
+    <button onclick="prevSlide()" class="slider-btn absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-lg z-20 shadow-xl" title="ก่อนหน้า">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button onclick="nextSlide()" class="slider-btn absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-lg z-20 shadow-xl" title="ถัดไป">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+
+    <!-- Slider Indicators / Pagination Dots -->
+    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center space-x-2.5 z-20" id="sliderDotsContainer">
+      <div class="slider-dot active" onclick="goToSlide(0)"></div>
+      <div class="slider-dot" onclick="goToSlide(1)"></div>
+      <div class="slider-dot" onclick="goToSlide(2)"></div>
+      <div class="slider-dot" onclick="goToSlide(3)"></div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. QUICK ACCESS SERVICE CARDS (สไตล์บริการเด่น depa.or.th)       -->
+  <!-- ============================================================== -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 z-30 relative mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
+      
+      <!-- Card 1: Lessons -->
+      <div onclick="switchTab('lessons')" class="service-card bg-white p-4 sm:p-5 rounded-2xl shadow-md border border-slate-200 cursor-pointer text-center group">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-blue-50 text-[#173b6b] group-hover:bg-[#173b6b] group-hover:text-[#fff200] flex items-center justify-center text-xl transition mb-2.5 font-bold shadow-sm">
+          <i class="fa-solid fa-book-open"></i>
+        </div>
+        <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#173b6b]">บทเรียนออนไลน์</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">เรียนรู้ทีละขั้นตอน</div>
+      </div>
+
+      <!-- Card 2: Worksheets -->
+      <div onclick="switchTab('worksheets')" class="service-card bg-white p-4 sm:p-5 rounded-2xl shadow-md border border-slate-200 cursor-pointer text-center group">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-red-50 text-red-600 group-hover:bg-red-600 group-hover:text-white flex items-center justify-center text-xl transition mb-2.5 font-bold shadow-sm">
+          <i class="fa-solid fa-flask-vial"></i>
+        </div>
+        <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-red-600">ใบงานปฏิบัติการ</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">ใบงานและกิจกรรมปฏิบัติการ</div>
+      </div>
+
+      <!-- Card 3: Exams -->
+      <div onclick="switchTab('quizzes')" class="service-card bg-white p-4 sm:p-5 rounded-2xl shadow-md border border-slate-200 cursor-pointer text-center group">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-yellow-50 text-yellow-600 group-hover:bg-yellow-500 group-hover:text-[#173b6b] flex items-center justify-center text-xl transition mb-2.5 font-bold shadow-sm">
+          <i class="fa-solid fa-clipboard-check"></i>
+        </div>
+        <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#173b6b]">สอบออนไลน์</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">คลังข้อสอบมาตรฐาน</div>
+      </div>
+
+      <!-- Card 4: Database & Logs -->
+      <div onclick="switchTab('code')" class="service-card bg-white p-4 sm:p-5 rounded-2xl shadow-md border border-slate-200 cursor-pointer text-center group">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-yellow-100 text-[#173b6b] group-hover:bg-[#173b6b] group-hover:text-[#fff200] flex items-center justify-center text-xl transition mb-2.5 font-bold shadow-sm">
+          <i class="fa-solid fa-database"></i>
+        </div>
+        <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#173b6b]">บันทึกฐานข้อมูล</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Database & AI Logs</div>
+      </div>
+
+      <!-- Card 5: Source Code -->
+      <div onclick="switchTab('code')" class="service-card bg-white p-4 sm:p-5 rounded-2xl shadow-md border border-slate-200 cursor-pointer text-center group">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-indigo-50 text-indigo-700 group-hover:bg-indigo-700 group-hover:text-white flex items-center justify-center text-xl transition mb-2.5 font-bold shadow-sm">
+          <i class="fa-solid fa-code"></i>
+        </div>
+        <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-700">คลังโค้ดตัวอย่าง</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Python & app.yaml</div>
+      </div>
+
+      <!-- Card 6: Gradebook -->
+      <div onclick="switchTab('scores')" class="service-card bg-white p-4 sm:p-5 rounded-2xl shadow-md border border-slate-200 cursor-pointer text-center group">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-emerald-50 text-emerald-700 group-hover:bg-emerald-700 group-hover:text-white flex items-center justify-center text-xl transition mb-2.5 font-bold shadow-sm">
+          <i class="fa-solid fa-square-poll-vertical"></i>
+        </div>
+        <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-emerald-700">สมุดบันทึกคะแนน</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">ผลสอบและออก CSV</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- MAIN CONTENT CONTAINER                                         -->
+  <!-- ============================================================== -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
+
+    <!-- Role Context Alert Banner (Admin Mode) -->
+    <div id="adminModeBanner" class="hidden mb-6 bg-gradient-to-r from-[#173b6b] to-[#0d2342] text-white p-5 rounded-2xl shadow-xl border-2 border-[#fff200] flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-full bg-[#fff200] flex items-center justify-center text-xl text-[#173b6b] shadow font-black">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <div class="font-bold text-white flex items-center gap-2 text-base">
+            <span>แผงควบคุมระบบสำหรับครูผู้สอน (Teacher & Admin CMS)</span>
+            <span class="text-xs bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded shadow">สิทธิ์การจัดการข้อมูล</span>
+          </div>
+          <div class="text-xs text-yellow-100 mt-0.5">ท่านได้รับสิทธิ์ เพิ่ม แก้ไข และลบข้อมูลบทเรียน คลังข้อสอบ สื่อการสอน ตลอดจนบันทึกและประเมินผลคะแนนได้ทันที</div>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="prepareCreateLesson()" class="btn-depa-yellow px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-1.5">
+          <i class="fa-solid fa-plus"></i> เพิ่มบทเรียนใหม่
+        </button>
+        <button onclick="prepareCreateQuiz()" class="bg-white hover:bg-slate-100 text-[#173b6b] font-bold px-4 py-2 rounded-xl text-xs shadow flex items-center gap-1.5">
+          <i class="fa-solid fa-plus"></i> เพิ่มข้อสอบเข้าคลัง
+        </button>
+        <button onclick="logoutAdmin()" class="bg-red-500/80 hover:bg-red-600 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-lock"></i> ล็อกสิทธิ์ (Logout)
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 1. TAB: LESSONS (บทเรียนออนไลน์)                              -->
+    <!-- ============================================================== -->
+    <section id="section-lessons" class="tab-section">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-4 border-b border-slate-200 gap-4">
+        <div>
+          <h2 class="text-2xl font-black text-[#173b6b] flex items-center gap-2 font-heading">
+            <i class="fa-solid fa-graduation-cap text-[#173b6b]"></i>
+            <span>หลักสูตรบทเรียนออนไลน์</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            ครอบคลุมสถาปัตยกรรมบอร์ดพัฒนา Arduino UNO Q, ส่วนขยาย Database-SQL Brick, การฝึกสอนโมเดลบนแพลตฟอร์ม Edge Impulse และการติดตั้งโมเดล .eim เพื่อใช้งานจริง
+          </p>
+        </div>
+        <div class="admin-only hidden">
+          <button onclick="prepareCreateLesson()" class="btn-depa-yellow px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> เพิ่มบทเรียนใหม่
+          </button>
+        </div>
+      </div>
+
+      <!-- Lessons Grid -->
+      <div id="lessonsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="col-span-full py-12 flex flex-col items-center justify-center text-slate-400 gap-3">
+          <i class="fa-solid fa-circle-notch fa-spin text-3xl text-[#173b6b]"></i>
+          <span class="text-xs font-bold text-slate-500">กำลังโหลดบทเรียนออนไลน์...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- 2. TAB: WORKSHEETS & PRACTICAL (ใบงาน & ข้อสอบปฏิบัติ)           -->
+    <!-- ============================================================== -->
+    <section id="section-worksheets" class="tab-section hidden">
+      <div class="mb-6 pb-4 border-b border-slate-200">
+        <h2 class="text-2xl font-black text-[#173b6b] font-heading">ใบงานปฏิบัติการ และโจทย์ข้อสอบปฏิบัติ</h2>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1">วัดสมรรถนะการปฏิบัติการจริงบนบอร์ด Arduino UNO Q และการบันทึกประวัติผ่าน Database-SQL Brick</p>
+      </div>
+
+      <!-- Guest Notice for Worksheets -->
+      <div id="worksheetsGuestNotice" class="hidden bg-gradient-to-r from-amber-50 to-yellow-50 border border-yellow-300 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm mb-6">
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-[#fff200] text-[#173b6b] flex items-center justify-center text-lg font-black shrink-0 shadow-sm">
+            <i class="fa-solid fa-clipboard-user"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-[#173b6b]">โหมดผู้เข้าชมทั่วไป: เข้าสู่ระบบนักเรียนเพื่อส่งงานและบันทึกคะแนน</h4>
+            <p class="text-xs text-slate-600 mt-0.5">ท่านสามารถดาวน์โหลดไฟล์ใบงาน PDF และเปิดดูคู่มือได้เสรี หากต้องการส่งรายงานปฏิบัติการหรือส่งใบงาน กรุณาเข้าสู่ระบบ</p>
+          </div>
+        </div>
+        <button onclick="openStudentLoginModal()" class="btn-depa-yellow px-4 py-2.5 rounded-xl text-xs font-bold shadow shrink-0 whitespace-nowrap flex items-center gap-1.5">
+          <i class="fa-solid fa-right-to-bracket text-[#173b6b]"></i> เข้าสู่ระบบเพื่อส่งงาน
+        </button>
+      </div>
+
+      <!-- Module Filter & Search Bar -->
+      <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none" id="worksheetFilterButtons">
+          <button onclick="setWorksheetFilter('all')" class="ws-filter-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold border transition bg-[#173b6b] text-white border-[#173b6b]" data-filter="all">
+            <i class="fa-solid fa-layer-group mr-1"></i> ทั้งหมด (12 บท)
+          </button>
+          <button onclick="setWorksheetFilter('part1')" class="ws-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold border transition bg-slate-100 text-slate-700 border-slate-200 hover:bg-yellow-100" data-filter="part1">
+            ภาค 1: สถาปัตยกรรม & ข้อมูล (บท 1-4)
+          </button>
+          <button onclick="setWorksheetFilter('part2')" class="ws-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold border transition bg-slate-100 text-slate-700 border-slate-200 hover:bg-yellow-100" data-filter="part2">
+            ภาค 2: คอมพิวเตอร์วิทัศน์ Edge AI (บท 5-10)
+          </button>
+          <button onclick="setWorksheetFilter('part3')" class="ws-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold border transition bg-slate-100 text-slate-700 border-slate-200 hover:bg-yellow-100" data-filter="part3">
+            ภาค 3: สัญญาณเสียง & บูรณาการ (บท 11-12)
+          </button>
+        </div>
+
+        <div class="relative min-w-[220px]">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+          <input type="text" id="worksheetSearchInput" oninput="handleWorksheetSearch()" placeholder="ค้นหาโจทย์/ใบงาน (เช่น FOMO, SQLite)..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-[#173b6b] transition">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Practical Tasks (Left 2 cols) -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-[#173b6b] flex items-center gap-2">
+              <i class="fa-solid fa-screwdriver-wrench text-[#173b6b]"></i>
+              โจทย์ข้อสอบปฏิบัติการ (บทละ 10 คะแนน)
+            </h3>
+            <span class="text-xs bg-yellow-100 text-[#173b6b] border border-yellow-300 px-3 py-1 rounded-full font-bold">รวม 120 คะแนน</span>
+          </div>
+          <div id="practicalList" class="space-y-4">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Worksheets List (Right 1 col) -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-bold text-[#173b6b] flex items-center gap-2">
+            <i class="fa-solid fa-file-pdf text-red-600"></i>
+            ใบงานปฏิบัติการประจำบท
+          </h3>
+          <div id="worksheetsList" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- 3. TAB: QUIZZES & EXAMS (ศูนย์ทดสอบออนไลน์)                  -->
+    <!-- ============================================================== -->
+    <section id="section-quizzes" class="tab-section hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-4 border-b border-slate-200 gap-4">
+        <div>
+          <h2 class="text-2xl font-black text-[#173b6b] font-heading">ศูนย์ทดสอบวัดผลออนไลน์ (Online Assessment Center)</h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">คลังข้อสอบมาตรฐาน ตรวจให้คะแนนแบบ Real-time พร้อมเฉลยละเอียดเชิงวิชาการ</p>
+        </div>
+        <div class="admin-only hidden">
+          <button onclick="prepareCreateQuiz()" class="btn-depa-blue px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2">
+            <i class="fa-solid fa-plus text-[#fff200]"></i> เพิ่มข้อสอบเข้าสู่คลัง
+          </button>
+        </div>
+      </div>
+
+      <!-- Guest Notice for Quizzes -->
+      <div id="quizzesGuestNotice" class="hidden bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm mb-6">
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-[#173b6b] text-[#fff200] flex items-center justify-center text-lg font-black shrink-0 shadow-sm">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-[#173b6b]">เข้าสู่ระบบนักเรียนก่อนเริ่มทำแบบทดสอบ</h4>
+            <p class="text-xs text-slate-600 mt-0.5">ระบบจะตรวจข้อสอบแบบเรียลไทม์และบันทึกคะแนนสะสมของท่านลงในสมุดบันทึกผลการเรียน กรุณาเข้าสู่ระบบก่อนทำแบบทดสอบ</p>
+          </div>
+        </div>
+        <button onclick="openStudentLoginModal()" class="btn-depa-blue px-4 py-2.5 rounded-xl text-xs font-bold shadow shrink-0 whitespace-nowrap flex items-center gap-1.5">
+          <i class="fa-solid fa-right-to-bracket text-[#fff200]"></i> เข้าสู่ระบบนักเรียนทันที
+        </button>
+      </div>
+
+      <!-- Exam Category Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Chapter Quizzes Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-lg transition hover:border-[#173b6b]">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-yellow-100 text-[#173b6b] flex items-center justify-center text-xl mb-4 font-bold shadow-sm">
+              <i class="fa-solid fa-list-check"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900">แบบทดสอบประจำบทเรียน</h3>
+            <p class="text-xs text-slate-600 mt-2">แบบทดสอบปรนัยท้ายบทเรียน (บทละ 10 ข้อ รวม 120 ข้อ)</p>
+            <div class="mt-4">
+              <label class="block text-xs font-bold text-slate-700 mb-1">เลือกบทเรียนที่ต้องการสอบ:</label>
+              <select id="examChapterSelect" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:ring-[#173b6b] focus:border-[#173b6b]">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+          </div>
+          <button onclick="startChapterExam()" class="mt-6 w-full btn-depa-yellow py-2.5 rounded-xl text-xs font-bold shadow">
+            เริ่มทำข้อสอบท้ายบท (10 ข้อ)
+          </button>
+        </div>
+
+        <!-- Midterm Exam Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-lg transition hover:border-[#173b6b]">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-blue-100 text-[#173b6b] flex items-center justify-center text-xl mb-4 font-bold shadow-sm">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-slate-900">ข้อสอบกลางภาคเรียน</h3>
+              <span class="text-xs bg-blue-100 text-[#173b6b] font-bold px-2 py-0.5 rounded">20 ข้อ</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-2">ครอบคลุมขอบข่ายบทที่ 1–6: การเตรียมระบบ, สถาปัตยกรรมมอดูล, ฐานข้อมูล Database-SQL, และโมเดลตรวจจับความผิดปกติจากภาพ</p>
+            <div class="mt-4 text-xs text-slate-500 space-y-1">
+              <div><i class="fa-regular fa-clock mr-1 text-[#173b6b]"></i> เวลาสอบ: 40 นาที</div>
+              <div><i class="fa-solid fa-list-ol mr-1 text-[#173b6b]"></i> จำนวน: 20 ข้อ (ปรนัย 4 ตัวเลือก 20 คะแนน)</div>
+            </div>
+          </div>
+          <button onclick="startStandardExam('midterm')" class="mt-6 w-full btn-depa-blue py-2.5 rounded-xl text-xs font-bold shadow">
+            เริ่มทำข้อสอบกลางภาค (20 ข้อ)
+          </button>
+        </div>
+
+        <!-- Final Exam Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-lg transition hover:border-[#173b6b]">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xl mb-4 font-bold shadow-sm">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-bold text-slate-900">ข้อสอบปลายภาคเรียน</h3>
+              <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded">20 ข้อ</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-2">ครอบคลุมขอบข่ายบทที่ 7–12: สถาปัตยกรรม FOMO, การจำแนกประเภทภาพ, การรู้จำคำสั่งเสียง KWS, และระบบปัญญาประดิษฐ์พหุโมดอล</p>
+            <div class="mt-4 text-xs text-slate-500 space-y-1">
+              <div><i class="fa-regular fa-clock mr-1 text-indigo-700"></i> เวลาสอบ: 40 นาที</div>
+              <div><i class="fa-solid fa-list-ol mr-1 text-indigo-700"></i> จำนวน: 20 ข้อ (ปรนัย 4 ตัวเลือก 20 คะแนน)</div>
+            </div>
+          </div>
+          <button onclick="startStandardExam('final')" class="mt-6 w-full bg-[#0d2342] hover:bg-[#173b6b] text-white py-2.5 rounded-xl text-xs font-bold shadow transition">
+            เริ่มทำข้อสอบปลายภาค (20 ข้อ)
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive Exam Runner View -->
+      <div id="examRunnerContainer" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden mb-8">
+        <!-- Exam Header -->
+        <div class="bg-[#173b6b] text-white p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4 border-b-4 border-[#fff200]">
+          <div>
+            <h3 id="activeExamTitle" class="text-lg sm:text-xl font-bold">ชื่อชุดข้อสอบ</h3>
+            <div id="activeExamSubtitle" class="text-xs text-yellow-200 mt-1">คำชี้แจงการสอบ</div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="text-right">
+              <div class="text-xs text-slate-300">คำถามที่ตอบแล้ว</div>
+              <div id="examProgressCount" class="text-base font-extrabold text-[#fff200]">0 / 10</div>
+            </div>
+            <button onclick="cancelExam()" class="text-xs text-red-200 hover:text-white border border-red-300/40 px-3 py-1.5 rounded-lg">
+              <i class="fa-solid fa-arrow-left mr-1"></i> ย้อนกลับ
+            </button>
+          </div>
+        </div>
+
+        <!-- Exam Questions List -->
+        <div id="examQuestionsBody" class="p-6 space-y-8 max-h-[70vh] overflow-y-auto">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Exam Footer Submission -->
+        <div class="bg-slate-50 border-t border-slate-200 p-5 flex items-center justify-between">
+          <div class="text-xs text-slate-500">
+            <i class="fa-solid fa-info-circle mr-1 text-[#173b6b]"></i> ระบบจะตรวจคำตอบและเฉลยละเอียดทันทีที่ส่งข้อสอบ
+          </div>
+          <button onclick="submitActiveExam()" class="btn-depa-yellow px-6 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> ส่งคำตอบและตรวจคะแนน
+          </button>
+        </div>
+      </div>
+
+      <!-- Exam Result Modal / View -->
+      <div id="examResultContainer" class="hidden bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden mb-8">
+        <div class="bg-gradient-to-r from-[#173b6b] to-[#0d2342] text-white p-8 text-center border-b-4 border-[#fff200]">
+          <div class="w-16 h-16 rounded-full bg-[#fff200] text-[#173b6b] mx-auto flex items-center justify-center text-3xl mb-3 shadow font-bold">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <h3 class="text-2xl font-bold">สรุปผลการทดสอบของคุณ</h3>
+          <div class="text-sm text-yellow-200 mt-1" id="resultExamTitle">ชื่อชุดข้อสอบ</div>
+          
+          <div class="mt-6 flex justify-center items-baseline space-x-2">
+            <span id="resultScore" class="text-5xl font-black text-[#fff200]">0</span>
+            <span id="resultMaxScore" class="text-2xl text-slate-300">/ 10</span>
+            <span id="resultPercentage" class="text-lg bg-black/30 text-yellow-300 px-3 py-1 rounded-full ml-3 font-bold">(0%)</span>
+          </div>
+        </div>
+
+        <!-- Detailed Review List -->
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+            <h4 class="font-bold text-[#173b6b] text-base">เฉลยละเอียดเชิงวิชาการรายข้อ</h4>
+            <button onclick="closeExamResult()" class="text-xs bg-[#173b6b] hover:bg-[#0d2342] text-white px-3 py-1.5 rounded-lg font-semibold">
+              <i class="fa-solid fa-check mr-1"></i> ปิดหน้ารายงาน
+            </button>
+          </div>
+          <div id="examReviewBody" class="space-y-6">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- 4. TAB: CODE SANDBOX (คลังโค้ด & SQL LOGGER)                     -->
+    <!-- ============================================================== -->
+    <section id="section-code" class="tab-section hidden">
+      <div class="mb-6 pb-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-black text-[#173b6b] font-heading">คลังชุดคำสั่งและการกำหนดค่าระบบ (Source Code & app.yaml)</h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            รองรับการประมวลผลบนชิป Qualcomm Dragonwing QRB2210 และระบบจัดการฐานข้อมูล Database-SQL Brick
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="codeCardsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- 5. TAB: MEDIA & DATASETS (สื่อและชุดข้อมูล)                      -->
+    <!-- ============================================================== -->
+    <section id="section-media" class="tab-section hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-4 border-b border-slate-200 gap-4">
+        <div>
+          <h2 class="text-2xl font-black text-[#173b6b] font-heading">คลังสื่อการสอนและชุดข้อมูล (Teaching Materials & Datasets)</h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">สไลด์บรรยาย PDF, ชุดภาพถ่าย และชุดเสียงสำหรับการฝึกสอนโมเดล</p>
+        </div>
+        <div class="admin-only hidden">
+          <button onclick="openModal('materialModal')" class="btn-depa-blue px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-2">
+            <i class="fa-solid fa-plus text-[#fff200]"></i> เพิ่มสื่อการสอน
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="materialsGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- 6. TAB: SCORES & GRADEBOOK (สมุดบันทึกคะแนน)                   -->
+    <!-- ============================================================== -->
+    <section id="section-scores" class="tab-section hidden">
+      <!-- 1. Guest Gatekeeper Lock Screen (Shown when not logged in) -->
+      <div id="scoresGatekeeperLock" class="bg-white rounded-3xl p-8 sm:p-12 text-center border border-slate-200 shadow-sm max-w-xl mx-auto my-8 space-y-5">
+        <div class="w-20 h-20 bg-amber-50 text-[#173b6b] border-2 border-yellow-400 rounded-3xl flex items-center justify-center text-3xl mx-auto shadow-md">
+          <i class="fa-solid fa-user-lock text-amber-600"></i>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-xl font-black text-[#173b6b] font-heading">เข้าสู่ระบบเพื่อดูสมุดบันทึกคะแนน</h3>
+          <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+            ข้อมูลผลการเรียนและคะแนนการทดสอบสงวนสิทธิ์การเข้าถึงเฉพาะนักเรียนและครูผู้สอน กรุณาเข้าสู่ระบบด้วยรหัสนักเรียนเพื่อตรวจสอบคะแนนสะสมและสถานะงานของท่าน
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button onclick="openStudentLoginModal()" class="w-full sm:w-auto btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-right-to-bracket text-[#173b6b]"></i> เข้าสู่ระบบนักเรียน
+          </button>
+          <button onclick="requestAdminRole()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold border border-slate-300 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-lock text-slate-500"></i> เข้าสู่ระบบครูผู้สอน (Admin)
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Protected Scores Content Area (Shown when logged in as student or admin) -->
+      <div id="scoresContentArea" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-200 gap-4">
+          <div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <h2 id="scoresSectionTitle" class="text-2xl font-black text-[#173b6b] font-heading">สมุดบันทึกผลการเรียนและการวัดผล</h2>
+              <span id="scoresPrivacyBadge" class="hidden text-xs bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full font-bold items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-user-shield text-emerald-600"></i> บันทึกส่วนบุคคล (เฉพาะตนเอง)
+              </span>
+            </div>
+            <p id="scoresSectionSubtitle" class="text-xs sm:text-sm text-slate-600 mt-1">ผลคะแนนสอบปรนัย กลางภาค ปลายภาค และผลการประเมินภาคปฏิบัติ</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="syncGoogleSheetStudents()" class="admin-only hidden btn-depa-yellow px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition" title="ดึงข้อมูลรายชื่อนักเรียนล่าสุดจาก Google Sheet">
+              <i class="fa-solid fa-arrows-rotate text-[#173b6b]"></i> ซิงค์ Google Sheet
+            </button>
+            <button onclick="exportScoresCSV()" class="btn-depa-blue px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow" title="ดาวน์โหลดรายงานคะแนน CSV">
+              <i class="fa-solid fa-file-csv text-[#fff200]"></i> ส่งออกรายงาน CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Student Personal Scorecard (Dynamic for logged-in student) -->
+        <div id="studentPersonalScorecard" class="hidden"></div>
+
+        <!-- Gradebook Sub-Navigation & Filters -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+            <button id="scoresSubTabBtn-scores" onclick="switchScoresSubTab('scores')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-[#173b6b] text-white shadow-sm">
+              <i class="fa-solid fa-award text-yellow-300"></i> ผลคะแนนสอบ & การประเมิน
+            </button>
+            <button id="scoresSubTabBtn-submissions" onclick="switchScoresSubTab('submissions')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+              <i class="fa-solid fa-file-circle-check text-blue-600"></i> ประวัติการส่งงานและใบงาน
+            </button>
+          </div>
+
+          <!-- Admin-Only Search & Filter Controls -->
+          <div id="adminScoresFilterControls" class="hidden flex flex-wrap items-center gap-2">
+            <div class="relative">
+              <input type="text" id="adminScoresSearchInput" oninput="onAdminScoresSearch(this.value)" placeholder="ค้นหารหัสนักเรียน/ชื่อ..." class="text-xs pl-8 pr-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#173b6b]">
+              <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+            </div>
+            <select id="adminScoresCategoryFilter" onchange="onAdminScoresCategoryFilter(this.value)" class="text-xs px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#173b6b]">
+              <option value="all">ทุกประเภทการประเมิน</option>
+              <option value="chapter_quiz">ข้อสอบท้ายบท</option>
+              <option value="midterm">กลางภาคเรียน</option>
+              <option value="final">ปลายภาคเรียน</option>
+              <option value="practical">ข้อสอบปฏิบัติ</option>
+              <option value="worksheet">ใบงานปฏิบัติการ</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Panel 1: Scores Table Panel -->
+        <div id="scoresViewPanel-scores" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm">
+              <thead class="bg-[#173b6b] text-white text-xs uppercase font-bold border-b border-slate-200">
+                <tr id="scoresTableHeaderRow">
+                  <th class="px-4 py-3.5">ประเภทการสอบ</th>
+                  <th class="px-4 py-3.5">ชุดข้อสอบ / บทเรียน</th>
+                  <th class="px-4 py-3.5 text-center">คะแนนที่ได้</th>
+                  <th class="px-4 py-3.5 text-center">ร้อยละ</th>
+                  <th class="px-4 py-3.5">ข้อเสนอแนะ / เกณฑ์</th>
+                  <th class="px-4 py-3.5 text-right">วันเวลาที่บันทึก</th>
+                </tr>
+              </thead>
+              <tbody id="scoresTableBody" class="divide-y divide-slate-100">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Panel 2: Submissions Table Panel -->
+        <div id="scoresViewPanel-submissions" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm">
+              <thead class="bg-[#173b6b] text-white text-xs uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3.5">บทเรียน</th>
+                  <th class="px-4 py-3.5">ประเภทงาน</th>
+                  <th class="px-4 py-3.5">ลิงก์ผลงานที่ส่ง</th>
+                  <th class="px-4 py-3.5">วันเวลาที่ส่ง</th>
+                  <th class="px-4 py-3.5 text-center">สถานะการตรวจ</th>
+                  <th class="px-4 py-3.5 text-right">คะแนน / บันทึก</th>
+                </tr>
+              </thead>
+              <tbody id="submissionsTableBody" class="divide-y divide-slate-100">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- 7. TAB: ADMIN CMS (แผงควบคุมระบบสำหรับครู/ADMIN)                  -->
+    <!-- ============================================================== -->
+    <section id="section-admin" class="tab-section hidden space-y-6">
+      
+      <!-- Top Header & Quick Actions -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-wrap items-center justify-between gap-4 border-l-4 border-l-[#173b6b]">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-blue-100 text-[#173b6b] flex items-center justify-center font-bold text-base shadow-sm">
+              <i class="fa-solid fa-chalkboard-user"></i>
+            </span>
+            <div>
+              <h2 class="text-xl font-black text-[#173b6b] font-heading flex items-center gap-2">
+                แผงควบคุมครูผู้สอนและผู้ดูแลระบบ
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-yellow-100 text-[#173b6b] border border-yellow-300 font-bold">Admin CMS</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">ระบบจัดการหลักสูตร ตรวจประเมินผลการเรียนรู้ ติดตามงานนักเรียน และเชื่อมต่อ Google Sheet</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="prepareCreatePractical()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+            <i class="fa-solid fa-plus text-yellow-200"></i> เพิ่มโจทย์ปฏิบัติ
+          </button>
+          <button onclick="prepareCreateWorksheet()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+            <i class="fa-solid fa-plus text-indigo-200"></i> เพิ่มใบงาน
+          </button>
+          <button onclick="prepareCreateLesson()" class="text-xs bg-yellow-100 hover:bg-yellow-200 text-[#173b6b] border border-yellow-300 font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+            <i class="fa-solid fa-plus text-amber-700"></i> เพิ่มบทเรียน
+          </button>
+          <button onclick="prepareCreateQuiz()" class="text-xs bg-blue-100 hover:bg-blue-200 text-[#173b6b] border border-blue-300 font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+            <i class="fa-solid fa-plus text-blue-700"></i> เพิ่มข้อสอบ
+          </button>
+          <a href="https://docs.google.com/spreadsheets/d/1SLgcSTaoFcy2kXb_oas70A9uImrhZWzcubnVf8yqlBM/edit#gid=1199951040" target="_blank" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm" title="เปิด Google Spreadsheet ชีต practical และ worksheet">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i> เปิด Google Sheet
+          </a>
+        </div>
+      </div>
+
+      <!-- Admin Sub-Navigation Tabs (Pills) -->
+      <div class="flex flex-wrap items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200">
+        <button onclick="switchAdminSubTab('grading')" id="adminSubBtn-grading" class="admin-sub-tab px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-[#173b6b] text-white shadow-sm">
+          <i class="fa-solid fa-clipboard-check text-yellow-300"></i>
+          <span>1. ตรวจให้คะแนนรูบริก</span>
+        </button>
+        <button onclick="switchAdminSubTab('submissions')" id="adminSubBtn-submissions" class="admin-sub-tab px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-700 hover:bg-white/60">
+          <i class="fa-solid fa-inbox text-blue-600"></i>
+          <span>2. รายการส่งงาน</span>
+          <span id="adminSubmissionCount" class="px-2 py-0.5 rounded-full text-[10px] bg-blue-100 text-[#173b6b] font-mono font-bold">0 งาน</span>
+        </button>
+        <button onclick="switchAdminSubTab('practical')" id="adminSubBtn-practical" class="admin-sub-tab px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-700 hover:bg-white/60">
+          <i class="fa-solid fa-microchip text-amber-600"></i>
+          <span>3. จัดการโจทย์ปฏิบัติ</span>
+          <span id="adminPracticalCount" class="px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-mono font-bold">12 บท</span>
+        </button>
+        <button onclick="switchAdminSubTab('worksheets')" id="adminSubBtn-worksheets" class="admin-sub-tab px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-700 hover:bg-white/60">
+          <i class="fa-solid fa-file-lines text-indigo-600"></i>
+          <span>4. จัดการใบงานประจำบท</span>
+          <span id="adminWorksheetsCount" class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-100 text-indigo-800 font-mono font-bold">12 บท</span>
+        </button>
+        <button onclick="switchAdminSubTab('lessons')" id="adminSubBtn-lessons" class="admin-sub-tab px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-700 hover:bg-white/60">
+          <i class="fa-solid fa-book-open text-sky-600"></i>
+          <span>5. จัดการบทเรียน (12 บท)</span>
+        </button>
+        <button onclick="switchAdminSubTab('quizzes')" id="adminSubBtn-quizzes" class="admin-sub-tab px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-700 hover:bg-white/60">
+          <i class="fa-solid fa-file-circle-question text-purple-600"></i>
+          <span>6. คลังข้อสอบ (160 ข้อ)</span>
+        </button>
+        <button onclick="switchAdminSubTab('overview')" id="adminSubBtn-overview" class="admin-sub-tab px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-700 hover:bg-white/60">
+          <i class="fa-solid fa-chart-pie text-emerald-600"></i>
+          <span>7. สถิติ & ภาพรวม</span>
+        </button>
+        <button onclick="switchAdminSubTab('settings')" id="adminSubBtn-settings" class="admin-sub-tab px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-700 hover:bg-white/60">
+          <i class="fa-solid fa-sliders text-slate-600"></i>
+          <span>8. ตั้งค่าชีต & ระบบ</span>
+        </button>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 1: GRADING FORM (ตรวจให้คะแนนรูบริก)               -->
+      <!-- ======================================================== -->
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 1: GRADING FORM (ตรวจให้คะแนนรูบริก - Studio)       -->
+      <!-- ======================================================== -->
+      <div id="adminSubContent-grading" class="admin-sub-content space-y-4">
+        
+        <!-- Top Toolbar: Chapter Select & Class Metrics & Prev/Next -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 border-l-4 border-l-[#173b6b]">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-blue-100 text-[#173b6b] flex items-center justify-center font-bold text-sm shrink-0">
+              <i class="fa-solid fa-clipboard-user"></i>
+            </span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-500 uppercase">กำลังตรวจบทเรียน:</span>
+                <select id="gradeUnitSelect" onchange="onGradeUnitChange()" class="text-xs font-bold text-[#173b6b] border border-blue-200 rounded-xl px-3 py-1.5 bg-blue-50/70 focus:bg-white focus:outline-none focus:border-[#173b6b] cursor-pointer">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Class Stats Pills & Nav Buttons -->
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-1.5 text-xs mr-2">
+              <span id="gradingStatPracticalBadge" class="px-2.5 py-1 rounded-full font-bold bg-amber-100 text-amber-900 border border-amber-300" title="ตรวจโจทย์ข้อสอบปฏิบัติแล้ว">
+                <i class="fa-solid fa-microchip mr-1 text-amber-600"></i>ปฏิบัติ: <span id="gradingStatPracticalCount">0/30</span>
+              </span>
+              <span id="gradingStatWorksheetBadge" class="px-2.5 py-1 rounded-full font-bold bg-indigo-100 text-indigo-900 border border-indigo-300" title="ตรวจใบงานปฏิบัติการแล้ว">
+                <i class="fa-solid fa-file-lines mr-1 text-indigo-600"></i>ใบงาน: <span id="gradingStatWorksheetCount">0/30</span>
+              </span>
+              <span id="gradingStatSubmittedBadge" class="px-2.5 py-1 rounded-full font-bold bg-blue-100 text-[#173b6b] border border-blue-200">
+                <i class="fa-solid fa-inbox mr-1"></i>ส่งงาน: <span id="gradingStatSubmittedCount">0/30</span>
+              </span>
+              <span id="gradingStatGradedCount" class="hidden">0/30</span>
+            </div>
+
+            <!-- Real-time Live Sync Button & Supabase Status Indicator -->
+            <button type="button" onclick="triggerLiveSheetSync(true)" id="btnRealtimeSyncNow" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs flex items-center gap-1.5 transition shadow-sm" title="ดึงข้อมูลคะแนนและการส่งงานสดจาก Supabase ทันที (Real-time WebSockets)">
+              <i id="iconRealtimeSync" class="fa-solid fa-bolt text-emerald-600"></i>
+              <span class="hidden sm:inline">ซิงค์สด Supabase</span>
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+            </button>
+            <span id="realtimeSyncStatusText" class="text-[10px] text-emerald-600 font-mono font-bold hidden md:inline-block">⚡ Supabase Realtime</span>
+
+            <!-- Quick Prev / Next -->
+            <button type="button" onclick="prevStudentToGrade()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1 transition" title="นักเรียนคนก่อนหน้า">
+              <i class="fa-solid fa-chevron-left text-[10px]"></i> ก่อนหน้า
+            </button>
+            <button type="button" onclick="nextStudentToGrade()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1 transition" title="นักเรียนคนถัดไป">
+              ถัดไป <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
+            <button type="button" onclick="nextUngradedStudent()" class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold text-xs flex items-center gap-1 transition" title="ไปยังนักเรียนคนต่อไปที่ส่งงานแล้วแต่ยังไม่ได้ตรวจ">
+              <i class="fa-solid fa-bolt text-amber-600"></i> คนรอตรวจ
+            </button>
+          </div>
+        </div>
+
+        <!-- Split Layout: Left Roster (4 cols) & Right Grading Desk (8 cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          
+          <!-- LEFT PANEL: Student Roster Sidebar (4 cols) -->
+          <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div class="font-bold text-xs text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-solid fa-users text-blue-600"></i>
+                <span>รายชื่อนักเรียนห้อง ม.5/12</span>
+              </div>
+              <span id="rosterFilterCount" class="text-[11px] font-mono text-slate-400">30 คน</span>
+            </div>
+
+            <!-- Roster Search & Quick Filters -->
+            <div class="space-y-2">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2 text-slate-400 text-xs"></i>
+                <input type="text" id="rosterSearchInput" oninput="renderGradingStudentRoster()" placeholder="ค้นหารหัส หรือชื่อนักเรียน..." class="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-[#173b6b]">
+              </div>
+              <div class="flex flex-wrap items-center gap-1 text-[11px]">
+                <button type="button" onclick="setRosterFilter('all')" id="rosterTab-all" class="roster-tab px-2.5 py-0.5 rounded-lg font-bold bg-[#173b6b] text-white">ทั้งหมด</button>
+                <button type="button" onclick="setRosterFilter('pending_practical')" id="rosterTab-pending_practical" class="roster-tab px-2.5 py-0.5 rounded-lg font-bold text-slate-600 hover:bg-slate-100">รอตรวจปฏิบัติ</button>
+                <button type="button" onclick="setRosterFilter('pending_worksheet')" id="rosterTab-pending_worksheet" class="roster-tab px-2.5 py-0.5 rounded-lg font-bold text-slate-600 hover:bg-slate-100">รอตรวจใบงาน</button>
+                <button type="button" onclick="setRosterFilter('pending')" id="rosterTab-pending" class="hidden">รอตรวจ</button>
+                <button type="button" onclick="setRosterFilter('graded')" id="rosterTab-graded" class="roster-tab px-2.5 py-0.5 rounded-lg font-bold text-slate-600 hover:bg-slate-100">ตรวจแล้ว</button>
+              </div>
+            </div>
+
+            <!-- Scrollable Student Cards List -->
+            <div id="gradingStudentRosterList" class="max-h-[560px] overflow-y-auto space-y-1.5 pr-1">
+              <!-- Rendered by JS -->
+            </div>
+
+            <!-- Hidden native select for backward compatibility -->
+            <select id="gradeStudentSelect" onchange="onGradeStudentChange()" class="hidden"></select>
+          </div>
+
+          <!-- RIGHT PANEL: Grading Desk Workspace (8 cols) -->
+          <div class="lg:col-span-8 space-y-4">
+            
+            <!-- Active Student Banner Card -->
+            <div class="bg-gradient-to-r from-[#173b6b] to-[#1c4782] text-white rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/20 text-[#fff200] flex items-center justify-center font-bold text-lg shrink-0">
+                  <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span id="activeStudentIdLabel" class="font-mono font-bold text-xs text-yellow-300">20501</span>
+                    <span class="text-white/40">|</span>
+                    <h3 id="activeStudentNameLabel" class="font-bold text-sm text-white">กำลังเลือกนักเรียน...</h3>
+                  </div>
+                  <div class="text-[11px] text-slate-200 mt-0.5 flex items-center gap-2">
+                    <span>ห้อง ม.5/12</span>
+                    <span>&bull;</span>
+                    <span id="activeStudentStatusBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white">
+                      ยังไม่ได้รับการประเมิน
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Next / Prev in Header -->
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="prevStudentToGrade()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition">
+                  <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button type="button" onclick="nextStudentToGrade()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition">
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Student Submission Showcase -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-folder-open text-blue-600"></i>
+                  ผลงานและเอกสารที่นักเรียนส่งเข้ามา
+                </span>
+                <span id="submissionFreshnessBadge" class="text-[11px] text-slate-400 font-mono">สถานะส่งงาน</span>
+              </div>
+              <div id="studentSubmissionPreview" class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1.5 transition">
+                <!-- Populated dynamically by JS -->
+              </div>
+            </div>
+
+            <!-- Mode Switcher: 1. Practical vs 2. Worksheet -->
+            <div class="flex items-center gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+              <button type="button" id="gradingModeBtn-practical" onclick="setGradingMode('practical')" class="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 bg-[#173b6b] text-white shadow-sm transition">
+                <i class="fa-solid fa-microchip text-amber-400"></i>
+                <span>1. ตรวจโจทย์ข้อสอบปฏิบัติ (รูบริก 10 คะแนน)</span>
+                <span id="deskStatusBadge-practical" class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-mono font-bold">-</span>
+              </button>
+              <button type="button" id="gradingModeBtn-worksheet" onclick="setGradingMode('worksheet')" class="flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 text-slate-600 hover:bg-white transition">
+                <i class="fa-solid fa-file-lines text-indigo-500"></i>
+                <span>2. ตรวจใบงานปฏิบัติการประจำบท (10 คะแนน)</span>
+                <span id="deskStatusBadge-worksheet" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-mono font-bold">-</span>
+              </button>
+            </div>
+
+            <!-- FORM 1: Main Practical Rubrics Grading Form -->
+            <div id="gradingFormContainer-practical" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+              <form onsubmit="handleGradePractical(event)" class="space-y-4">
+                
+                <!-- Quick Preset Score Buttons -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+                      ให้คะแนนโจทย์ปฏิบัติด่วน (คลิกเดียวปรับครบ 3 เกณฑ์):
+                    </span>
+                    <span class="text-[11px] text-slate-400">หรือคลิกปรับที่เกณฑ์ย่อยด้านล่าง</span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" onclick="applyRubricPreset(10)" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                      ⭐ เต็ม 10 (ดีเยี่ยม)
+                    </button>
+                    <button type="button" onclick="applyRubricPreset(9)" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                      🌟 9 คะแนน (ดีมาก)
+                    </button>
+                    <button type="button" onclick="applyRubricPreset(8)" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                      👍 8 คะแนน (ดี)
+                    </button>
+                    <button type="button" onclick="applyRubricPreset(7)" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                      ⚡ 7 คะแนน (ผ่านเกณฑ์)
+                    </button>
+                    <button type="button" onclick="applyRubricPreset(5)" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs flex items-center gap-1 transition">
+                      ⚠️ 5 คะแนน (ปรับปรุง)
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Interactive Rubric Criteria Checklist -->
+                <div id="rubricCriteriaSection" class="p-4 bg-yellow-50/60 rounded-2xl border border-yellow-200 space-y-3">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-[#173b6b] flex items-center gap-1.5">
+                      <i class="fa-solid fa-list-check text-yellow-600"></i>
+                      เกณฑ์การประเมินรูบริก 3 ข้อ (คลิกเลือกระดับคะแนนได้ทันที):
+                    </span>
+                    <span id="rubricAutoSumLabel" class="text-xs font-mono text-emerald-800 font-black bg-white px-3 py-1 rounded-xl border border-emerald-300 shadow-sm">
+                      รวม 10 / 10 คะแนน
+                    </span>
+                  </div>
+                  <div id="rubricCriteriaContainer" class="space-y-3 pt-1">
+                    <!-- Dynamically populated by JS with interactive level pills -->
+                  </div>
+                </div>
+
+                <!-- Total Score Summary Bar -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-3.5 rounded-xl border border-blue-200 flex flex-wrap items-center justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-award text-amber-500 text-lg"></i>
+                    <div>
+                      <span class="text-xs font-bold text-slate-700">คะแนนปฏิบัติสุทธิ:</span>
+                      <span id="rubricScoreDisplayTotal" class="text-lg font-black text-[#173b6b] ml-1">10.0</span>
+                      <span class="text-xs font-bold text-slate-500">/ 10 คะแนน</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 font-bold">ปรับตัวเลขตรง:</span>
+                    <input type="number" id="gradeScoreInput" min="0" max="10" step="0.5" value="10" required class="w-20 text-xs border border-slate-300 rounded-lg p-1.5 font-bold text-center text-[#173b6b] bg-white focus:outline-none focus:border-[#173b6b]">
+                  </div>
+                </div>
+
+                <!-- Quick Feedback Chips -->
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-bold text-slate-700">
+                    <i class="fa-solid fa-comment-dots text-blue-600 mr-1"></i>
+                    ข้อเสนอแนะของครูผู้ประเมิน (Feedback):
+                  </label>
+                  <div class="flex flex-wrap items-center gap-1.5 text-[11px] pb-1">
+                    <span class="text-slate-400 font-bold text-[10px] mr-1">คลิกเติมข้อความ:</span>
+                    <button type="button" onclick="appendQuickFeedback('ต่อวงจรและรันสคริปต์คำสั่งได้ถูกต้องสมบูรณ์')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">+ ต่อวงจรและรันสคริปต์ถูกต้องสมบูรณ์</button>
+                    <button type="button" onclick="appendQuickFeedback('การคิดวิเคราะห์และสรุปผล Edge AI ทำได้ดีมาก')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">+ วิเคราะห์และสรุปผลดีมาก</button>
+                    <button type="button" onclick="appendQuickFeedback('ผลการทดลองผ่านเกณฑ์ ควรเพิ่มภาพประกอบขั้นตอนในรายงาน')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">+ ผ่านเกณฑ์ ควรเพิ่มรูปภาพในรายงาน</button>
+                    <button type="button" onclick="appendQuickFeedback('ปฏิบัติตามขั้นตอนได้เรียบร้อย รหัสโปรแกรมทำงานได้ดี')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">+ ปฏิบัติตามขั้นตอนได้เรียบร้อย</button>
+                  </div>
+                  <input type="text" id="gradeNotesInput" placeholder="พิมพ์ข้อเสนอแนะเพิ่มเติม หรือคลิกข้อความลัดด้านบน..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:border-[#173b6b]">
+                </div>
+
+                <!-- Submit Button & Auto-Next Toggle -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                  <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-600 select-none">
+                    <input type="checkbox" id="gradeAutoNextCheckbox" checked class="w-4 h-4 rounded text-[#173b6b] accent-[#173b6b]">
+                    <span>เมื่อบันทึกแล้ว ข้ามไปนักเรียนคนถัดไปทันที (Auto-Next)</span>
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <button type="submit" class="btn-depa-blue px-6 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition hover:scale-[1.02]">
+                      <i class="fa-solid fa-floppy-disk text-[#fff200]"></i> บันทึกคะแนนโจทย์ปฏิบัติ (Sync แท็บ practical)
+                    </button>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+
+            <!-- FORM 2: Dedicated Worksheet Grading Form -->
+            <div id="gradingFormContainer-worksheet" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4 hidden">
+              <form onsubmit="handleGradeWorksheet(event)" class="space-y-4">
+                
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <div class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                      <i class="fa-solid fa-file-pen"></i>
+                    </span>
+                    <div>
+                      <h4 class="font-bold text-xs text-slate-800">ประเมินผลคะแนนใบงานปฏิบัติการประจำบท</h4>
+                      <p class="text-[11px] text-slate-400 font-mono">บันทึกคะแนนลงชีต worksheet (คอลัมน์ G และ H)</p>
+                    </div>
+                  </div>
+                  <span id="worksheetStatusIndicator" class="px-2.5 py-1 rounded-full font-bold text-xs bg-slate-100 text-slate-600 border border-slate-200">
+                    รอการตรวจ
+                  </span>
+                </div>
+
+                <!-- Quick Preset Score Buttons for Worksheet -->
+                <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-indigo-950 flex items-center gap-1.5">
+                      <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i>
+                      ให้คะแนนใบงานด่วน (1-Click Presets):
+                    </span>
+                    <span class="text-[11px] text-slate-400">คลิกระดับคะแนนที่ต้องการ</span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" onclick="applyWorksheetPreset(10)" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                      ⭐ เต็ม 10 (สมบูรณ์แบบ)
+                    </button>
+                    <button type="button" onclick="applyWorksheetPreset(9)" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                      🌟 9 คะแนน (ผลทดลองครบถ้วน)
+                    </button>
+                    <button type="button" onclick="applyWorksheetPreset(8)" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                      👍 8 คะแนน (ผ่านเกณฑ์ดี)
+                    </button>
+                    <button type="button" onclick="applyWorksheetPreset(7)" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition">
+                      ⚡ 7 คะแนน (พอใช้)
+                    </button>
+                    <button type="button" onclick="applyWorksheetPreset(5)" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs flex items-center gap-1 transition">
+                      ⚠️ 5 คะแนน (ปรับปรุง)
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Interactive Worksheet Level Pills -->
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                      <i class="fa-solid fa-list-ol text-indigo-600"></i>
+                      เลือกระดับคะแนนใบงานโดยละเอียด:
+                    </span>
+                    <span class="text-[11px] text-slate-400 font-mono">คะแนนเต็ม 10</span>
+                  </div>
+                  <div id="worksheetLevelPillsContainer" class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <!-- Populated dynamically by JS -->
+                  </div>
+                </div>
+
+                <!-- Total Score Summary Bar for Worksheet -->
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-3.5 rounded-xl border border-indigo-200 flex flex-wrap items-center justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-file-signature text-indigo-600 text-lg"></i>
+                    <div>
+                      <span class="text-xs font-bold text-slate-700">คะแนนใบงานสุทธิ:</span>
+                      <span id="worksheetScoreDisplayTotal" class="text-lg font-black text-indigo-800 ml-1">10.0</span>
+                      <span class="text-xs font-bold text-slate-500">/ 10 คะแนน</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 font-bold">ปรับตัวเลขตรง:</span>
+                    <input type="number" id="gradeWorksheetScoreInput" min="0" max="10" step="0.5" value="10" oninput="onWorksheetScoreInputChange(this.value)" required class="w-20 text-xs border border-slate-300 rounded-lg p-1.5 font-bold text-center text-indigo-800 bg-white focus:outline-none focus:border-indigo-600">
+                  </div>
+                </div>
+
+                <!-- Quick Feedback Chips for Worksheet -->
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-bold text-slate-700">
+                    <i class="fa-solid fa-comment-dots text-indigo-600 mr-1"></i>
+                    ข้อเสนอแนะครูสำหรับใบงาน (Worksheet Feedback):
+                  </label>
+                  <div class="flex flex-wrap items-center gap-1.5 text-[11px] pb-1">
+                    <span class="text-slate-400 font-bold text-[10px] mr-1">คลิกเติมข้อความ:</span>
+                    <button type="button" onclick="appendWorksheetFeedback('บันทึกผลการทดลองและตารางข้อมูลครบถ้วนถูกต้อง')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">+ บันทึกผลและตารางข้อมูลครบถ้วน</button>
+                    <button type="button" onclick="appendWorksheetFeedback('ตอบคำถามคิดวิเคราะห์ท้ายใบงานได้ชัดเจนลึกซึ้ง')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">+ ตอบคำถามคิดวิเคราะห์ได้ชัดเจน</button>
+                    <button type="button" onclick="appendWorksheetFeedback('รหัสโปรแกรมและผลการรัน Edge AI สอดคล้องกับโจทย์')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">+ ผลการรันสอดคล้องกับโจทย์</button>
+                    <button type="button" onclick="appendWorksheetFeedback('ควรเพิ่มรูปภาพหรือกราฟแสดงผลการทดลองให้สมบูรณ์ขึ้น')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">+ ควรเพิ่มรูปภาพประกอบในรายงาน</button>
+                  </div>
+                  <input type="text" id="gradeWorksheetNotesInput" placeholder="พิมพ์ข้อเสนอแนะใบงานเพิ่มเติม หรือคลิกข้อความลัดด้านบน..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:border-indigo-600">
+                </div>
+
+                <!-- Submit Button & Auto-Next Toggle -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                  <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-600 select-none">
+                    <input type="checkbox" id="gradeWorksheetAutoNextCheckbox" checked class="w-4 h-4 rounded text-indigo-600 accent-indigo-600">
+                    <span>เมื่อบันทึกแล้ว ข้ามไปนักเรียนคนถัดไปทันที (Auto-Next)</span>
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition hover:scale-[1.02] bg-indigo-600 hover:bg-indigo-700 text-white">
+                      <i class="fa-solid fa-floppy-disk text-amber-300"></i> บันทึกคะแนนใบงาน (Sync แท็บ worksheet)
+                    </button>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 2: SUBMISSIONS LIST (รายการส่งงานของนักเรียน)       -->
+      <!-- ======================================================== -->
+      <div id="adminSubContent-submissions" class="admin-sub-content hidden space-y-4">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h3 class="text-base font-bold text-[#173b6b] flex items-center gap-2">
+                <i class="fa-solid fa-inbox text-yellow-600"></i>
+                รายการส่งงานของนักเรียนทั้งหมด
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">ตรวจสอบรายงานโจทย์ปฏิบัติและใบงานที่ส่งเข้ามา พร้อมกดปุ่มตรวจงานได้ทันที</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="handleSyncAllToGoogleSheet()" class="btn-depa-blue text-xs font-bold px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5">
+                <i class="fa-solid fa-cloud-arrow-up text-yellow-300"></i> ซิงค์งานทั้งหมดขึ้น Google Sheet
+              </button>
+              <button onclick="fetchAllData().then(() => { renderAdminSubmissions(); showToast('รีเฟรชตารางส่งงานแล้ว', 'info'); })" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl border border-slate-300 flex items-center gap-1 transition">
+                <i class="fa-solid fa-arrows-rotate text-[#173b6b]"></i> รีเฟรชตาราง
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <!-- Filter Type Pills -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-slate-600 mr-1">กรองประเภท:</span>
+              <button onclick="filterAdminSubmissions('all')" id="subFilterBtn-all" class="sub-filter-pill active text-xs font-bold px-3 py-1.5 rounded-lg bg-[#173b6b] text-white shadow-sm transition">
+                ทั้งหมด
+              </button>
+              <button onclick="filterAdminSubmissions('practical')" id="subFilterBtn-practical" class="sub-filter-pill text-xs font-bold px-3 py-1.5 rounded-lg bg-white text-slate-700 hover:bg-amber-50 border border-slate-200 transition">
+                🎯 โจทย์ปฏิบัติ
+              </button>
+              <button onclick="filterAdminSubmissions('worksheet')" id="subFilterBtn-worksheet" class="sub-filter-pill text-xs font-bold px-3 py-1.5 rounded-lg bg-white text-slate-700 hover:bg-indigo-50 border border-slate-200 transition">
+                📝 ใบงานประจำบท
+              </button>
+            </div>
+
+            <!-- Search Box -->
+            <div class="relative w-full sm:w-64">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+              <input type="text" id="adminSubSearchInput" oninput="searchAdminSubmissions(this.value)" placeholder="ค้นหารหัส, ชื่อนักเรียน, บทเรียน..." class="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-[#173b6b]">
+            </div>
+          </div>
+
+          <!-- Submissions Data Table -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="p-3">วัน-เวลาที่ส่ง</th>
+                  <th class="p-3">รหัสนักเรียน</th>
+                  <th class="p-3">ชื่อ-นามสกุล</th>
+                  <th class="p-3">บทเรียน</th>
+                  <th class="p-3">ประเภทงาน</th>
+                  <th class="p-3">ลิงก์ส่งงาน</th>
+                  <th class="p-3">บันทึกสรุป (Notes)</th>
+                  <th class="p-3 text-right">การจัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="adminSubmissionsTableBody" class="divide-y divide-slate-100 bg-white">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 3: MANAGE PRACTICAL EXAMS (จัดการโจทย์ข้อสอบปฏิบัติ) -->
+      <!-- ======================================================== -->
+      <div id="adminSubContent-practical" class="admin-sub-content hidden space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h3 class="text-base font-bold text-[#173b6b] flex items-center gap-2">
+                <i class="fa-solid fa-microchip text-amber-600"></i>
+                จัดการโจทย์ข้อสอบภาคปฏิบัติ (Embedded AI Practical Tasks)
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">กำหนดสถานการณ์โจทย์ (Scenario), เกณฑ์รูบริก 3 ข้อ (10 คะแนน), ไฟล์โค้ดอ้างอิง</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="prepareCreatePractical()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition">
+                <i class="fa-solid fa-plus text-yellow-200"></i> เพิ่มโจทย์ปฏิบัติการใหม่
+              </button>
+            </div>
+          </div>
+
+          <!-- Search Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div class="flex items-center gap-2 text-xs text-slate-600">
+              <span class="font-bold">โจทย์ทั้งหมด:</span>
+              <span id="adminPracticalTotalCount" class="font-bold text-amber-700 font-mono">12 บท</span>
+            </div>
+            <div class="relative w-full sm:w-72">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+              <input type="text" id="adminPracticalSearchInput" oninput="renderAdminPractical()" placeholder="ค้นหาชื่อโจทย์, บทเรียน, เนื้อหา..." class="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-[#173b6b]">
+            </div>
+          </div>
+
+          <!-- Practical Cards Container -->
+          <div id="adminPracticalList" class="space-y-3">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 4: MANAGE WORKSHEETS (จัดการใบงานปฏิบัติการ)       -->
+      <!-- ======================================================== -->
+      <div id="adminSubContent-worksheets" class="admin-sub-content hidden space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h3 class="text-base font-bold text-[#173b6b] flex items-center gap-2">
+                <i class="fa-solid fa-file-lines text-indigo-600"></i>
+                จัดการใบงานปฏิบัติการประจำบท (Lab Worksheets)
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">จัดการกิจกรรมการทดลอง ใบงานแบบ PDF ลิงก์เปิดดูออนไลน์ และไฟล์โค้ดตัวอย่าง</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="prepareCreateWorksheet()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition">
+                <i class="fa-solid fa-plus text-indigo-200"></i> เพิ่มใบงานปฏิบัติการใหม่
+              </button>
+            </div>
+          </div>
+
+          <!-- Search Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div class="flex items-center gap-2 text-xs text-slate-600">
+              <span class="font-bold">ใบงานทั้งหมด:</span>
+              <span id="adminWorksheetsTotalCount" class="font-bold text-indigo-700 font-mono">12 บท</span>
+            </div>
+            <div class="relative w-full sm:w-72">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+              <input type="text" id="adminWorksheetSearchInput" oninput="renderAdminWorksheets()" placeholder="ค้นหาชื่อใบงาน, บทเรียน, คำชี้แจง..." class="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-[#173b6b]">
+            </div>
+          </div>
+
+          <!-- Worksheets Cards Container -->
+          <div id="adminWorksheetsList" class="space-y-3">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 5: MANAGE LESSONS (จัดการบทเรียน)                  -->
+      <!-- ======================================================== -->
+      <div id="adminSubContent-lessons" class="admin-sub-content hidden space-y-4">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+              <h3 class="text-base font-bold text-[#173b6b] flex items-center gap-2">
+                <i class="fa-solid fa-book text-[#173b6b]"></i> จัดการหลักสูตรและบทเรียน (12 บทเรียน)
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">เพิ่มบทเรียนใหม่ แก้ไขคำอธิบาย วิดีโอ สไลด์บรรยาย หรือลบบทเรียน</p>
+            </div>
+            <button onclick="prepareCreateLesson()" class="text-xs bg-yellow-100 text-[#173b6b] hover:bg-yellow-200 font-bold px-3.5 py-2 rounded-xl border border-yellow-300 flex items-center gap-1.5 shadow-sm transition">
+              <i class="fa-solid fa-plus text-amber-700"></i> เพิ่มบทเรียนใหม่
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="adminLessonsList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 6: MANAGE QUIZZES (จัดการคลังข้อสอบ)                -->
+      <!-- ======================================================== -->
+      <div id="adminSubContent-quizzes" class="admin-sub-content hidden space-y-4">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h3 class="text-base font-bold text-[#173b6b] flex items-center gap-2">
+                <i class="fa-solid fa-file-circle-question text-[#173b6b]"></i> จัดการคลังข้อสอบมาตรฐาน (160 ข้อ)
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">เพิ่มข้อสอบใหม่ แก้ไขโจทย์ ตัวเลือก เฉลยละเอียด หรือลบข้อสอบ</p>
+            </div>
+            <button onclick="prepareCreateQuiz()" class="text-xs bg-blue-100 text-[#173b6b] hover:bg-blue-200 font-bold px-3.5 py-2 rounded-xl border border-blue-300 flex items-center gap-1.5 shadow-sm transition">
+              <i class="fa-solid fa-plus text-blue-700"></i> เพิ่มข้อสอบใหม่
+            </button>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <select id="adminQuizFilterCategory" onchange="renderAdminQuizzes()" class="w-full text-xs border border-slate-300 rounded-xl p-2 bg-white font-medium focus:outline-none focus:border-[#173b6b]">
+              <option value="all">📚 แสดงข้อสอบทั้งหมดในคลัง (160 ข้อ)</option>
+              <option value="chapter_quiz">📝 เฉพาะข้อสอบประจำบทเรียน (120 ข้อ)</option>
+              <option value="midterm">🎯 เฉพาะข้อสอบกลางภาคเรียน (20 ข้อ)</option>
+              <option value="final">🏆 เฉพาะข้อสอบปลายภาคเรียน (20 ข้อ)</option>
+            </select>
+          </div>
+
+          <div class="max-h-[600px] overflow-y-auto space-y-2.5 pr-1" id="adminQuizzesList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 7: STATS & OVERVIEW (สถิติ & สรุปภาพรวมชั้นเรียน)   -->
+      <!-- ======================================================== -->
+      <div id="adminSubContent-overview" class="admin-sub-content hidden space-y-6">
+        
+        <!-- KPI Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-[#173b6b]">
+            <div class="text-xs font-bold text-slate-500 uppercase flex items-center justify-between">
+              <span>บทเรียนทั้งหมด</span>
+              <i class="fa-solid fa-book text-[#173b6b]"></i>
+            </div>
+            <div id="statLessonsCount" class="text-3xl font-extrabold text-[#173b6b] mt-1">12</div>
+            <div class="text-xs text-slate-400 mt-1">บทเรียนออนไลน์ตรงหลักสูตร</div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-yellow-400">
+            <div class="text-xs font-bold text-slate-500 uppercase flex items-center justify-between">
+              <span>คลังข้อสอบทั้งหมด</span>
+              <i class="fa-solid fa-clipboard-question text-yellow-600"></i>
+            </div>
+            <div id="statQuizzesCount" class="text-3xl font-extrabold text-[#173b6b] mt-1">160</div>
+            <div class="text-xs text-slate-400 mt-1">ปรนัย 120 + กลาง/ปลายภาค 40 ข้อ</div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+            <div class="text-xs font-bold text-slate-500 uppercase flex items-center justify-between">
+              <span>ข้อสอบภาคปฏิบัติ</span>
+              <i class="fa-solid fa-microchip text-emerald-600"></i>
+            </div>
+            <div id="statPracticalCount" class="text-3xl font-extrabold text-emerald-700 mt-1">12</div>
+            <div class="text-xs text-slate-400 mt-1">รูบริกประเมินรวม 120 คะแนน</div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
+            <div class="text-xs font-bold text-slate-500 uppercase flex items-center justify-between">
+              <span>คะแนนเฉลี่ยรวม</span>
+              <i class="fa-solid fa-chart-line text-blue-600"></i>
+            </div>
+            <div id="statAvgScore" class="text-3xl font-extrabold text-[#173b6b] mt-1">90.8%</div>
+            <div class="text-xs text-slate-400 mt-1">จากผลการทดสอบและปฏิบัติการ</div>
+          </div>
+        </div>
+
+        <!-- Gradebook Quick Link Banner -->
+        <div class="bg-gradient-to-r from-[#173b6b] to-[#0d2342] text-white p-6 rounded-2xl shadow-sm flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1">
+            <h4 class="text-base font-bold text-[#fff200] flex items-center gap-2">
+              <i class="fa-solid fa-square-poll-vertical"></i> สมุดบันทึกผลการเรียน (Gradebook & Export)
+            </h4>
+            <p class="text-xs text-slate-200">ตรวจสอบตารางคะแนนรวมของนักเรียนทุกคนในชั้นเรียน ม.5/12 และส่งออกเป็นไฟล์ CSV</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="switchTab('scores')" class="btn-depa-yellow text-xs font-bold px-4 py-2 rounded-xl shadow flex items-center gap-1.5 text-[#173b6b]">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> ไปยังสมุดบันทึกคะแนน
+            </button>
+            <button onclick="exportScoresCSV()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2 rounded-xl border border-white/20 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-download"></i> ดาวน์โหลด CSV
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SUB-TAB 8: SETTINGS & SHEET (ตั้งค่าชีต & กู้คืนระบบ)       -->
+      <!-- ======================================================== -->
+      <div id="adminSubContent-settings" class="admin-sub-content hidden space-y-6">
+        
+        <!-- Google Sheet Integration Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-file-excel text-emerald-600 text-lg"></i>
+                <h3 class="text-base font-bold text-[#173b6b]">การเชื่อมต่อบันทึกข้อมูลลง Google Sheet</h3>
+                <span id="googleSheetSyncBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  Spreadsheet: 1SLgcSTaoFcy2kXb_oas70A9uImrhZWzcubnVf8yqlBM
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">
+                ปลายทาง: บันทึกแยกเป็น 2 แท็บชีต &rarr; แท็บ <strong>practical</strong> (โจทย์ปฏิบัติ) และ แท็บ <strong>worksheet</strong> (ใบงานประจำบท)
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="handleSyncAllToGoogleSheet()" class="btn-depa-blue text-xs font-bold px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5">
+                <i class="fa-solid fa-cloud-arrow-up text-yellow-300"></i> ซิงค์งานทั้งหมดขึ้น Google Sheet
+              </button>
+              <a href="https://docs.google.com/spreadsheets/d/1SLgcSTaoFcy2kXb_oas70A9uImrhZWzcubnVf8yqlBM/edit#gid=1199951040" target="_blank" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl border border-slate-300 flex items-center gap-1 transition">
+                <i class="fa-solid fa-arrow-up-right-from-square text-emerald-600"></i> เปิด Google Sheet
+              </a>
+            </div>
+          </div>
+
+          <!-- Webhook Configuration Form -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+            <label class="block text-xs font-bold text-slate-700">
+              <i class="fa-solid fa-link text-[#173b6b] mr-1"></i> Google Apps Script Webhook URL:
+            </label>
+            <div class="flex gap-2">
+              <input type="url" id="googleSheetWebhookInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="flex-1 text-xs border border-slate-300 rounded-xl p-2.5 bg-white focus:outline-none focus:border-[#173b6b] font-mono">
+              <button onclick="handleSaveGoogleSheetWebhook()" class="btn-depa-blue px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap">
+                <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึก URL
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-500">
+              * นำ URL ที่ได้จากการ Deploy เป็น Web app ในเมนู <em>ส่วนขยาย (Extensions) &gt; Apps Script</em> ของชีตมาวางที่นี่
+            </p>
+          </div>
+        </div>
+
+        <!-- Danger Zone: Factory Reset -->
+        <div class="p-6 bg-red-50 rounded-2xl border border-red-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-red-900 font-bold text-sm">
+              <i class="fa-solid fa-triangle-exclamation text-red-600 text-base"></i>
+              <span>คืนค่าฐานข้อมูลมาตรฐานหลักสูตร depa (Reset to Default)</span>
+            </div>
+            <button onclick="confirmResetDatabase()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow transition flex items-center gap-1.5">
+              <i class="fa-solid fa-rotate-left"></i> คืนค่าข้อมูลเริ่มต้น
+            </button>
+          </div>
+          <p class="text-xs text-red-700">
+            คำเตือน: การรีเซ็ตจะล้างข้อมูลบทเรียนและข้อสอบที่แก้ไขเพิ่มเติม แล้วคืนค่ากลับสู่ข้อมูลมาตรฐาน 12 บทเรียน และ 160 ข้อสอบตั้งต้น
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODALS (ADD/EDIT LESSON, ADD/EDIT QUIZ, DETAILS, MATERIALS)     -->
+  <!-- ============================================================== -->
+
+  <!-- 1. Lesson Modal (Add / Edit) -->
+  <div id="lessonModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between border-b-2 border-[#fff200]">
+        <h3 id="lessonModalTitle" class="text-base font-bold">เพิ่ม / แก้ไขบทเรียน</h3>
+        <button onclick="closeModal('lessonModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form onsubmit="handleSaveLesson(event)" class="p-6 space-y-4">
+        <input type="hidden" id="lessonFormId">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div class="sm:col-span-1">
+            <label class="block text-xs font-bold text-slate-700 mb-1">บทที่</label>
+            <input type="number" id="lessonFormChapter" min="1" max="50" required class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อบทเรียน (ภาษาไทย)</label>
+            <input type="text" id="lessonFormTitle" required class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อบทเรียน (ภาษาอังกฤษ)</label>
+          <input type="text" id="lessonFormTitleEn" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">คำอธิบายและสาระสำคัญ</label>
+          <textarea id="lessonFormDesc" rows="3" class="w-full text-xs border border-slate-300 rounded-xl p-2.5"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ผลการเรียนรู้ (แยกบรรทัดละ 1 ข้อ)</label>
+          <textarea id="lessonFormObjectives" rows="3" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-sans"></textarea>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ลิงก์วิดีโอ (YouTube Playlist/Ep)</label>
+            <input type="text" id="lessonFormVideo" placeholder="https://youtube.com/..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ลิงก์เอกสารสไลด์ (PDF/Box)</label>
+            <input type="text" id="lessonFormSlide" placeholder="materials/... หรือ ลิงก์ Box" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+        </div>
+        <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+          <button type="button" onclick="closeModal('lessonModal')" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-semibold">ยกเลิก</button>
+          <button type="submit" class="btn-depa-blue px-5 py-2 text-xs font-bold rounded-xl shadow">บันทึกข้อมูลบทเรียน</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Quiz Modal (Add / Edit Question) -->
+  <div id="quizModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between border-b-2 border-[#fff200]">
+        <h3 id="quizModalTitle" class="text-base font-bold">เพิ่ม / แก้ไขข้อสอบ</h3>
+        <button onclick="closeModal('quizModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form onsubmit="handleSaveQuiz(event)" class="p-6 space-y-4">
+        <input type="hidden" id="quizFormId">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">หมวดหมู่ชุดข้อสอบ</label>
+            <select id="quizFormCategory" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50">
+              <option value="chapter_quiz">แบบทดสอบท้ายบทเรียน</option>
+              <option value="midterm">ข้อสอบกลางภาคเรียน</option>
+              <option value="final">ข้อสอบปลายภาคเรียน</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">สังกัดบทเรียน</label>
+            <select id="quizFormChapter" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">คำถาม / โจทย์สถานการณ์</label>
+          <textarea id="quizFormText" rows="3" required class="w-full text-xs border border-slate-300 rounded-xl p-2.5"></textarea>
+        </div>
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700">ตัวเลือกคำตอบ 4 ตัวเลือก</label>
+          <div class="flex items-center space-x-2">
+            <span class="w-6 text-center font-bold text-xs text-[#173b6b]">ก.</span>
+            <input type="text" id="quizFormOpt0" required class="flex-grow text-xs border border-slate-300 rounded-xl p-2">
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="w-6 text-center font-bold text-xs text-[#173b6b]">ข.</span>
+            <input type="text" id="quizFormOpt1" required class="flex-grow text-xs border border-slate-300 rounded-xl p-2">
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="w-6 text-center font-bold text-xs text-[#173b6b]">ค.</span>
+            <input type="text" id="quizFormOpt2" required class="flex-grow text-xs border border-slate-300 rounded-xl p-2">
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="w-6 text-center font-bold text-xs text-[#173b6b]">ง.</span>
+            <input type="text" id="quizFormOpt3" required class="flex-grow text-xs border border-slate-300 rounded-xl p-2">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ตัวเลือกที่ถูกต้อง (คำตอบ)</label>
+            <select id="quizFormCorrectIndex" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50 font-bold text-[#173b6b]">
+              <option value="0">ก.</option>
+              <option value="1">ข.</option>
+              <option value="2">ค.</option>
+              <option value="3">ง.</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">คะแนน (Points)</label>
+            <input type="number" id="quizFormPoints" value="1" min="1" max="10" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">คำอธิบายเฉลยละเอียดเชิงวิชาการ</label>
+          <textarea id="quizFormExplanation" rows="2" class="w-full text-xs border border-slate-300 rounded-xl p-2.5"></textarea>
+        </div>
+        <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+          <button type="button" onclick="closeModal('quizModal')" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-semibold">ยกเลิก</button>
+          <button type="submit" class="btn-depa-blue px-5 py-2 text-xs font-bold rounded-xl shadow">บันทึกข้อสอบ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Practical Exam Modal (Add / Edit Practical Task) -->
+  <div id="practicalModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden my-8">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between border-b-2 border-[#fff200]">
+        <h3 id="practicalModalTitle" class="text-base font-bold flex items-center gap-2">
+          <i class="fa-solid fa-microchip text-amber-300"></i> เพิ่ม / แก้ไขโจทย์ข้อสอบปฏิบัติ
+        </h3>
+        <button onclick="closeModal('practicalModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form onsubmit="handleSavePractical(event)" class="p-6 space-y-4">
+        <input type="hidden" id="practicalFormId">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">หน่วย/บทที่ (Unit)</label>
+            <input type="number" id="practicalFormUnit" min="1" max="50" required class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">สังกัดบทเรียน</label>
+            <select id="practicalFormChapter" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">คะแนนเต็ม</label>
+            <input type="number" id="practicalFormMaxScore" value="10" min="1" max="100" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อโจทย์ข้อสอบปฏิบัติ (Title)</label>
+          <input type="text" id="practicalFormTitle" required placeholder="เช่น การตรวจสอบสภาพแวดล้อมระบบปฏิบัติการลีนุกซ์..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            สถานการณ์โจทย์และภารกิจที่กำหนด (Scenario / Mission)
+          </label>
+          <textarea id="practicalFormScenario" rows="4" placeholder="ระบุสถานการณ์และภารกิจที่ 1, 2, 3..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-sans leading-relaxed"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            เกณฑ์การประเมินรูบริก (Rubrics Breakdown - รวม 10 คะแนน)
+          </label>
+          <textarea id="practicalFormRubrics" rows="3" placeholder="* เกณฑ์ที่ 1 (3 คะแนน): ...&#10;* เกณฑ์ที่ 2 (4 คะแนน): ...&#10;* เกณฑ์ที่ 3 (3 คะแนน): ..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-sans leading-relaxed"></textarea>
+          <p class="text-[11px] text-slate-400 mt-1">* แต่ละเกณฑ์ย่อยให้ขึ้นต้นบรรทัดด้วยเครื่องหมายดอกจัน (*)</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ไฟล์โค้ดตัวอย่างอ้างอิง (Code Reference)</label>
+          <input type="text" id="practicalFormCodeRef" placeholder="code_examples/chapter01/check_system_env.py" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-mono">
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+          <button type="button" onclick="closeModal('practicalModal')" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-semibold">ยกเลิก</button>
+          <button type="submit" class="btn-depa-blue px-5 py-2 text-xs font-bold rounded-xl shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk text-[#fff200]"></i> บันทึกโจทย์ปฏิบัติ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Worksheet Modal (Add / Edit Lab Worksheet) -->
+  <div id="worksheetModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden my-8">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between border-b-2 border-[#fff200]">
+        <h3 id="worksheetModalTitle" class="text-base font-bold flex items-center gap-2">
+          <i class="fa-solid fa-file-lines text-indigo-300"></i> เพิ่ม / แก้ไขใบงานปฏิบัติการ
+        </h3>
+        <button onclick="closeModal('worksheetModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form onsubmit="handleSaveWorksheet(event)" class="p-6 space-y-4">
+        <input type="hidden" id="worksheetFormId">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ใบงานประจำบทที่</label>
+            <input type="number" id="worksheetFormChapterNum" min="1" max="50" required class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">สังกัดบทเรียน</label>
+            <select id="worksheetFormChapter" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">เวลาที่ใช้ (นาที)</label>
+            <input type="number" id="worksheetFormTime" value="60" min="10" max="300" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อใบงานปฏิบัติการ (Title)</label>
+          <input type="text" id="worksheetFormTitle" required placeholder="เช่น ใบงานปฏิบัติการที่ 1: การเตรียมความพร้อมระบบ..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            คำชี้แจงและขั้นตอนกิจกรรมการทดลอง (Instructions)
+          </label>
+          <textarea id="worksheetFormInstructions" rows="3" placeholder="ระบุขั้นตอนการทดลองและเป้าหมายกิจกรรม..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-sans leading-relaxed"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อไฟล์เอกสาร (File Name)</label>
+            <input type="text" id="worksheetFormFileName" placeholder="Lab_Worksheet_01.pdf" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">สถานะใบงาน (Status)</label>
+            <select id="worksheetFormStatus" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50 font-bold text-emerald-700">
+              <option value="active">เปิดใช้งาน (Active)</option>
+              <option value="inactive">ปิดใช้งานชั่วคราว (Draft)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ลิงก์ดาวน์โหลดไฟล์ (File URL / PDF / Box)</label>
+            <input type="text" id="worksheetFormFileUrl" placeholder="/worksheets/Lab_Worksheet_01.pdf" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">ลิงก์เปิดดูออนไลน์ (View URL)</label>
+            <input type="text" id="worksheetFormViewUrl" placeholder="/worksheets/worksheet01.html" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ไฟล์โค้ดตัวอย่างประกอบ (Code Reference)</label>
+          <input type="text" id="worksheetFormCodeRef" placeholder="code_examples/chapter01/check_system_env.py" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 font-mono">
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+          <button type="button" onclick="closeModal('worksheetModal')" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-semibold">ยกเลิก</button>
+          <button type="submit" class="btn-depa-blue px-5 py-2 text-xs font-bold rounded-xl shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk text-[#fff200]"></i> บันทึกใบงานปฏิบัติการ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Lesson Details Viewer Modal -->
+  <div id="lessonViewerModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between border-b-2 border-[#fff200]">
+        <div>
+          <span id="viewLessonBadge" class="text-xs bg-[#fff200] text-[#173b6b] font-black px-2.5 py-0.5 rounded shadow">บทที่ 1</span>
+          <h3 id="viewLessonTitle" class="text-base sm:text-lg font-bold mt-1 text-white font-heading">ชื่อบทเรียน</h3>
+        </div>
+        <button onclick="closeModal('lessonViewerModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="p-6 max-h-[75vh] overflow-y-auto space-y-6">
+        <div>
+          <h4 class="text-xs font-bold uppercase text-[#173b6b] tracking-wider">สาระสำคัญและเนื้อหาการเรียนรู้</h4>
+          <p id="viewLessonDesc" class="text-xs sm:text-sm text-slate-700 mt-1 leading-relaxed"></p>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold uppercase text-[#173b6b] tracking-wider">ผลการเรียนรู้</h4>
+          <ul id="viewLessonObjectives" class="mt-2 space-y-1.5 text-xs sm:text-sm text-slate-700 list-disc list-inside"></ul>
+        </div>
+        <!-- Video & Slides Links -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <i class="fa-brands fa-youtube text-2xl text-red-600"></i>
+              <div>
+                <div class="text-xs font-bold text-slate-900">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</div>
+                <div class="text-[11px] text-slate-500">เผยแพร่ผ่านระบบ YouTube</div>
+              </div>
+            </div>
+            <a id="viewLessonVideoLink" href="#" target="_blank" class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-bold">รับชมวีดิทัศน์</a>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <i class="fa-solid fa-file-pdf text-2xl text-[#173b6b]"></i>
+              <div>
+                <div class="text-xs font-bold text-slate-900">เอกสารประกอบการบรรยาย (PDF)</div>
+                <div class="text-[11px] text-slate-500">เอกสารอิเล็กทรอนิกส์ Box Cloud</div>
+              </div>
+            </div>
+            <a id="viewLessonSlideLink" href="#" target="_blank" class="text-xs btn-depa-blue px-3 py-1.5 rounded-lg font-bold">เปิดเอกสาร</a>
+          </div>
+        </div>
+        <!-- Multiple Video Episodes Container -->
+        <div id="viewLessonEpisodesContainer" class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5 hidden">
+          <div class="text-xs font-bold text-[#173b6b] flex items-center justify-between">
+            <span class="flex items-center gap-1.5"><i class="fa-brands fa-youtube text-red-600 text-sm"></i> รวมคลิปวีดิทัศน์ประจำบทเรียน:</span>
+            <span class="text-[11px] text-slate-500 font-normal">คลิกเพื่อรับชมคลิปแต่ละตอน</span>
+          </div>
+          <div id="viewLessonEpisodesList" class="flex flex-wrap gap-2 text-xs"></div>
+        </div>
+      </div>
+      <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        <span class="text-xs text-slate-500">ไฟล์โค้ดตัวอย่าง: <span id="viewLessonCodeFile" class="font-mono text-[#173b6b] font-bold"></span></span>
+        <div class="flex items-center gap-2">
+          <a id="viewDedicatedLessonPageBtn" href="chapter01.html" class="btn-depa-blue text-xs font-bold px-4 py-2 rounded-xl shadow flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-book-open-reader text-yellow-300"></i> เข้าสู่หน้าบทเรียนฉบับเต็ม
+          </a>
+          <button onclick="startLessonExamFromModal()" class="btn-depa-yellow text-xs font-bold px-4 py-2 rounded-xl shadow">
+            <i class="fa-solid fa-pen-to-square mr-1"></i> ทำแบบทดสอบวัดผลสัมฤทธิ์
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Material Modal (Add) -->
+  <div id="materialModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between border-b-2 border-[#fff200]">
+        <h3 class="text-base font-bold">เพิ่มสื่อการสอนหรือชุดข้อมูล</h3>
+        <button onclick="closeModal('materialModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form onsubmit="handleSaveMaterial(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">สังกัดบทเรียน</label>
+          <select id="materialFormChapter" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ประเภทสื่อ</label>
+          <select id="materialFormType" class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50">
+            <option value="slide">สไลด์ประกอบการสอน (Slide PDF)</option>
+            <option value="dataset">ชุดข้อมูลรูปภาพ/เสียง (Dataset)</option>
+            <option value="code">ซอร์สโค้ดตัวอย่าง (Source Code)</option>
+            <option value="doc">เอกสารคู่มือ (Document)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อสื่อ / ชุดข้อมูล</label>
+          <input type="text" id="materialFormTitle" required class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">ลิงก์ URL หรือที่อยู่ไฟล์</label>
+          <input type="text" id="materialFormUrl" required placeholder="https://app.box.com/... หรือ โฟลเดอร์" class="w-full text-xs border border-slate-300 rounded-xl p-2.5">
+        </div>
+        <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+          <button type="button" onclick="closeModal('materialModal')" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-semibold">ยกเลิก</button>
+          <button type="submit" class="btn-depa-blue px-5 py-2 text-xs font-bold rounded-xl shadow">บันทึก</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Admin Authentication Modal (RBAC Security) -->
+  <div id="adminAuthModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between border-b-2 border-[#fff200]">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-[#fff200] text-[#173b6b] flex items-center justify-center font-bold">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold">ยืนยันสิทธิ์ครูผู้สอน</h3>
+            <p class="text-[10px] text-slate-200">Teacher & Admin Verification</p>
+          </div>
+        </div>
+        <button onclick="closeModal('adminAuthModal')" class="text-slate-300 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <form onsubmit="handleAdminLogin(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">รหัสผ่านผู้ดูแลระบบ (Passcode)</label>
+          <div class="relative">
+            <input type="password" id="adminPasscodeInput" required placeholder="ป้อนรหัสผ่านครูผู้สอน..." class="w-full text-xs border border-slate-300 rounded-xl p-3 pr-10 focus:ring-2 focus:ring-[#173b6b] focus:border-transparent outline-none transition font-mono">
+            <button type="button" onclick="togglePasscodeVisibility()" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 text-xs">
+              <i id="passcodeToggleIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <div id="adminAuthError" class="hidden text-xs text-red-600 mt-2 font-medium flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-exclamation"></i> <span id="adminAuthErrorMsg">รหัสผ่านไม่ถูกต้อง</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">
+            <i class="fa-solid fa-circle-info text-yellow-500 mr-1"></i> สำหรับการทดสอบในห้องเรียน รหัสผ่านเริ่มต้นคือ: <code class="font-bold text-slate-700 bg-slate-100 px-1 py-0.5 rounded">admin1234</code>
+          </p>
+        </div>
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal('adminAuthModal')" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-semibold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="adminLoginSubmitBtn" class="btn-depa-blue px-5 py-2 text-xs font-bold rounded-xl shadow transition flex items-center gap-2">
+            <i class="fa-solid fa-unlock-keyhole"></i> เข้าสู่ระบบ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Student Login Modal -->
+  <div id="studentLoginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between border-b-2 border-[#fff200]">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-[#fff200] text-[#173b6b] flex items-center justify-center font-bold">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold">เข้าสู่ระบบนักเรียน (Student Portal)</h3>
+            <p class="text-[10px] text-yellow-300">ห้อง ม.5/12 • รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</p>
+          </div>
+        </div>
+        <button onclick="closeModal('studentLoginModal')" class="text-slate-300 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleStudentLogin(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">รหัสนักเรียน (StudentID 5 หลัก)</label>
+          <div class="relative">
+            <input type="text" id="studentLoginIdInput" required placeholder="เช่น 20506" maxlength="10" oninput="onStudentIdInput(this.value)" class="w-full text-xs border border-slate-300 rounded-xl p-3 pl-9 focus:ring-2 focus:ring-[#173b6b] focus:border-transparent outline-none transition font-mono font-bold text-slate-800">
+            <i class="fa-solid fa-id-badge absolute left-3 top-3.5 text-slate-400 text-xs"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span>รหัสผ่าน (Password)</span>
+            <span class="text-[11px] text-blue-600 font-normal">StudentID เดียวกัน</span>
+          </label>
+          <div class="relative">
+            <input type="password" id="studentLoginPassInput" required placeholder="ป้อนรหัสผ่าน (StudentID เดียวกัน)" class="w-full text-xs border border-slate-300 rounded-xl p-3 pl-9 pr-10 focus:ring-2 focus:ring-[#173b6b] focus:border-transparent outline-none transition font-mono text-slate-800">
+            <i class="fa-solid fa-lock absolute left-3 top-3.5 text-slate-400 text-xs"></i>
+            <button type="button" onclick="toggleStudentPassVisibility()" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 text-xs">
+              <i id="studentPassToggleIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <label class="flex items-center gap-2 mt-2 text-[11px] text-slate-600 cursor-pointer">
+            <input type="checkbox" id="autoFillPasswordCheckbox" checked onchange="toggleAutoFillPassword(this.checked)" class="rounded text-[#173b6b] focus:ring-[#173b6b]">
+            <span>ใช้รหัสนักเรียนเป็นรหัสผ่านอัตโนมัติ (Default Password)</span>
+          </label>
+        </div>
+
+        <div id="studentAuthError" class="hidden text-xs text-red-600 font-medium flex items-center gap-1.5 p-2.5 rounded-lg bg-red-50 border border-red-200">
+          <i class="fa-solid fa-circle-exclamation flex-shrink-0"></i> <span id="studentAuthErrorMsg">ข้อผิดพลาดในการเข้าสู่ระบบ</span>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <button type="button" onclick="syncGoogleSheetStudents()" class="text-[11px] text-[#173b6b] hover:text-blue-700 flex items-center gap-1.5 font-bold transition">
+            <i class="fa-solid fa-arrows-rotate text-xs"></i>
+            <span>ซิงค์ข้อมูลจาก Google Sheet</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="closeModal('studentLoginModal')" class="px-3.5 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-semibold transition">
+              ยกเลิก
+            </button>
+            <button type="submit" id="studentLoginSubmitBtn" class="btn-depa-yellow px-4 sm:px-5 py-2 text-xs font-bold rounded-xl shadow transition flex items-center gap-2">
+              <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Interactive Code Preview Modal -->
+  <div id="codePreviewModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-slate-800/90 px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="flex space-x-1.5">
+            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+          </div>
+          <span id="codeModalTitle" class="text-xs font-mono font-bold text-yellow-300 ml-2">code_example.py</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="copyCodeFromModal()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition" id="copyCodeBtn">
+            <i class="fa-solid fa-copy"></i> คัดลอกโค้ด
+          </button>
+          <a id="codeModalDownloadLink" href="#" download class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition">
+            <i class="fa-solid fa-download"></i> ดาวน์โหลด
+          </a>
+          <button onclick="closeModal('codePreviewModal')" class="text-slate-400 hover:text-white p-1 text-base">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-4 overflow-y-auto flex-grow bg-[#0d1117] text-slate-200 font-mono text-xs leading-relaxed select-text" id="codeModalContent">
+        กำลังโหลดโค้ด...
+      </div>
+      <div class="bg-slate-800/70 px-5 py-2.5 border-t border-slate-700/60 text-[11px] text-slate-400 flex items-center justify-between">
+        <span id="codeModalMeta"><i class="fa-solid fa-terminal mr-1 text-green-400"></i> พร้อมรันบนบอร์ด Arduino UNO Q / Python 3.10+</span>
+        <button onclick="closeModal('codePreviewModal')" class="text-slate-400 hover:text-slate-200 text-xs">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Student Lab Report Submission Modal -->
+  <div id="studentSubmissionModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+      <div class="bg-[#173b6b] text-white px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up text-yellow-300"></i>
+          <h3 class="text-sm font-bold" id="submissionModalTitle">ส่งงานปฏิบัติการ</h3>
+        </div>
+        <button onclick="closeModal('studentSubmissionModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleStudentSubmitLab(event)" class="p-6 space-y-4">
+        <input type="hidden" id="submissionChapterId">
+        <input type="hidden" id="submissionTaskType" value="practical">
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div><strong class="text-slate-700">ผู้ส่งงาน:</strong> <span id="submissionStudentDisplay" class="font-bold text-[#173b6b]">นักเรียน</span></div>
+            <span id="submissionTaskTypeBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">โจทย์ปฏิบัติ</span>
+          </div>
+          <div><strong class="text-slate-700">บทเรียน:</strong> <span id="submissionChapterDisplay" class="text-slate-800">บทที่ ...</span></div>
+        </div>
+        <div>
+          <label id="submissionUrlLabel" class="block text-xs font-bold text-slate-700 mb-1">ลิงก์ส่งผลงาน / เอกสารรายงาน:</label>
+          <input type="url" id="submissionReportUrl" placeholder="https://drive.google.com/... หรือ https://github.com/..." required class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:border-[#173b6b]">
+          <p id="submissionUrlHint" class="text-[11px] text-slate-400 mt-1">* กรุณาเปิดสิทธิ์ลิงก์ Google Drive ให้เป็น 'ทุกคนที่มีลิงก์สามารถดูได้'</p>
+        </div>
+        <div>
+          <label id="submissionNotesLabel" class="block text-xs font-bold text-slate-700 mb-1">บันทึกสรุปผลการปฏิบัติการ (Notes):</label>
+          <textarea id="submissionNotes" rows="3" placeholder="ระบุผลการทดลองหรือหมายเหตุ..." class="w-full text-xs border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:border-[#173b6b]"></textarea>
+        </div>
+        <div class="pt-2 flex justify-end space-x-2">
+          <button type="button" onclick="closeModal('studentSubmissionModal')" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-xl font-medium">ยกเลิก</button>
+          <button type="submit" class="btn-depa-blue px-5 py-2 text-xs font-bold rounded-xl shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-paper-plane text-yellow-300"></i> ยืนยันการส่งงาน
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa OFFICIAL DESIGN & STANDARDS)                   -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-10 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-white/10">
+        
+        <!-- Col 1: About KT-Edu -->
+        <div class="md:col-span-2 space-y-3">
+          <div class="flex items-center space-x-3.5">
+            <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow border-2 border-[#fff200] bg-black p-0.5">
+            <div>
+              <div class="font-bold text-white text-base">KT-Edu Learning Platform</div>
+              <div class="text-[11px] text-yellow-300 font-mono">Embedded Artificial Intelligence • Arduino UNO Q & Edge Impulse</div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed max-w-lg">
+            แพลตฟอร์มการจัดการเรียนรู้ออนไลน์สำหรับรายวิชาเพิ่มเติม ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว<br>
+            บูรณาการชุดสื่อการสอน Arduino UNO Q, Edge Impulse Studio, และ Database-SQL Brick
+          </p>
+          <div class="flex items-center space-x-3 pt-1">
+            <span class="text-slate-400 text-xs font-semibold">ช่องทางติดตาม:</span>
+            <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="w-7 h-7 rounded-full bg-white/10 hover:bg-[#1877f2] flex items-center justify-center text-white transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-xs"></i></a>
+            <a href="https://youtube.com/@Thanaud" target="_blank" class="w-7 h-7 rounded-full bg-white/10 hover:bg-red-600 flex items-center justify-center text-white transition" title="สื่อวีดิทัศน์การสอน Arduino UNO Q"><i class="fa-brands fa-youtube text-xs"></i></a>
+            <a href="https://line.me" target="_blank" class="w-7 h-7 rounded-full bg-white/10 hover:bg-[#06c755] flex items-center justify-center text-white transition"><i class="fa-brands fa-line text-xs"></i></a>
+          </div>
+        </div>
+
+        <!-- Col 2: Course Quick Links -->
+        <div class="space-y-2">
+          <div class="font-bold text-white text-sm uppercase tracking-wider text-yellow-300 font-heading">สารบบบทเรียน</div>
+          <ul class="space-y-1.5 text-xs text-slate-400">
+            <li><a href="javascript:void(0)" onclick="switchTab('lessons')" class="hover:text-yellow-300 transition">บทเรียนออนไลน์</a></li>
+            <li><a href="javascript:void(0)" onclick="switchTab('worksheets')" class="hover:text-yellow-300 transition">ใบงานปฏิบัติการ</a></li>
+            <li><a href="javascript:void(0)" onclick="switchTab('quizzes')" class="hover:text-yellow-300 transition">ศูนย์ทดสอบออนไลน์</a></li>
+            <li><a href="javascript:void(0)" onclick="switchTab('code')" class="hover:text-yellow-300 transition">Database-SQL Brick</a></li>
+            <li><a href="javascript:void(0)" onclick="switchTab('scores')" class="hover:text-yellow-300 transition">สมุดบันทึกผลการเรียน</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Standards & Badges -->
+        <div class="space-y-3">
+          <div class="font-bold text-white text-sm uppercase tracking-wider text-yellow-300 font-heading">มาตรฐานและความปลอดภัย</div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            ระบบพัฒนาตามเกณฑ์มาตรฐานการเรียนรู้ สพฐ. กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี และมาตรฐานการเข้าถึงข้อมูล W3C
+          </p>
+          <div class="flex items-center space-x-2 pt-1">
+            <img src="https://www.depa.or.th/storage/app/media/W3C/wcag2AA.png" alt="W3C WCAG 2.0" class="h-8 object-contain bg-white/90 px-1 rounded">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Disclaimer & Curriculum Signature -->
+      <div class="flex flex-col sm:flex-row items-center justify-between text-slate-400 text-[11px] pt-4 gap-4">
+        <div class="space-y-1 text-center sm:text-left">
+          <div>
+            © 2569 KT-Edu Learning Platform. สงวนลิขสิทธิ์เพื่อการศึกษาและการเรียนรู้รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว
+          </div>
+          <div class="flex space-x-3 justify-center sm:justify-start text-[10px]">
+            <a href="javascript:void(0)" class="hover:text-yellow-300 transition">หลักสูตรแกนกลาง สพฐ.</a>
+            <span class="text-white/20">•</span>
+            <a href="javascript:void(0)" class="hover:text-yellow-300 transition">Arduino App Lab</a>
+          </div>
+        </div>
+        <div class="text-center sm:text-right space-y-0.5">
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+            <i class="fa-solid fa-award"></i> Curriculum & Instruction
+          </span>
+          <div class="text-xs font-bold text-slate-100 tracking-wider">
+            TEACHER PANITTHA BOONYONG
+          </div>
+          <div class="text-[10px] text-slate-400">
+            Embedded Artificial Intelligence Program
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript App Logic -->
+  <script src="js/app.js?v=20261017b"></script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

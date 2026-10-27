@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 1: การเตรียมความพร้อมระบบและบอร์ดพัฒนา Arduino UNO Q | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* Custom Styling for Dedicated Lesson Page */
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.45;
+      white-space: normal;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    /* Smooth Callout Styles */
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+  <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=oVg57hOrU4s" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 1</span>
+          <span class="font-semibold text-white truncate">การเตรียมความพร้อมระบบและบอร์ดพัฒนา Arduino UNO Q</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. CHAPTER HERO BANNER                                         -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#0d2342] text-white py-10 sm:py-14 border-b-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-slate-300 mb-4 font-medium">
+        <a href="index.html" class="hover:text-yellow-300 transition">หน้าหลัก</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-white/40"></i>
+        <a href="index.html#section-lessons" class="hover:text-yellow-300 transition">บทเรียนออนไลน์</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-white/40"></i>
+        <span class="text-[#fff200] font-bold">บทที่ 1</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-4 max-w-3xl">
+        <div class="inline-flex items-center gap-2 bg-[#fff200] text-[#173b6b] text-xs font-black px-3.5 py-1 rounded-full shadow">
+          <i class="fa-solid fa-microchip"></i> Fundamental & Setup Module • สถาปัตยกรรมฮาร์ดแวร์และซอฟต์แวร์พื้นฐาน
+        </div>
+        <h1 class="text-xl sm:text-3xl lg:text-4xl font-black font-heading leading-snug sm:leading-normal tracking-tight text-white">
+          การเตรียมความพร้อมระบบ <br class="hidden sm:inline">
+          <span class="text-[#fff200]">และบอร์ดพัฒนา Arduino UNO Q</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-3xl">
+          เอกสารประกอบการจัดการเรียนรู้และแนวปฏิบัติการเชิงลึก มุ่งเน้นการศึกษาโครงสร้างสถาปัตยกรรมหน่วยประมวลผล <strong>Qualcomm Dragonwing QRB2210</strong> ภายใต้ระบบปฏิบัติการ <strong>Debian Linux AArch64</strong> ตลอดจนกระบวนการติดตั้งและกำหนดค่าโปรแกรมสภาพแวดล้อมสำหรับการพัฒนา <strong>Arduino App Lab</strong> การสื่อสารผ่านโครงข่ายคอมพิวเตอร์ (Network Mode) และการประยุกต์ใช้งานแพลตฟอร์ม <strong>Edge Impulse Studio</strong> เพื่อวางรากฐานการพัฒนาระบบปัญญาประดิษฐ์บนอุปกรณ์ปลายทาง (Edge AI)
+        </p>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-2">
+          <a href="#section-ep1" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=oVg57hOrU4s" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: Arduino App Lab & Board Setup)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+      </div>
+
+        <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">3 คาบ (150 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">สถาปัตยกรรมเป้าหมาย:</span>
+              <span class="font-bold text-white">Linux AArch64 (QRB2210)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">ซอฟต์แวร์หลัก:</span>
+              <span class="font-bold text-white">Arduino App Lab</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter01/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter01 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. MAIN LAYOUT: STICKY TOC SIDEBAR + ARTICLE CONTENT          -->
+  <!-- ============================================================== -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- ========================================================== -->
+      <!-- A. STICKY TABLE OF CONTENTS SIDEBAR (3 COLS)               -->
+      <!-- ========================================================== -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-24 space-y-6">
+        
+        <!-- Table of Contents Navigation -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex items-center gap-2 font-bold text-[#173b6b] text-sm border-b border-slate-100 pb-3 mb-3">
+            <i class="fa-solid fa-list-check text-yellow-500"></i>
+            <span>สารบัญเนื้อหาบทที่ 1</span>
+          </div>
+          <nav class="space-y-1 text-xs">
+            <a href="#section-outcomes" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              1. สาระสำคัญและผลการเรียนรู้
+            </a>
+            <a href="#section-ep1" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              2. การติดตั้งและตั้งค่าโปรแกรม Arduino App Lab
+            </a>
+            <a href="#section-ep2" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              3. สถาปัตยกรรมและการตรวจสอบระบบปฏิบัติการบนบอร์ด
+            </a>
+            <a href="#section-ep3" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              4. การเชื่อมต่อและการตั้งค่าโหมดเครือข่าย
+            </a>
+            <a href="#section-ep29" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              5. หลักการ Edge AI และการใช้งานแพลตฟอร์ม Edge Impulse
+            </a>
+            <a href="#section-checklist" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              6. การประเมินสมรรถนะการปฏิบัติการ (Performance Checklist)
+            </a>
+            <a href="#section-quiz" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              7. คำถามทบทวนองค์ความรู้ท้ายบทเรียน
+            </a>
+          </nav>
+        </div>
+
+        <!-- Hardware Checklist Card -->
+        <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] rounded-2xl shadow-md p-5 text-white text-xs space-y-3 border-2 border-yellow-400/40">
+          <div class="flex items-center gap-2 text-yellow-300 font-bold text-xs uppercase tracking-wider">
+            <i class="fa-solid fa-box-open"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ (Laboratory Equipment)
+          </div>
+          <ul class="space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>บอร์ดพัฒนา <strong>Arduino UNO Q</strong> (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>สายเชื่อมต่อ <strong>USB Type-C</strong> (ชนิดรับส่งข้อมูลและจ่ายกระแสไฟฟ้า 3A)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>เครื่องคอมพิวเตอร์ (ระบบปฏิบัติการ Windows 10/11, macOS หรือ Ubuntu Linux)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>โครงข่ายสัญญาณอินเทอร์เน็ตแบบไร้สาย (Wi-Fi) หรือสายสัญญาณ LAN</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>บัญชีผู้ใช้งานแพลตฟอร์ม <strong>Edge Impulse Studio</strong> (ไม่มีค่าใช้จ่าย)</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=1#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 1
+          </a>
+          <a href="index.html?chapter=1#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 1
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- ========================================================== -->
+      <!-- B. MAIN ARTICLE CONTENT (9 COLS)                           -->
+      <!-- ========================================================== -->
+      <article class="lg:col-span-9 space-y-10">
+
+        <!-- ======================================================== -->
+        <!-- SECTION 1: สาระสำคัญและผลการเรียนรู้                     -->
+        <!-- ======================================================== -->
+        <section id="section-outcomes" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded Artificial Intelligence: Edge AI) คือ การนำโมเดลการเรียนรู้ของเครื่อง (Machine Learning) และการเรียนรู้เชิงลึก (Deep Learning) ที่ผ่านการฝึกสอนแล้ว มาประมวลผลบนชิปของอุปกรณ์ปลายทางโดยตรง ผ่านสถาปัตยกรรมประมวลผลร่วม (Heterogeneous Computing) ของบอร์ดพัฒนา <strong>Arduino UNO Q</strong> ซึ่งผสานการทำงานระหว่างหน่วยประมวลผลหลัก Qualcomm Dragonwing QRB2210 และไมโครคอนโทรลเลอร์ ARM Cortex-M4 ช่วยลดความหน่วงในการประมวลผลและตอบสนองได้ทันที (Real-Time / Low Latency) ประหยัดปริมาณการรับส่งข้อมูลผ่านเครือข่าย (Bandwidth) และรักษาความปลอดภัยของข้อมูลส่วนบุคคลได้อย่างมีประสิทธิภาพ
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายสถาปัตยกรรมหน่วยประมวลผลของบอร์ด ความแตกต่างระหว่าง Cloud AI กับ Edge AI ตลอดจนโครงสร้างของไฟล์โมเดลไบนารี <code>.eim</code> ได้อย่างถูกต้องตามหลักวิชาการ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการติดตั้งซอฟต์แวร์ (Practice & Setup)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถดาวน์โหลด ติดตั้ง และตั้งค่าโปรแกรมสภาพแวดล้อมสำหรับการพัฒนา <strong>Arduino App Lab</strong> พร้อมติดตั้งไดรเวอร์ (Driver) เพื่อเชื่อมต่อคอมพิวเตอร์กับบอร์ดได้อย่างถูกต้องตามขั้นตอน
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะระบบและการสื่อสาร (System & Network)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถใช้คำสั่งเทอร์มินัล (Terminal) ในการตรวจสอบระบบปฏิบัติการ <strong>Debian Linux AArch64</strong> และตั้งค่าการสื่อสารผ่านเครือข่ายแบบ <strong>Network Mode</strong> ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความละเอียดรอบคอบในการตรวจสอบอุปกรณ์ตามมาตรฐานความปลอดภัยทางอิเล็กทรอนิกส์ มีความรับผิดชอบในการปฏิบัติงานร่วมกัน และมีทักษะในการแก้ปัญหาทางเทคนิคอย่างเป็นระบบ
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: การติดตั้งและกำหนดค่าซอฟต์แวร์ (EP.1)         -->
+        <!-- ======================================================== -->
+        <section id="section-ep1" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-laptop-code mr-1 text-yellow-400"></i> ตอนที่ 1: การติดตั้งซอฟต์แวร์
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การติดตั้งและตั้งค่าโปรแกรมสภาพแวดล้อม Arduino App Lab
+            </h2>
+          </div>
+
+          <!-- คำอธิบาย Ep.1 -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              <strong>โปรแกรม Arduino App Lab</strong> คือ โปรแกรมสภาพแวดล้อมสำหรับการพัฒนา (IDE: Integrated Development Environment) ที่ออกแบบมาเพื่อบอร์ดในตระกูล <strong>Q-Series</strong> โดยเฉพาะ โดยพัฒนาต่อยอดจาก Arduino IDE รุ่นดั้งเดิม ให้มุ่งเน้นการเขียนโปรแกรมด้วย <strong>ภาษาไพทอน (Python 3)</strong> บนระบบปฏิบัติการลีนุกซ์ พร้อมระบบควบคุมฮาร์ดแวร์และโมเดลปัญญาประดิษฐ์ในรูปแบบบล็อกคำสั่ง (Modular Brick Architecture) ที่ใช้งานง่ายและเป็นระบบ
+            </p>
+          </div>
+
+          <!-- รูปภาพประกอบฮาร์ดแวร์ 1 -->
+          <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+            <img src="images/chapters/ch01_hardware_setup.jpg" alt="การต่อเชื่อมบอร์ดพัฒนา Arduino UNO Q กับเครื่องคอมพิวเตอร์" class="w-full h-auto object-cover max-h-[460px]">
+            <div class="bg-slate-900 text-slate-300 text-xs px-4 py-2.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-camera mr-2 text-yellow-400"></i><strong>ภาพที่ 1.1:</strong> การเชื่อมต่อบอร์ดพัฒนา Arduino UNO Q ผ่านสาย USB Type-C เข้ากับเครื่องคอมพิวเตอร์และการเปิดใช้งานโปรแกรม Arduino App Lab</span>
+              <span class="text-yellow-400 font-medium text-[11px]">Hardware Setup</span>
+            </div>
+          </div>
+
+          <!-- ตารางสเปกขั้นต่ำ -->
+          <div class="space-y-2">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">ความต้องการของระบบคอมพิวเตอร์สำหรับการปฏิบัติการ (System Requirements)</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse border border-slate-200 rounded-xl overflow-hidden">
+                <thead class="bg-[#173b6b] text-white">
+                  <tr>
+                    <th class="p-3 border border-slate-300">ทรัพยากรระบบ</th>
+                    <th class="p-3 border border-slate-300">เกณฑ์ขั้นต่ำที่รองรับ (Minimum Requirement)</th>
+                    <th class="p-3 border border-slate-300">เกณฑ์มาตรฐานที่แนะนำ (Recommended Specification)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  <tr>
+                    <td class="p-3 font-bold border border-slate-200 text-slate-900">ระบบปฏิบัติการ</td>
+                    <td class="p-3 border border-slate-200">Windows 10 (64-bit) / macOS 11+ / Ubuntu 20.04+</td>
+                    <td class="p-3 border border-slate-200 text-emerald-700 font-semibold">Windows 11 (64-bit) / macOS Sonoma 14+</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold border border-slate-200 text-slate-900">หน่วยประมวลผลกลาง (CPU)</td>
+                    <td class="p-3 border border-slate-200">Intel Core i3 หรือ AMD Ryzen 3 ขึ้นไป</td>
+                    <td class="p-3 border border-slate-200 text-emerald-700 font-semibold">Intel Core i5 รุ่นที่ 11 ขึ้นไป หรือ Apple Silicon M1/M2/M3</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold border border-slate-200 text-slate-900">หน่วยความจำหลัก (RAM)</td>
+                    <td class="p-3 border border-slate-200">8 GB DDR4</td>
+                    <td class="p-3 border border-slate-200 text-emerald-700 font-semibold">16 GB DDR4/DDR5 (สำหรับการประมวลผลกราฟิกและฝึกสอนโมเดล)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold border border-slate-200 text-slate-900">ช่องเชื่อมต่ออุปกรณ์ภายนอก</td>
+                    <td class="p-3 border border-slate-200">พอร์ต USB 2.0 (รองรับกระแสไฟฟ้า 5V 1.5A)</td>
+                    <td class="p-3 border border-slate-200 text-emerald-700 font-semibold">พอร์ต USB Type-C มาตรฐาน 3.2 Gen 2 (จ่ายกระแสไฟฟ้า 5V 3.0A Data)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ขั้นตอนการติดตั้ง Step-by-step -->
+          <div class="space-y-4 pt-2">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-blue-600"></i> ลำดับขั้นตอนการติดตั้งโปรแกรม (Step-by-Step Installation)
+            </h4>
+
+            <div class="space-y-3 text-xs sm:text-sm text-slate-700">
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="w-7 h-7 rounded-full bg-[#173b6b] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</span>
+                <div>
+                  <div class="font-bold text-slate-900">การดาวน์โหลดโปรแกรมติดตั้ง Arduino App Lab</div>
+                  <p class="text-slate-600 mt-0.5">เข้าสู่เว็บไซต์ทางการของผู้พัฒนา Arduino หรือลิงก์ที่ผู้สอนจัดเตรียมไว้ เพื่อดาวน์โหลดโปรแกรมติดตั้งรุ่นล่าสุดที่ตรงกับระบบปฏิบัติการของคอมพิวเตอร์ (เช่น ไฟล์ <code>ArduinoAppLab-Setup.exe</code> สำหรับ Windows)</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="w-7 h-7 rounded-full bg-[#173b6b] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</span>
+                <div>
+                  <div class="font-bold text-slate-900">การติดตั้งโปรแกรมควบคุมอุปกรณ์ หรือ ไดรเวอร์ (Device Driver)</div>
+                  <p class="text-slate-600 mt-0.5">ระหว่างการติดตั้ง ตัวติดตั้งจะขออนุญาตลงทะเบียน Qualcomm USB Driver และ Virtual Network Interface ให้นักเรียนคลิกปุ่ม <strong>"Install"</strong> เพื่อให้คอมพิวเตอร์สามารถตรวจจับและสื่อสารกับบอร์ด Arduino UNO Q ผ่านพอร์ต USB-C ได้อย่างสมบูรณ์</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="w-7 h-7 rounded-full bg-[#173b6b] text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</span>
+                <div>
+                  <div class="font-bold text-slate-900">การอนุญาตผ่านระบบไฟร์วอลล์ (Windows Defender Firewall)</div>
+                  <p class="text-slate-600 mt-0.5">เมื่อเปิดใช้งานโปรแกรมครั้งแรก ระบบรักษาความปลอดภัยของ Windows จะแสดงหน้าต่างแจ้งเตือน ให้เลือกทำเครื่องหมายในช่อง <strong>"Private networks"</strong> แล้วคลิกปุ่ม <strong>"Allow access"</strong> เพื่อเปิดช่องทางสำหรับโพรโทคอล mDNS (พอร์ต 5353) ให้คอมพิวเตอร์และบอร์ดค้นหากันในเครือข่ายได้</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Warning Callout -->
+          <div class="callout-warning p-4 rounded-xl text-xs sm:text-sm text-amber-900 space-y-1">
+            <div class="font-bold flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> ข้อควรระวัง: การเลือกสายเชื่อมต่อ USB Type-C
+            </div>
+            <p>
+              สายชาร์จโทรศัพท์ทั่วไปอาจมีเฉพาะสายนำกระแสไฟฟ้า (<code>VBUS/GND</code>) แต่ไม่มีสายรับส่งสัญญาณข้อมูล (Data Lines: <code>D+/D-</code> หรือ <code>TX/RX</code>) หากนำมาเชื่อมต่อ บอร์ดจะมีไฟติดสว่างแต่คอมพิวเตอร์จะมองไม่เห็นบอร์ด <strong>ผู้เรียนต้องเลือกใช้สาย USB Type-C ชนิดรับส่งข้อมูล (Data Cable) ที่รองรับการจ่ายกระแสไฟฟ้าไม่ต่ำกว่า 3 แอมแปร์ (3A) เท่านั้น</strong>
+            </p>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: สถาปัตยกรรมและระบบปฏิบัติการ (EP.2)           -->
+        <!-- ======================================================== -->
+        <section id="section-ep2" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-brands fa-linux mr-1 text-yellow-400"></i> ตอนที่ 2: สถาปัตยกรรมและการตรวจสอบระบบปฏิบัติการ
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              สถาปัตยกรรมระบบและการตรวจสอบระบบปฏิบัติการ Debian Linux AArch64 บนบอร์ดพัฒนา
+            </h2>
+          </div>
+
+          <!-- เนื้อหา Ep.2 สถาปัตยกรรม -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              บอร์ดพัฒนา <strong>Arduino UNO Q</strong> ออกแบบโดยใช้สถาปัตยกรรมแบบประมวลผลสองระบบร่วมกัน (Heterogeneous Dual-Core Architecture) ซึ่งประกอบด้วยหน่วยประมวลผล 2 ส่วนหลักที่ทำงานประสานกันผ่านระบบบัสความเร็วสูง:
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div class="p-4 rounded-xl bg-slate-900 text-white space-y-2">
+                <div class="text-yellow-300 font-bold text-xs uppercase flex items-center gap-2">
+                  <i class="fa-solid fa-microchip"></i> 1. หน่วยไมโครโปรเซสเซอร์หลัก (Microprocessor Unit: MPU)
+                </div>
+                <div class="text-sm font-black">Qualcomm Dragonwing QRB2210</div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  หน่วยประมวลผลกลาง 4 คอร์ (Quad-Core) ARM Cortex-A53 ความกว้าง 64 บิต สถาปัตยกรรม <strong>AArch64</strong> ทำงานบนระบบปฏิบัติการลีนุกซ์ <strong>Debian 12 (Bookworm)</strong> มีหน้าที่ประมวลผลโค้ดภาษาไพทอน ประมวลผลภาพ เสียง และรันโมเดลปัญญาประดิษฐ์ไฟล์ <code>.eim</code>
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#173b6b] text-white space-y-2">
+                <div class="text-yellow-300 font-bold text-xs uppercase flex items-center gap-2">
+                  <i class="fa-solid fa-bolt"></i> 2. หน่วยไมโครคอนโทรลเลอร์ (Microcontroller Unit: MCU)
+                </div>
+                <div class="text-sm font-black">ARM Cortex-M4 Microcontroller</div>
+                <p class="text-xs text-slate-200 leading-relaxed">
+                  หน่วยประมวลผลควบคุมแบบเวลาจริง (Real-Time Control) ทำหน้าที่ควบคุมขาสัญญาณดิจิทัล (GPIO) ขาแอนะล็อก (ADC) สัญญาณพัลส์ (PWM) และควบคุมแผงไฟ LED Matrix โดยสื่อสารแลกเปลี่ยนข้อมูลกับหน่วยประมวลผลหลักผ่านระบบบัสความเร็วสูงบนบอร์ด
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- การสังเกตไฟ LED สถานะการบูต -->
+          <div class="space-y-3">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-lightbulb text-yellow-500"></i> ลำดับขั้นตอนการสังเกตไฟแสดงสถานะขณะเปิดเครื่อง (Boot Sequence)
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="inline-block w-3 h-3 rounded-full bg-emerald-500 mr-1.5 align-middle"></span>
+                <strong>PWR (ไฟเลี้ยงระบบ):</strong> ติดสว่างนิ่งทันทีเมื่อเสียบสายไฟที่จ่ายไฟได้ถูกต้องสมบูรณ์
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="inline-block w-3 h-3 rounded-full bg-amber-400 mr-1.5 align-middle"></span>
+                <strong>BOOT/ACT (สถานะโหลดระบบ):</strong> กะพริบเป็นจังหวะ แสดงว่าซีพียูกำลังโหลดระบบปฏิบัติการลีนุกซ์
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="inline-block w-3 h-3 rounded-full bg-blue-500 mr-1.5 align-middle"></span>
+                <strong>SYS OK (ระบบพร้อมทำงาน):</strong> ติดสว่างนิ่งหรือกะพริบสม่ำเสมอ แสดงว่าระบบพร้อมรับคำสั่งจาก Arduino App Lab
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Terminal Simulator -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-terminal text-[#173b6b]"></i> การตรวจสอบระบบผ่านคำสั่งเทอร์มินัล (Linux Commands)
+              </h4>
+              <span class="text-xs text-slate-400 font-medium">User: arduino@arduino-uno-q</span>
+            </div>
+
+            <!-- Terminal Box 1: uname -a and lscpu -->
+            <div class="terminal-window shadow-xl">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                  <span class="text-xs font-mono text-slate-400 ml-2">arduino@arduino-uno-q: ~</span>
+                </div>
+                <span class="text-[11px] text-slate-400 font-mono">Bash Shell</span>
+              </div>
+              <div class="terminal-body space-y-3 font-mono text-xs leading-normal">
+                <!-- Command 1 -->
+                <div class="space-y-1">
+                  <div class="text-yellow-400 font-bold">$ uname -a</div>
+                  <div class="text-slate-200 leading-snug">Linux arduino-uno-q 5.15.0-qrb2210 #1 SMP PREEMPT aarch64 GNU/Linux</div>
+                  <div class="text-emerald-400 text-[11px] leading-relaxed pt-0.5 font-sans">↳ คำอธิบายผลลัพธ์: ยืนยันว่าระบบทำงานบนสถาปัตยกรรม 64 บิต (aarch64) ซึ่งต้องใช้ไฟล์โมเดลปัญญาประดิษฐ์ .eim ที่คอมไพล์สำหรับ AArch64 เท่านั้น</div>
+                </div>
+
+                <!-- Command 2 -->
+                <div class="pt-2.5 border-t border-slate-800 space-y-1">
+                  <div class="text-yellow-400 font-bold">$ lscpu | grep "Model name\|Architecture\|CPU(s):"</div>
+                  <div class="text-slate-200 leading-tight space-y-0.5">
+                    <div>Architecture:           aarch64</div>
+                    <div>CPU(s):                 4</div>
+                    <div>Model name:             Qualcomm Kryo 260 / Cortex-A53</div>
+                  </div>
+                  <div class="text-emerald-400 text-[11px] leading-relaxed pt-0.5 font-sans">↳ คำอธิบายผลลัพธ์: ตรวจพบหน่วยประมวลผลกลาง 4 คอร์ ช่วยให้สามารถประมวลผลโมเดลโครงข่ายประสาทเทียมและขั้นตอนการเรียนรู้ของเครื่องแบบคู่ขนานได้รวดเร็ว</div>
+                </div>
+
+                <!-- Command 3 -->
+                <div class="pt-2.5 border-t border-slate-800 space-y-1">
+                  <div class="text-yellow-400 font-bold">$ free -h</div>
+                  <div class="text-slate-200 leading-tight overflow-x-auto whitespace-pre font-mono text-[11px]">              total        used        free      shared  buff/cache   available
+Mem:          1.9Gi       380Mi       1.2Gi        16Mi       360Mi       1.5Gi</div>
+                  <div class="text-emerald-400 text-[11px] leading-relaxed pt-0.5 font-sans">↳ คำอธิบายผลลัพธ์: ตรวจสอบหน่วยความจำแรม (RAM) พบพื้นที่ว่างคงเหลือเพียงพอสำหรับการโหลดโมเดลปัญญาประดิษฐ์เข้าสู่หน่วยความจำ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Python Test Script -->
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                <i class="fa-brands fa-python text-blue-600"></i> โค้ดภาษาไพทอนสำหรับตรวจสอบสภาพแวดล้อม: <code>check_env.py</code>
+              </span>
+              <span class="text-xs text-slate-500 font-medium">Python 3.10+</span>
+            </div>
+            <div class="terminal-window p-3 text-xs">
+              <pre class="text-emerald-300">import os, platform, sys
+
+print("========================================")
+print(" ตรวจสอบความพร้อมของระบบและบอร์ดพัฒนา Arduino UNO Q")
+print("========================================")
+print(f"OS Platform     : {platform.system()} {platform.release()}")
+print(f"Architecture    : {platform.machine()}")
+print(f"Python Version  : {sys.version.split()[0]}")
+print(f"Working Dir     : {os.getcwd()}")
+print("สถานะ: พร้อมรองรับการประมวลผล Edge AI (.eim)")
+print("========================================")</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: การสื่อสารผ่านโหมดเครือข่าย (EP.3 & EP.7)     -->
+        <!-- ======================================================== -->
+        <section id="section-ep3" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-wifi mr-1 text-yellow-400"></i> ตอนที่ 3: การเชื่อมต่อระบบเครือข่าย
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การเชื่อมต่อและการตั้งค่าโหมดเครือข่าย (Network Mode)
+            </h2>
+          </div>
+
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              ในการนำระบบปัญญาประดิษฐ์บนอุปกรณ์ปลายทาง (Edge AI) ไปใช้งานจริง เช่น ติดตั้งบนหุ่นยนต์ แขนกล หรือสายพานลำเลียง เราไม่สามารถต่อสาย USB เข้ากับคอมพิวเตอร์ตลอดเวลาได้ บอร์ดพัฒนา Arduino UNO Q จึงออกแบบมาให้รองรับการทำงานในโหมดเครือข่าย (Network Mode) ทำให้นักเรียนสามารถส่งโค้ดโปรแกรม ดูภาพสดจากกล้องแบบเรียลไทม์ และเรียกดูผลการทำนายผลลัพธ์ผ่านระบบเครือข่ายไร้สาย (Wi-Fi) หรือสาย LAN ได้อย่างสะดวกและคล่องตัว
+            </p>
+          </div>
+
+          <!-- ตารางเปรียบเทียบโหมดการเชื่อมต่อ -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-[#173b6b] text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-plug text-blue-600"></i> 1. โหมดเชื่อมต่อสาย USB โดยตรง (USB Direct Mode)
+              </div>
+              <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                <li>เชื่อมต่อผ่านสาย USB Type-C เข้ากับพอร์ตคอมพิวเตอร์โดยตรง</li>
+                <li>เหมาะสำหรับการตั้งค่าเริ่มต้นบอร์ดในครั้งแรก (First-time initialization)</li>
+                <li>เหมาะสำหรับการกู้คืนระบบหรือติดตั้งระบบปฏิบัติการใหม่</li>
+                <li>มีข้อจำกัดเรื่องระยะการทำงานตามความยาวของสาย USB</li>
+              </ul>
+            </div>
+
+            <div class="p-4 rounded-xl bg-yellow-50/70 border border-yellow-200 space-y-2">
+              <div class="font-bold text-[#173b6b] text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-wifi text-yellow-600"></i> 2. โหมดการเชื่อมต่อไร้สาย (Wireless Network Mode: แนะนำ)
+              </div>
+              <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                <li>เชื่อมต่อผ่านสัญญาณ Wi-Fi (รองรับทั้งย่านความถี่ 2.4 GHz และ 5.0 GHz)</li>
+                <li>สามารถเข้าถึงและควบคุมบอร์ดจากคอมพิวเตอร์เครื่องใดก็ได้ในเครือข่ายเดียวกัน</li>
+                <li>รองรับการดูภาพสดจากกล้องผ่านพอร์ต 7000 แบบไร้สาย</li>
+                <li>มีความคล่องตัวสูง เหมาะกับการติดตั้งบนหุ่นยนต์หรือเครื่องจักรอัตโนมัติ</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- ขั้นตอนการตั้งค่า Wi-Fi & mDNS -->
+          <div class="space-y-3 pt-2">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-network-wired text-blue-600"></i> ลำดับขั้นตอนการตั้งค่าบอร์ดเพื่อเชื่อมต่อเครือข่าย
+            </h4>
+
+            <div class="space-y-2.5 text-xs sm:text-sm text-slate-700">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center font-bold text-xs shrink-0">1</span>
+                <div>
+                  <strong>การตั้งค่า Wi-Fi (SSID และรหัสผ่าน):</strong> เปิดแท็บ Settings ในโปรแกรม Arduino App Lab เลือกชื่อเครือข่าย Wi-Fi ภายในห้องปฏิบัติการ แล้วใส่รหัสผ่านเพื่อเชื่อมต่อ
+                </div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center font-bold text-xs shrink-0">2</span>
+                <div>
+                  <strong>การค้นหาบอร์ดด้วยโพรโทคอล mDNS:</strong> บอร์ดจะประกาศชื่อในเครือข่ายเป็น <code>arduino-uno-q.local</code> ทำให้นักเรียนเรียกใช้งานได้ทันทีโดยไม่ต้องจดจำหมายเลข IP Address
+                </div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center font-bold text-xs shrink-0">3</span>
+                <div>
+                  <strong>การทดสอบการตอบสนองด้วยคำสั่ง Ping:</strong> เปิดหน้าต่าง Command Prompt บนคอมพิวเตอร์ แล้วพิมพ์คำสั่ง <code>ping arduino-uno-q.local</code> หากขึ้นข้อความตอบกลับ <code>Reply from...</code> แสดงว่าการเชื่อมต่อเครือข่ายเสร็จสมบูรณ์
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: มโนทัศน์ Edge AI และ Edge Impulse (EP.29)     -->
+        <!-- ======================================================== -->
+        <section id="section-ep29" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-brain mr-1 text-yellow-400"></i> ตอนที่ 4: สถาปัตยกรรมปัญญาประดิษฐ์บนอุปกรณ์ปลายทาง
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              หลักการปัญญาประดิษฐ์บนอุปกรณ์ปลายทาง และการใช้งานแพลตฟอร์ม Edge Impulse
+            </h2>
+          </div>
+
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              ในอดีต การประมวลผลปัญญาประดิษฐ์ต้องส่งข้อมูลภาพหรือสัญญาณจากเซนเซอร์ผ่านเครือข่ายอินเทอร์เน็ตขึ้นไปประมวลผลบนเซิร์ฟเวอร์คลาวด์ขนาดใหญ่ (Cloud AI) ซึ่งทำให้มีความหน่วงในการส่งข้อมูล และอาจมีความเสี่ยงเรื่องความปลอดภัยของข้อมูล แต่ด้วยเทคโนโลยีปัญญาประดิษฐ์บนอุปกรณ์ปลายทาง (Edge AI) นักเรียนสามารถนำโมเดลการเรียนรู้เชิงลึกที่ผ่านการย่อขนาดและปรับให้เหมาะสมแล้ว มาประมวลผลบนชิปของบอร์ดสมองกลฝังตัว เช่น Qualcomm Dragonwing QRB2210 ได้โดยตรง
+            </p>
+          </div>
+
+          <!-- ตารางเปรียบเทียบ Cloud AI vs Edge AI -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse border border-slate-200 rounded-xl overflow-hidden">
+              <thead class="bg-[#173b6b] text-white">
+                <tr>
+                  <th class="p-3 border border-slate-300">คุณลักษณะ (Performance Attributes)</th>
+                  <th class="p-3 border border-slate-300">Cloud AI (การประมวลผลบนคลาวด์)</th>
+                  <th class="p-3 border border-slate-300 text-yellow-300 font-bold">Edge AI (การประมวลผลบนบอร์ดปลายทาง)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 bg-white">
+                <tr>
+                  <td class="p-3 font-bold border border-slate-200 text-slate-900">ความเร็วในการตอบสนองและความหน่วง (Latency)</td>
+                  <td class="p-3 border border-slate-200 text-slate-600">มีความหน่วงสูง (200 - 2,000 มิลลิวินาที ขึ้นอยู่กับความเร็วอินเทอร์เน็ต)</td>
+                  <td class="p-3 border border-slate-200 text-emerald-700 font-bold">ความหน่วงต่ำมาก ตอบสนองทันที (10 - 50 มิลลิวินาที แบบเรียลไทม์)</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-bold border border-slate-200 text-slate-900">การพึ่งพาสัญญาณอินเทอร์เน็ต</td>
+                  <td class="p-3 border border-slate-200 text-red-600">ต้องเชื่อมต่ออินเทอร์เน็ตตลอดเวลา (ระบบหยุดทำงานทันทีหากเน็ตหลุด)</td>
+                  <td class="p-3 border border-slate-200 text-emerald-700 font-bold">ทำงานแบบออฟไลน์ได้ 100% (ทำงานได้ต่อเนื่องแม้ไม่มีอินเทอร์เน็ต)</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-bold border border-slate-200 text-slate-900">ความปลอดภัยและความเป็นส่วนตัวของข้อมูล</td>
+                  <td class="p-3 border border-slate-200 text-slate-600">มีความเสี่ยงจากการส่งภาพหรือข้อมูลออกสู่เครือข่ายภายนอก</td>
+                  <td class="p-3 border border-slate-200 text-emerald-700 font-bold">ปลอดภัยสูงสุด ข้อมูลภาพและเซนเซอร์ถูกประมวลผลอยู่ภายในบอร์ด</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-bold border border-slate-200 text-slate-900">การใช้ปริมาณข้อมูลเครือข่าย (Bandwidth)</td>
+                  <td class="p-3 border border-slate-200 text-slate-600">สิ้นเปลืองแบนด์วิดท์ เพราะต้องส่งไฟล์ภาพหรือวิดีโอสดขึ้นคลาวด์ตลอดเวลา</td>
+                  <td class="p-3 border border-slate-200 text-emerald-700 font-bold">ประหยัดแบนด์วิดท์ ส่งเฉพาะผลลัพธ์หรือสัญญาณแจ้งเตือนเมื่อพบเหตุการณ์</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- รูปภาพประกอบ Edge Impulse Pipeline 2 -->
+          <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+            <img src="images/chapters/ch01_edge_impulse_pipeline.jpg" alt="วงจรกระบวนการ Machine Learning Pipeline บน Edge Impulse Studio" class="w-full h-auto object-cover max-h-[460px]">
+            <div class="bg-slate-900 text-slate-300 text-xs px-4 py-2.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-diagram-project mr-2 text-yellow-400"></i><strong>ภาพที่ 1.2:</strong> โครงสร้างและวงจรกระบวนการพัฒนาโมเดลปัญญาประดิษฐ์ 5 ขั้นตอน (Machine Learning Workflow Pipeline) บนแพลตฟอร์ม Edge Impulse Studio</span>
+              <span class="text-yellow-400 font-medium text-[11px]">ML Workflow Pipeline</span>
+            </div>
+          </div>
+
+          <!-- 5 ขั้นตอนหลักบน Edge Impulse -->
+          <div class="space-y-4 pt-2">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-arrows-spin text-blue-600"></i> วงจรกระบวนการพัฒนาโมเดล 5 ขั้นตอนบน Edge Impulse
+            </h4>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
+              
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1 text-center">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-black mx-auto flex items-center justify-center text-xs">1</div>
+                <div class="font-bold text-slate-900">Data Acquisition</div>
+                <div class="text-[11px] text-slate-500">การเก็บตัวอย่างและแบ่งสัดส่วน 80:20 (Train/Test)</div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1 text-center">
+                <div class="w-8 h-8 rounded-full bg-yellow-100 text-[#173b6b] font-black mx-auto flex items-center justify-center text-xs">2</div>
+                <div class="font-bold text-slate-900">Impulse Design</div>
+                <div class="text-[11px] text-slate-500">กำหนด Input, บล็อกประมวลผลสัญญาณ DSP และบล็อกการเรียนรู้</div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1 text-center">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-black mx-auto flex items-center justify-center text-xs">3</div>
+                <div class="font-bold text-slate-900">Model Training</div>
+                <div class="text-[11px] text-slate-500">ฝึกสอนโครงข่ายประสาทเทียมและดูผลจาก Confusion Matrix</div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1 text-center">
+                <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-800 font-black mx-auto flex items-center justify-center text-xs">4</div>
+                <div class="font-bold text-slate-900">Model Testing</div>
+                <div class="text-[11px] text-slate-500">ประเมินความถูกต้องด้วยชุดข้อมูลทดสอบที่ไม่เคยนำมาฝึกสอน</div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-[#173b6b] text-white space-y-1 text-center shadow-md">
+                <div class="w-8 h-8 rounded-full bg-[#fff200] text-[#173b6b] font-black mx-auto flex items-center justify-center text-xs">5</div>
+                <div class="font-bold text-yellow-300">Deployment</div>
+                <div class="text-[11px] text-slate-200">สร้างไฟล์โมเดลไบนารี <strong>.eim</strong> สำหรับติดตั้งลงบนบอร์ด</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- รู้จักไฟล์ .eim -->
+          <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-950 space-y-2">
+            <div class="font-bold flex items-center gap-2 text-emerald-800">
+              <i class="fa-solid fa-file-code text-base"></i> ทำความเข้าใจโครงสร้างไฟล์โมเดล .eim (Edge Impulse Model)
+            </div>
+            <p>
+              ไฟล์นามสกุล <strong><code>.eim</code></strong> (Edge Impulse Model) คือ ไฟล์โมเดลปัญญาประดิษฐ์ระดับระบบ (Native Machine Code) ที่คอมไพล์ด้วยภาษา C++ เพื่อให้ทำงานบนระบบปฏิบัติการลีนุกซ์ 64 บิต (Linux AArch64) โดยเฉพาะ ภายในไฟล์ประกอบด้วยขั้นตอนการประมวลผลสัญญาณดิจิทัล (DSP) และโครงข่ายประสาทเทียมที่ปรับแต่งมาอย่างสมบูรณ์ ทำให้บอร์ดสามารถประมวลผลได้อย่างรวดเร็วและใช้หน่วยความจำน้อย โดยไม่ต้องติดตั้งไลบรารีขนาดใหญ่เพิ่มเติม
+            </p>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ======================================================== -->
+        <!-- SECTION 6: การประเมินสมรรถนะการปฏิบัติการ                -->
+        <!-- ======================================================== -->
+        <section id="section-checklist" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 6</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              การประเมินสมรรถนะการปฏิบัติการ (Performance Assessment Checklist)
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">รายการเกณฑ์การตรวจสอบสมรรถนะที่ผู้เรียนต้องผ่านการประเมินผลในบทเรียนที่ 1</p>
+          </div>
+
+          <div class="space-y-3">
+            
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 1: การติดตั้งโปรแกรม Arduino App Lab และไดรเวอร์อุปกรณ์ตามขั้นตอน</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ติดตั้งโปรแกรมสำเร็จและคอมพิวเตอร์สามารถตรวจจับการเชื่อมต่อบอร์ด Arduino UNO Q ได้อย่างถูกต้อง</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 2: การใช้คำสั่งเทอร์มินัลเพื่อตรวจสอบสถาปัตยกรรม Linux AArch64</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ใช้คำสั่ง <code>uname -a</code>, <code>lscpu</code> และ <code>free -h</code> เพื่อตรวจสอบคุณลักษณะเฉพาะทางเทคนิค (Specifications) ของหน่วยประมวลผล Qualcomm QRB2210 แบบ 4 คอร์</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 3: การตั้งค่าการเชื่อมต่อเครือข่าย Wi-Fi และการทดสอบโพรโทคอล mDNS</span>
+                <p class="text-slate-500 mt-0.5 text-xs">บอร์ดได้รับหมายเลข IP Address และสามารถตอบรับคำสั่ง Ping ผ่านชื่อ <code>arduino-uno-q.local</code> ได้อย่างสมบูรณ์</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 4: การลงทะเบียนและการสร้างโปรเจกต์บนแพลตฟอร์ม Edge Impulse Studio</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ลงทะเบียนเข้าใช้งานแพลตฟอร์มและสร้างโปรเจกต์แรกภายใต้ชื่อ <code>Student_EdgeAI_Setup</code> ได้สำเร็จ</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 5: การประเมินผลสัมฤทธิ์ทางการเรียนท้ายบทเรียนที่ 1 ผ่านเกณฑ์ร้อยละ 70</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ทำแบบทดสอบวัดผลสัมฤทธิ์ทางการเรียนประจำบทที่ 1 ในศูนย์ทดสอบออนไลน์ของระบบครบถ้วนและผ่านเกณฑ์ที่กำหนด</p>
+              </div>
+            </label>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 7: คำถามทบทวนองค์ความรู้ท้ายบทเรียน              -->
+        <!-- ======================================================== -->
+        <section id="section-quiz" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 7</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              คำถามทบทวนองค์ความรู้ท้ายบทเรียน (Academic Review Questions)
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">แบบฝึกหัดสำหรับประเมินตนเองและทบทวนเนื้อหาสำคัญเพื่อเตรียมความพร้อมสู่การปฏิบัติการขั้นสูง</p>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>1. เหตุใดบอร์ดพัฒนา Arduino UNO Q จึงสามารถประมวลผลไฟล์โมเดลปัญญาประดิษฐ์ <code>.eim</code> ได้ แตกต่างจากบอร์ด Arduino รุ่นก่อนอย่างไร?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เนื่องจากบอร์ดพัฒนา Arduino UNO Q ใช้หน่วยประมวลผลหลัก (MPU) ชิป <strong>Qualcomm Dragonwing QRB2210 (Quad-Core 64-bit ARM Cortex-A53)</strong> ที่ทำงานบนระบบปฏิบัติการ <strong>Debian Linux AArch64</strong> ซึ่งมีโครงสร้างแบบระบบปฏิบัติการเต็มรูปแบบและมีแรมสูง ในขณะที่บอร์ด Arduino รุ่นก่อนเป็นเพียงไมโครคอนโทรลเลอร์ (MCU) ขนาดเล็กที่ไม่มีระบบปฏิบัติการ จึงไม่สามารถประมวลผลไฟล์โมเดลไบนารีระดับระบบ (<code>.eim</code>) ได้
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>2. ในขั้นตอน Data Acquisition บนแพลตฟอร์ม Edge Impulse เหตุใดจึงต้องแบ่งชุดข้อมูลเป็น Training (80%) และ Testing (20%)?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เพื่อป้องกันปัญหา <strong>Overfitting</strong> (ภาวะที่โมเดลจดจำเฉพาะข้อมูลที่ใช้สอน แต่ไม่สามารถทำนายข้อมูลใหม่ได้) โดยชุดข้อมูล Training ใช้สำหรับฝึกสอนและปรับค่าน้ำหนัก (Weights) ของโครงข่ายประสาทเทียม ส่วนชุดข้อมูล Testing มีไว้เพื่อทดสอบประเมินความแม่นยำกับข้อมูลใหม่ที่โมเดลไม่เคยเห็น เพื่อให้มั่นใจว่าโมเดลสามารถนำไปใช้งานจริงได้อย่างแม่นยำ
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>3. ข้อได้เปรียบสำคัญที่สุดของการประมวลผลปัญญาประดิษฐ์บนอุปกรณ์ปลายทาง (Edge AI) เมื่อเปรียบเทียบกับระบบคลาวด์ (Cloud AI) ในงานภาคอุตสาหกรรมคืออะไร?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> คือ <strong>การตอบสนองได้ทันทีแบบเรียลไทม์โดยมีความหน่วงต่ำมาก (Real-Time Low Latency)</strong> และ <strong>ความต่อเนื่องในการทำงานโดยไม่ต้องพึ่งพาอินเทอร์เน็ต (Offline Reliability)</strong> เช่น ในระบบควบคุมสายพานการผลิต บอร์ดสามารถประมวลผลและสั่งคัดแยกชิ้นงานหรือตัดการทำงานได้ทันทีภายในเสี้ยววินาที แม้ในขณะที่สัญญาณอินเทอร์เน็ตภายนอกจะหยุดชะงัก
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ======================================================== -->
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">สรุปสาระสำคัญบทเรียนที่ 1</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">การเตรียมความพร้อมสู่บทเรียนถัดไป</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">บทเรียนที่ 2: สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick) และการควบคุมฮาร์ดแวร์พื้นฐาน</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญบทเรียน</span>
+            </a>
+            <a href="chapter02.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>เข้าสู่บทเรียนที่ 2</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

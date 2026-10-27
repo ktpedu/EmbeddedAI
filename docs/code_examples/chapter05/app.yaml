@@ -1,0 +1,38 @@
+# ==============================================================================
+# โครงการสื่อการเรียนรู้ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI Learning Platform)
+# ไฟล์คอนฟิกูเรชัน: app.yaml
+# บทเรียนที่ 5: การฝึกสอนโมเดลตรวจจับความผิดปกติจากภาพ (Visual Anomaly Detection)
+# ==============================================================================
+
+version: "1.0"
+module_name: "visual_anomaly_detection_test"
+description: "การทดสอบและประเมินค่าคะแนนความผิดปกติของภาพ (Visual Anomaly Score Evaluation)"
+
+model:
+  name: "fomo_ad_bearing_model"
+  format: "eim"
+  input_width: 96
+  input_height: 96
+  color_depth: "RGB"
+  feature_extractor: "MobileNetV2"
+  alpha: 0.35
+
+anomaly_detection:
+  # ค่าขีดเริ่มเปลี่ยนในการตัดสินใจ (Anomaly Threshold)
+  anomaly_threshold: 20.0
+  # ค่าขีดเริ่มเปลี่ยนขั้นวิกฤต (Critical Threshold)
+  critical_threshold: 40.0
+  # ตัวแปรควบคุมการประเมิน (mean = ค่าเฉลี่ยทั้งภาพ, max = ค่าสูงสุดรายพิกัด/บล็อก)
+  evaluation_metric: "max"
+
+camera:
+  device_id: 0
+  capture_width: 640
+  capture_height: 480
+  fps: 30
+
+hardware:
+  platform: "Arduino UNO Q"
+  display_feedback: true
+  buzzer_pin: 8
+  relay_pin: 7

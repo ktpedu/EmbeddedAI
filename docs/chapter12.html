@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 12: การจำแนกเสียงเฉพาะทางและการบูรณาการระบบ Edge AI เชิงวิศวกรรม | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+    <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=OSzculUyvaY&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=44" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 12</span>
+          <span class="font-semibold text-white truncate">การจำแนกเสียงเฉพาะทางและการบูรณาการระบบ Edge AI เชิงวิศวกรรม</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. HERO / BREADCRUMB HEADER                                    -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#1e4985] text-white py-10 px-4 sm:px-6 lg:px-8 border-b-4 border-[#fff200] relative overflow-hidden">
+    <div class="absolute right-0 top-0 w-96 h-96 bg-[#fff200]/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+    <div class="max-w-7xl mx-auto relative z-10">
+      
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-slate-300 mb-4 whitespace-nowrap flex-shrink-0">
+        <a href="index.html" class="hover:text-yellow-300">หน้าหลัก</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <a href="index.html#section-curriculum" class="hover:text-yellow-300">หลักสูตร</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <span class="text-[#fff200] font-semibold">บทที่ 12 (Capstone)</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#fff200] text-[#173b6b] shadow">
+            <i class="fa-solid fa-graduation-cap"></i> ภาคการบูรณาการระบบระดับวิศวกรรม (Engineering Capstone Integration)
+          </div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            บทที่ 12: การจำแนกเสียงเฉพาะทางและการบูรณาการระบบ Edge AI เชิงวิศวกรรม
+          </h1>
+          <p class="text-sm sm:text-base text-slate-200 max-w-3xl leading-relaxed">
+            Audio Classification & Full-Scale Edge AI Engineering Integration: การฝึกสอนโมเดลจำแนกเสียงเครื่องจักรอุตสาหกรรม การบูรณาการระบบพหุโมดอล (Multi-Modal AI: Vision & Audio) การบันทึกข้อมูลประวัติลง Database-SQL Brick และการบำรุงรักษาเชิงคาดการณ์ (Predictive Maintenance)
+          </p>
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-3">
+          <a href="#section-objectives" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=OSzculUyvaY" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/m1zd2ahqm8xb20ozfig7h4gow6rhjmi1" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: Audio Classification Acoustic AI)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+        </div>
+
+                <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">4 คาบ (200 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">สถาปัตยกรรมเป้าหมาย:</span>
+              <span class="font-bold text-white">Multi-Modal Edge AI Integration</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">ซอฟต์แวร์/มอดูลหลัก:</span>
+              <span class="font-bold text-white">Audio Classification & Industrial Capstone</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter12/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter12 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. MAIN CONTENT AREA (2 COLUMNS)                               -->
+  <!-- ============================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- STICKY TABLE OF CONTENTS (LEFT COLUMN - 3 COLS) -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-20 space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 overflow-hidden">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h2 class="text-sm font-extrabold text-[#173b6b] uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-[#fff200] bg-[#173b6b] p-1.5 rounded-md text-xs"></i> สารบัญเนื้อหา
+            </h2>
+            <span class="text-[11px] bg-slate-100 text-slate-500 font-semibold px-2 py-0.5 rounded">7 ส่วน</span>
+          </div>
+          <nav class="mt-4 space-y-1 text-xs">
+            <a href="#section-objectives" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+                1. สาระสำคัญและผลการเรียนรู้
+              </a>
+            <a href="#section-architecture" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              2. สถาปัตยกรรมระบบพหุโมดอล
+            </a>
+            <a href="#section-ep1" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              3. ตอนที่ 1: การจำแนกเสียงเครื่องจักร (Audio)
+            </a>
+            <a href="#section-ep2" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              4. ตอนที่ 2: สถาปัตยกรรม Multi-Modal Fusion
+            </a>
+            <a href="#section-ep3" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              5. ตอนที่ 3: บันทึกข้อมูล SQLite เพื่อการซ่อมบำรุง
+            </a>
+            <a href="#section-ep4" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              6. ตอนที่ 4: การตัดวงจรฉุกเฉินและความปลอดภัย
+            </a>
+            <a href="#section-code" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              7. โค้ดตัวอย่างและการทดสอบปฏิบัติ
+            </a>
+            <a href="#section-checklist" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              8. ใบงานภารกิจปฏิบัติการ
+            </a>
+            <a href="#section-review" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              9. คำถามทบทวนท้ายบทเรียน
+            </a>
+          </nav>
+        </div>
+
+        <!-- Capstone Banner -->
+        <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] text-white p-4 rounded-xl border border-blue-900 shadow text-xs space-y-2">
+          <div class="font-bold flex items-center gap-1.5 text-yellow-300">
+            <i class="fa-solid fa-award text-yellow-400"></i> บทเรียนสุดท้าย (Capstone)
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            ผสานทักษะจากบทที่ 1 ถึง 11 เพื่อสร้างโซลูชันโรงงานอัจฉริยะที่ตรวจจับทั้งภาพ เสียง และประวัติการทำงานแบบเบ็ดเสร็จ
+          </p>
+        </div>
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>ชุดเซนเซอร์พหุโมดอล (กล้อง USB UVC Webcam + ไมโครโฟนดิจิทัล)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>อุปกรณ์ขับเคลื่อนทางวิศวกรรม (Actuator / Relay / Emergency Interlock)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>ระบบจัดเก็บฐานข้อมูล SQLite สำหรับระบบบำรุงรักษาเชิงคาดการณ์ (Predictive Maintenance)</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=12#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 12
+          </a>
+          <a href="index.html?chapter=12#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 12
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- ARTICLE BODY (RIGHT COLUMN - 9 COLS) -->
+      <article class="lg:col-span-9 space-y-10 min-w-0">
+
+        <!-- ======================================================== -->
+        <!-- 1. OBJECTIVES SECTION (K-P1-P2-A)                        -->
+        <!-- ======================================================== -->
+        <section id="section-objectives" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              การจำแนกประเภทเสียงเหตุการณ์ในสิ่งแวดล้อม (Audio Classification) เช่น เสียงสัญญาณเตือนภัย เสียงกระจกแตก หรือเสียงผิดปกติของเครื่องจักรอุตสาหกรรม ต้องใช้เทคนิคการสกัดคุณลักษณะทางความถี่สเปกโทรแกรม MFE (Mel-Filterbank Energy) ร่วมกับการกรองเสียงรบกวนพื้นหลัง (Background Noise) การบูรณาการในระดับวิศวกรรมขั้นสูง (Capstone Integration) จะหลอมรวมการประมวลผลแบบพหุโมดอล <strong>(Multi-Modal AI: Computer Vision & Audio Processing)</strong> ทำงานร่วมกันบนบอร์ดพัฒนา Arduino UNO Q พร้อมทั้งบันทึกประวัติเหตุการณ์ฉุกเฉินลงในฐานข้อมูล SQLite แบบ Event-driven เพื่อสนับสนุนการวิเคราะห์ระบบการบำรุงรักษาเชิงคาดการณ์ (Predictive Maintenance) และความปลอดภัยทางอุตสาหกรรม
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายหลักการจำแนกเสียงเหตุการณ์ (Acoustic Events), สถาปัตยกรรมการหลอมรวมข้อมูลพหุโมดอล (Multi-Modal Sensor Fusion) และโครงสร้างระบบบำรุงรักษาเชิงคาดการณ์ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการวิเคราะห์และฝึกสอนโมเดลเสียง (Acoustic Analysis & Modeling)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถบันทึกและจำแนกช่วงความถี่เสียงเหตุการณ์สิ่งแวดล้อม ออกแบบ Impulse สกัดคุณลักษณะ MFE และปรับแต่งพารามิเตอร์หลังการประมวลผล (Post-processing) เพื่อลดการแจ้งเตือนผิดพลาดได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการบูรณาการระบบพหุโมดอล (Multi-Modal Capstone Integration)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถติดตั้งและรันโมเดลระบบรับภาพและระบบเสียงควบคู่กันบนบอร์ด UNO Q เขียนสคริปต์บันทึกประวัติการทำงานลงฐานข้อมูล SQLite และสร้างระบบตัดวงจรฉุกเฉิน (Emergency Interlock) ได้อย่างสมบูรณ์
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความตระหนักในมาตรฐานความปลอดภัยทางอุตสาหกรรมขั้นสูงสุด เคารพในกฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA) ในการติดตั้งระบบดักจับเสียง และมีความรับผิดชอบต่อการพัฒนาโครงงานวิศวกรรม
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 2. ARCHITECTURE SECTION                                  -->
+        <!-- ======================================================== -->
+        <section id="section-architecture" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 2: สถาปัตยกรรมระบบ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              สถาปัตยกรรมระบบพหุโมดอลระดับอุตสาหกรรม (Industrial Multi-Modal Architecture)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การผสานงานระหว่างเซนเซอร์ภาพ ไมโครโฟน ฐานข้อมูลในอุปกรณ์ และระบบตัดวงจรฉุกเฉินบนบอร์ดพัฒนา Arduino UNO Q
+            </p>
+          </div>
+
+          <!-- Architecture Image -->
+          <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+            <img src="images/chapters/ch12_multi_ai_architecture.jpg" alt="แผนภาพสถาปัตยกรรมระบบพหุโมดอลระดับอุตสาหกรรม" class="w-full h-auto object-cover max-h-[420px]">
+            <div class="p-3 text-[11px] text-slate-500 bg-slate-100 text-center border-t border-slate-200">
+              รูปที่ 12.1: แผนภาพสถาปัตยกรรมระบบบูรณาการพหุโมดอล (Multi-Modal Sensory Fusion & Edge Database Logging)
+            </div>
+          </div>
+
+          <!-- Curriculum Roadmap Recap -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">แผนผังองค์ความรู้หลักสูตร 12 บทเรียน (Full 12-Chapter Curriculum Roadmap):</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+              <div class="p-2.5 rounded-lg bg-blue-50 border border-blue-200">
+                <span class="font-bold text-[#173b6b] block">ภาคที่ 1: พื้นฐานฮาร์ดแวร์และข้อมูล</span>
+                <span class="text-[11px] text-slate-600">บทที่ 1 (Env) • บทที่ 2 (Matrix) • บทที่ 3 (SQL) • บทที่ 4 (Pipeline)</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200">
+                <span class="font-bold text-amber-900 block">ภาคที่ 2: การมองเห็นของคอมพิวเตอร์</span>
+                <span class="text-[11px] text-slate-600">บทที่ 5-7 (VAD) • บทที่ 8-9 (FOMO) • บทที่ 10 (Classification)</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200">
+                <span class="font-bold text-emerald-900 block">ภาคที่ 3: สัญญาณเสียงและการบูรณาการ</span>
+                <span class="text-[11px] text-slate-600">บทที่ 11 (Thai KWS) • <strong>บทที่ 12 (Capstone Multi-Modal)</strong></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 3. EP.1: ACOUSTIC ANOMALY DETECTION                      -->
+        <!-- ======================================================== -->
+        <section id="section-ep1" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 1 (EP.1)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การจำแนกเสียงเครื่องจักรอุตสาหกรรม (Industrial Audio Classification)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ทำไมเสียงความผิดปกติของเครื่องจักรจึงไม่ใช้โมเดลเสียงพูด และเทคนิคการตรวจจับคลื่นเสียงความถี่สูง
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            เสียงการทำงานของเครื่องจักรกลในโรงงานอุตสาหกรรม (เช่น มอเตอร์ไฟฟ้า ปั๊มไฮดรอลิก เฟืองเกียร์ หรือสายพาน) มีลักษณะเป็นสัญญาณต่อเนื่องที่มีการสั่นพ้องทางกล (Mechanical Resonance) ต่างจากเสียงพูดของมนุษย์ที่มีช่องว่างของคำอย่างชัดเจน ในงานจำแนกเสียงเครื่องจักร เราจะใช้การสกัดคุณลักษณะด้วย <strong>MFE (Mel-Filterbank Energy)</strong> หรือ <strong>Spectrogram</strong> ซึ่งเก็บข้อมูลพลังงานความถี่ต่อเนื่องได้ละเอียดกว่า และฝึกสอนโมเดล 2D CNN เพื่อแยกแยะรูปแบบเสียง:
+          </p>
+
+          <!-- Acoustic Classes Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-emerald-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check"></i> Normal_Hum (ปกติ)
+              </div>
+              <p class="text-slate-600 text-[11px] leading-relaxed">
+                เสียงมอเตอร์หมุนราบรื่น สเปกตรัมพลังงานกระจายสม่ำเสมอในย่านความถี่ต่ำถึงปานกลาง (50–1,200 Hz)
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-amber-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-triangle-exclamation"></i> Bearing_Fault (สึกหรอ)
+              </div>
+              <p class="text-slate-600 text-[11px] leading-relaxed">
+                เสียงเสียดสีของตลับลูกปืนที่เริ่มขาดสารหล่อลื่น ปรากฏฮาร์โมนิกความถี่สูง (2,500–5,000 Hz) เป็นสัญญาณเตือนก่อนเครื่องจักรเสียหาย
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-red-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-xmark"></i> Gear_Jam (วิกฤต)
+              </div>
+              <p class="text-slate-600 text-[11px] leading-relaxed">
+                เสียงกระแทกของฟันเฟืองที่ขบติดขัดหรือมีเศษโลหะติด พลังงานพุ่งสูงฉับพลัน ต้องตัดวงจรหยุดเครื่องทันที
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 4. EP.2: MULTI-MODAL FUSION ON EDGE                      -->
+        <!-- ======================================================== -->
+        <section id="section-ep2" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 2 (EP.2)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              สถาปัตยกรรมการหลอมรวมข้อมูลพหุโมดอล (Multi-Modal Sensor Fusion)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การประสานงานระหว่างโมเดลการมองเห็น (Vision) และโมเดลเสียง (Audio) บนโปรเซสเซอร์ของ Arduino UNO Q
+            </p>
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              ในระบบอัจฉริยะขั้นสูง การพึ่งพาเซนเซอร์ชนิดเดียว (Single Modality) มักมีจุดบอด เช่น ในสภาพแสงจ้าหรือมีฝุ่นควัน กล้องอาจมองไม่เห็นตำหนิ หรือในโรงงานที่มีเสียงดัง การใช้ไมโครโฟนอย่างเดียวอาจถูกรบกวน การทำ <strong>Decision-Level Sensor Fusion</strong> เป็นการนำผลการทำนายจากทั้งสองช่องทางมารวมกัน:
+            </p>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+              <div class="font-bold text-[#173b6b] flex items-center gap-2">
+                <i class="fa-solid fa-code-merge text-blue-600"></i> ตรรกะการตัดสินใจร่วม (Dual-Confirmation Decision Matrix):
+              </div>
+              <ul class="list-disc list-inside text-slate-600 space-y-1.5 leading-relaxed">
+                <li><strong>สภาวะที่ 1 (ชิ้นงานปกติ &amp; เสียงปกติ):</strong> เซอร์โวมอเตอร์ปล่อยชิ้นงานผ่านสายพานตามรอบการทำงานปกติ</li>
+                <li><strong>สภาวะที่ 2 (ชิ้นงานผิดรูป แต่เสียงปกติ):</strong> ก้านปัดเซอร์โวผลักชิ้นงานลงกล่องคัดแยก โดยไม่ต้องหยุดสายพาน</li>
+                <li><strong>สภาวะที่ 3 (ตรวจพบเสียง Gear_Jam):</strong> สั่งตัดไฟฉุกเฉิน (E-Stop Relay) หยุดสายพานทันที แม้กล้องจะยังไม่เห็นชิ้นงานติดขัด เพื่อป้องกันเพลาหัก</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 5. EP.3: SQL LOGGING FOR PREDICTIVE MAINTENANCE         -->
+        <!-- ======================================================== -->
+        <section id="section-ep3" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 3 (EP.3)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การบันทึกประวัติลงฐานข้อมูล SQLite เพื่อการบำรุงรักษาเชิงคาดการณ์
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              เปลี่ยนข้อมูลการตรวจจับแบบสดให้เป็นบันทึกทางวิศวกรรม (Audit Trail) สำหรับวิเคราะห์สุขภาพเครื่องจักร
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            หัวใจสำคัญของการบำรุงรักษาเชิงคาดการณ์ (Predictive Maintenance) คือการสะสมข้อมูลย้อนหลังอย่างต่อเนื่อง เพื่อตรวจจับแนวโน้มความเสื่อมสภาพก่อนที่อุปกรณ์จะหยุดทำงาน โดยในระบบนี้เราใช้ <strong>Database-SQL Brick</strong> บันทึกข้อมูลลงฐานข้อมูล SQLite ในเครื่อง:
+          </p>
+
+          <!-- Dashboard Image -->
+          <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+            <img src="images/chapters/ch12_predictive_maintenance_dashboard.jpg" alt="แดชบอร์ดตรวจสอบสุขภาพเครื่องจักรและการบันทึกประวัติ SQLite" class="w-full h-auto object-cover max-h-[380px]">
+            <div class="p-3 text-[11px] text-slate-500 bg-slate-100 text-center border-t border-slate-200">
+              รูปที่ 12.2: หน้าต่างแดชบอร์ดตรวจสอบสุขภาพเครื่องจักรและตารางบันทึกประวัติการตรวจวัดบน Database-SQL Brick
+            </div>
+          </div>
+
+          <!-- SQL Schema Box -->
+          <div class="space-y-2">
+            <h3 class="font-bold text-xs text-slate-800">โครงสร้างตาราง machine_audit_logs:</h3>
+            <pre class="bg-slate-900 text-slate-200 p-3 rounded-lg text-xs font-mono overflow-x-auto leading-relaxed"><code>CREATE TABLE machine_audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL,
+    sensor_type TEXT NOT NULL,    -- 'ACOUSTIC_MIC' หรือ 'VISION_CAM'
+    event_label TEXT NOT NULL,    -- 'Bearing_Fault', 'Normal_Hum', 'Defect'
+    confidence REAL NOT NULL,     -- 0.00 ถึง 1.00
+    severity TEXT NOT NULL,       -- 'NORMAL', 'WARNING', 'CRITICAL'
+    action_taken TEXT NOT NULL    -- คำสั่งที่ส่งต่อไปยังฮาร์ดแวร์
+);</code></pre>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 6. EP.4: EMERGENCY INTERLOCK & SAFETY                   -->
+        <!-- ======================================================== -->
+        <section id="section-ep4" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 4 (EP.4)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การตัดวงจรฉุกเฉิน (Emergency Interlock) และมาตรฐานความปลอดภัย
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การออกแบบวงจรฮาร์ดแวร์แบบ Fail-Safe เพื่อป้องกันอุบัติเหตุในโรงงานอุตสาหกรรม
+            </p>
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              ในระบบอัตโนมัติ คำสั่งตัดการทำงานฉุกเฉิน (Emergency Stop / E-Stop) ต้องมีความน่าเชื่อถือสูงสุด การนำ AI มาควบคุมวงจรอุตสาหกรรมต้องปฏิบัติตามหลักการ <strong>Normally Closed (NC) Fail-Safe Circuit</strong>:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mt-3">
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="font-bold text-red-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-shield-halved text-red-600"></i> ฮาร์ดแวร์อินเตอร์ล็อก (Hardware Interlock)
+                </div>
+                <p class="text-slate-600 leading-relaxed">
+                  ต่อหน้ารีเลย์แบบอนุกรมเข้ากับวงจรควบคุมมอเตอร์หลัก หากเกิดข้อผิดพลาดระดับ <strong>CRITICAL</strong> ระบบจะส่งสัญญาณเปิดหน้าสัมผัส ตัดกระแสไฟฟ้าของสายพานทันทีภายใน <strong>ไม่เกิน 50 มิลลิวินาที</strong>
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="font-bold text-blue-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-server text-blue-600"></i> สถาปัตยกรรม Edge-to-Cloud Reporting
+                </div>
+                <p class="text-slate-600 leading-relaxed">
+                  การประมวลผลและการตัดวงจรฉุกเฉินทำบนบอร์ดพัฒนา Arduino UNO Q ภายในเครื่องทั้งหมด (Local Autonomous Decision) จากนั้นระบบจะซิงก์ข้อมูลสรุปขึ้นแดชบอร์ด Web UI หรือคลาวด์ตามรอบเวลา
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 7. SOURCE CODE SECTION                                   -->
+        <!-- ======================================================== -->
+        <section id="section-code" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 4: ตัวอย่างโค้ดและการทดสอบภาคปฏิบัติ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              โค้ดระบบบูรณาการพหุโมดอลระดับอุตสาหกรรม (multi_ai_live.py)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              สคริปต์ไพทอนฉบับสมบูรณ์ ผสานการทำงานของ Audio Classification, Database-SQL และระบบตัดวงจรฉุกเฉิน
+            </p>
+          </div>
+
+          <!-- Code Box -->
+          <div class="terminal-window">
+            <div class="terminal-header">
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="text-xs text-yellow-300 font-mono font-bold ml-2">code_examples/chapter12/multi_ai_live.py</span>
+              </div>
+              <button onclick="navigator.clipboard.writeText(document.getElementById('multiCode').innerText); alert('คัดลอกโค้ดเรียบร้อยแล้ว');" class="text-xs bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded transition flex items-center gap-1.5">
+                <i class="fa-regular fa-copy"></i> คัดลอกโค้ด
+              </button>
+            </div>
+            <pre class="terminal-body" id="multiCode"><code><span class="text-slate-500">#!/usr/bin/env python3</span>
+<span class="text-slate-500"># -*- coding: utf-8 -*-</span>
+<span class="text-blue-400">import</span> sys, time, datetime, sqlite3
+
+<span class="text-blue-400">try</span>:
+    <span class="text-blue-400">from</span> arduino.app_bricks.audio_classification <span class="text-blue-400">import</span> AudioClassification
+    <span class="text-blue-400">from</span> arduino.app_utils <span class="text-blue-400">import</span> App
+    IS_ARDUINO_ENV = <span class="text-yellow-400">True</span>
+<span class="text-blue-400">except</span> ImportError:
+    IS_ARDUINO_ENV = <span class="text-yellow-400">False</span>
+
+
+<span class="text-purple-400">class</span> <span class="text-yellow-300 font-bold">MultiModalEdgeSystem</span>:
+    <span class="text-slate-500">"""คลาสบูรณาการระบบ Edge AI เชิงวิศวกรรม (Audio + SQL Logging + E-Stop)"""</span>
+    <span class="text-blue-400">def</span> <span class="text-blue-300">__init__</span>(self, db_path=<span class="text-green-300">":memory:"</span>):
+        self.conn = sqlite3.connect(db_path)
+        self.init_database()
+
+    <span class="text-blue-400">def</span> <span class="text-blue-300">init_database</span>(self):
+        <span class="text-blue-400">with</span> self.conn:
+            self.conn.execute(<span class="text-green-300">"""
+                CREATE TABLE IF NOT EXISTS machine_audit_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT NOT NULL,
+                    sensor_type TEXT NOT NULL,
+                    event_label TEXT NOT NULL,
+                    confidence REAL NOT NULL,
+                    severity TEXT NOT NULL,
+                    action_taken TEXT NOT NULL
+                )
+            """</span>)
+
+    <span class="text-blue-400">def</span> <span class="text-blue-300">handle_acoustic_event</span>(self, label: str, confidence: float):
+        timestamp = datetime.datetime.now().strftime(<span class="text-green-300">"%Y-%m-%d %H:%M:%S"</span>)
+        <span class="text-blue-400">if</span> label.lower() <span class="text-blue-400">in</span> [<span class="text-green-300">"background"</span>, <span class="text-green-300">"ambient"</span>]:
+            <span class="text-blue-400">return</span>
+
+        severity = <span class="text-green-300">"NORMAL"</span>
+        action = <span class="text-green-300">"บันทึกประวัติการเดินเครื่องปกติ"</span>
+
+        <span class="text-blue-400">if</span> label <span class="text-blue-400">in</span> [<span class="text-green-300">"Bearing_Fault"</span>]:
+            severity = <span class="text-green-300">"WARNING"</span>
+            action = <span class="text-green-300">"ส่งสัญญาณแจ้งเตือนช่างซ่อมบำรุง (Yellow LED ON)"</span>
+        <span class="text-blue-400">elif</span> label <span class="text-blue-400">in</span> [<span class="text-green-300">"Gear_Jam"</span>]:
+            severity = <span class="text-green-300">"CRITICAL"</span>
+            action = <span class="text-green-300">"ตัดวงจรฉุกเฉิน (Relay E-Stop Pin 7 = HIGH) และเปิด Buzzer"</span>
+
+        <span class="text-blue-400">with</span> self.conn:
+            self.conn.execute(<span class="text-green-300">"""
+                INSERT INTO machine_audit_logs (timestamp, sensor_type, event_label, confidence, severity, action_taken)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """</span>, (timestamp, <span class="text-green-300">"ACOUSTIC_MIC"</span>, label, confidence, severity, action))
+
+        print(<span class="text-green-300">f"[{severity}] [{timestamp}] พบเสียง '{label}' ({confidence*100:.1f}%) -> {action}"</span>)</code></pre>
+          </div>
+
+          <!-- Terminal Run Output -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">ผลการทดสอบการทำงานผ่านคอนโซล (Execution Console Output):</h3>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-xs text-green-400 font-mono flex items-center gap-2">
+                  <i class="fa-solid fa-terminal"></i> python code_examples/chapter12/multi_ai_live.py
+                </span>
+                <span class="text-[10px] text-slate-400">Terminal Output</span>
+              </div>
+              <pre class="terminal-body font-mono text-xs"><code>============================================================================
+   ระบบบูรณาการปัญญาประดิษฐ์พหุโมดอล (Multi-Modal Edge AI Integration)
+   หลักสูตร: การพัฒนาปัญญาประดิษฐ์บนอุปกรณ์ขอบ (บทเรียนที่ 12 - Capstone)
+============================================================================
+[*] เริ่มต้นการทดสอบในโหมดจำลองสถานการณ์คอนโซล (Console Simulation)...
+[*] กำหนดค่าเกณฑ์ความเชื่อมั่นเสียง (Audio Threshold): 0.80 (80%)
+[*] เริ่มต้นระบบบันทึกประวัติ Database-SQL บนหน่วยความจำ (SQLite)...
+----------------------------------------------------------------------------
+
+--- [รอบการประมวลผลสัญญาณที่ 1 / 5] ---
+[2026-10-14 14:54:06] [-] เสียงบรรยากาศปกติ (Background: 94.0%)
+
+--- [รอบการประมวลผลสัญญาณที่ 2 / 5] ---
+[NORMAL] [2026-10-14 14:54:06] ตรวจพบเสียง: 'Normal_Hum' (ความเชื่อมั่น: 89.00%)
+  -> ระดับความรุนแรง: NORMAL
+  -> การตอบสนองเชิงวิศวกรรม: บันทึกประวัติการเดินเครื่องปกติ
+  -> ฐานข้อมูล: บันทึกข้อมูลสำเร็จ (SQLite Machine Audit)
+
+--- [รอบการประมวลผลสัญญาณที่ 3 / 5] ---
+[WARN] [2026-10-14 14:54:06] ตรวจพบเสียง: 'Bearing_Fault' (ความเชื่อมั่น: 92.00%)
+  -> ระดับความรุนแรง: WARNING
+  -> การตอบสนองเชิงวิศวกรรม: ส่งสัญญาณแจ้งเตือนช่างซ่อมบำรุง (Yellow LED ON)
+  -> ฐานข้อมูล: บันทึกข้อมูลสำเร็จ (SQLite Machine Audit)
+
+--- [รอบการประมวลผลสัญญาณที่ 4 / 5] ---
+[2026-10-14 14:54:06] [-] เสียงบรรยากาศปกติ (Background: 96.0%)
+
+--- [รอบการประมวลผลสัญญาณที่ 5 / 5] ---
+[CRITICAL ALERT] [2026-10-14 14:54:06] ตรวจพบเสียง: 'Gear_Jam' (ความเชื่อมั่น: 95.00%)
+  -> ระดับความรุนแรง: CRITICAL
+  -> การตอบสนองเชิงวิศวกรรม: ตัดวงจรฉุกเฉิน (Relay E-Stop Pin 7 = HIGH) และเปิด Buzzer
+  -> ฐานข้อมูล: บันทึกข้อมูลสำเร็จ (SQLite Machine Audit)
+
+============================================================================
+   รายงานสรุปการตรวจวัดสุขภาพเครื่องจักรประจำกะงาน (Predictive Maintenance)
+   หลักสูตร: การพัฒนาปัญญาประดิษฐ์บนอุปกรณ์ขอบ (บทเรียนที่ 12)
+============================================================================
+ID   | เวลา                | เหตุการณ์          | เชื่อมั่น | ระดับ   
+----------------------------------------------------------------------------
+3    | 2026-10-14 14:54:06 | Gear_Jam           |   95.0% | CRITICAL
+2    | 2026-10-14 14:54:06 | Bearing_Fault      |   92.0% | WARNING 
+1    | 2026-10-14 14:54:06 | Normal_Hum         |   89.0% | NORMAL  
+----------------------------------------------------------------------------
+สถิติรวม: ปกติ=1 | แจ้งเตือน=1 | วิกฤต=1 | ฉากหลัง=2
+============================================================================
+[✓] บูรณาการระบบ Edge AI พหุโมดอลเสร็จสมบูรณ์ พร้อมเชื่อมต่อโรงงานอัจฉริยะ</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 8. HANDS-ON LAB CHECKLIST (INTERACTIVE)                  -->
+        <!-- ======================================================== -->
+        <section id="section-checklist" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 5: ใบงานภารกิจภาคปฏิบัติ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              ภารกิจปฏิบัติการประจำบทเรียน (Hands-on Lab Checklist)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ทำเครื่องหมายในช่องสี่เหลี่ยมเมื่อปฏิบัติตามขั้นตอนสำเร็จ เพื่อบันทึกความก้าวหน้าการเรียนรู้
+            </p>
+          </div>
+
+          <div class="space-y-3" id="ch12-checklist">
+            
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch12-task" data-task="1">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 1: รวบรวมชุดข้อมูลเสียงเครื่องจักร 3 รูปแบบและคลาส Background</span>
+                <span class="text-slate-500">บันทึกเสียง Normal_Hum, Bearing_Fault, Gear_Jam และเสียงบรรยากาศ Background คลาสละไม่ต่ำกว่า 40 ตัวอย่างบน Edge Impulse</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch12-task" data-task="2">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 2: ฝึกสอนโมเดล Audio Classification ด้วยโครงข่าย 2D CNN</span>
+                <span class="text-slate-500">เลือกบล็อก MFE Spectrogram และฝึกสอนโมเดลจนได้ค่าความแม่นยำ (Accuracy) สูงกว่า 85% บน Confusion Matrix</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch12-task" data-task="3">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 3: คอมไพล์โมเดล .eim และกำหนดค่า app.yaml แบบพหุโมดอล</span>
+                <span class="text-slate-500">กำหนดค่าคอนฟิกูเรชันใน <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">app.yaml</code> ให้เชื่อมต่อทั้ง Audio, Vision, Database-SQL และ Relay</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch12-task" data-task="4">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 4: รันสคริปต์ multi_ai_live.py และทดสอบระบบตัดวงจรฉุกเฉิน</span>
+                <span class="text-slate-500">ทดสอบส่งสัญญาณเสียง Gear_Jam และตรวจสอบว่าคำสั่งตัดไฟฉุกเฉิน E-Stop Relay Pin 7 ทำงานทันที</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch12-task" data-task="5">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 5: ตรวจสอบประวัติ SQLite และออกรายงาน Predictive Maintenance</span>
+                <span class="text-slate-500">ตรวจสอบตาราง <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">machine_audit_logs</code> และพิมพ์รายงานสรุปผลเพื่อใช้ในการวางแผนซ่อมบำรุง</span>
+              </div>
+            </label>
+
+          </div>
+
+          <div class="flex items-center justify-between pt-2">
+            <span class="text-xs text-slate-500" id="ch12-progress-text">ความคืบหน้าภารกิจ: 0 / 5 สำเร็จ</span>
+            <button onclick="resetChecklist()" class="text-xs text-slate-400 hover:text-red-500 transition">
+              <i class="fa-solid fa-rotate-right mr-1"></i> รีเซ็ตภารกิจ
+            </button>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 9. REVIEW QUESTIONS SECTION                              -->
+        <!-- ======================================================== -->
+        <section id="section-review" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 6: คำถามทบทวนความรู้</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              คำถามทบทวนองค์ความรู้ท้ายบทเรียน (Review Questions)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ทดสอบความเข้าใจเชิงลึกเกี่ยวกับการบูรณาการระบบ Edge AI และการบำรุงรักษาเชิงคาดการณ์
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                1. การประมวลผลแบบพหุโมดอล (Multi-Modal AI) ช่วยแก้ปัญหาจุดบอดของการใช้เซนเซอร์ภาพหรือไมโครโฟนเพียงอย่างเดียวในโรงงานอุตสาหกรรมอย่างไร?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ในสภาพแวดล้อมโรงงานจริง เซนเซอร์ภาพอาจถูกบดบังด้วยควัน ฝุ่นละออง หรือการเปลี่ยนแปลงของแสงไฟ ทำให้ตรวจจับตำหนิผิดพลาด ในขณะที่ไมโครโฟนสามารถดักจับการสั่นสะเทือนและเสียงผิดปกติภายในตลับลูกปืนหรือเฟืองเกียร์ที่ตาเปล่ามองไม่เห็นได้ ในทางกลับกัน ภาพจะช่วยยืนยันตำแหน่งและรูปร่างของชิ้นงานได้แม่นยำกว่าเสียง การหลอมรวมข้อมูลทั้งสองช่วยสร้างระบบยืนยันคู่ (Dual Confirmation) เพิ่มความแม่นยำ ลด False Alarm และช่วยให้การตัดสินใจสั่งการฉุกเฉินถูกต้องแม่นยำสูงสุด
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                2. เพราะเหตุใดในการบำรุงรักษาเชิงคาดการณ์ (Predictive Maintenance) จึงจำเป็นต้องมีระบบบันทึกฐานข้อมูลในอุปกรณ์ (Database-SQL) แทนการแสดงผลสดบนหน้าจอเพียงอย่างเดียว?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> การแสดงผลสดจะบอกเฉพาะสภาวะปัจจุบันในเสี้ยววินาทีนั้น แต่การพยากรณ์ความเสื่อมสภาพของเครื่องจักรจำเป็นต้องวิเคราะห์แนวโน้มเชิงสถิติ (Trend Analysis) เช่น เสียงสัญญาณ Bearing_Fault เริ่มปรากฏความถี่บ่อยขึ้นจาก 1 ครั้งต่อวัน เป็น 10 ครั้งต่อชั่วโมง การบันทึกประวัติลงฐานข้อมูล SQLite ในอุปกรณ์ช่วยสร้างหลักฐานทางวิศวกรรม (Audit Trail) ทำให้สามารถประมวลผลสร้างกราฟแนวโน้ม และวางแผนกำหนดการเปลี่ยนอะไหล่ล่วงหน้าได้ก่อนที่เครื่องจักรจะพังฉับพลัน
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                3. ในการออกแบบระบบตัดวงจรฉุกเฉิน (Emergency Interlock) เพื่อความปลอดภัยอุตสาหกรรม มีหลักการออกแบบฮาร์ดแวร์และซอฟต์แวร์อย่างไรให้เป็นระบบ Fail-Safe?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ในเชิงฮาร์ดแวร์ ต้องออกแบบวงจรตัดต่อแบบ Normally Closed (NC) ซึ่งหากเกิดเหตุสายสัญญาณขาดหรือไฟเลี้ยงระบบตก วงจรจะตัดการจ่ายไฟแก่มอเตอร์ทันทีเพื่อความปลอดภัย ในเชิงซอฟต์แวร์ ต้องกำหนดเกณฑ์ความเชื่อมั่นที่เข้มงวดและมี Watchdog Timer ตรวจสอบสถานะการประมวลผล หากโมเดลตรวจพบความผิดปกติระดับ CRITICAL (เช่น Gear_Jam) ระบบต้องส่งสัญญาณตัดวงจรรีเลย์ทันทีในระดับ Local Edge โดยไม่ต้องรอคำสั่งจากคลาวด์ เพื่อให้หยุดเครื่องจักรได้ภายในเสี้ยววินาที
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 12 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=12#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">ยินดีด้วย! คุณเรียนจบหลักสูตรครบ 12 บทแล้ว</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">การวัดและประเมินผลสัมฤทธิ์ทางการเรียนรู้รวม (Final Assessment)</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">ทดสอบวัดความรู้รวบยอดทั้ง 12 บทเรียน พร้อมรับผลการประเมินสมรรถนะปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter11.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 11</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="index.html?chapter=12#section-quizzes" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <i class="fa-solid fa-award"></i> <span>ทำแบบทดสอบวัดผลสัมฤทธิ์</span>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Interactive Checklist Logic with LocalStorage
+    const ch12Checkboxes = document.querySelectorAll('.ch12-task');
+    const ch12ProgressText = document.getElementById('ch12-progress-text');
+
+    function updateProgress() {
+      const total = ch12Checkboxes.length;
+      let checkedCount = 0;
+      ch12Checkboxes.forEach(cb => {
+        const taskId = cb.getAttribute('data-task');
+        if (cb.checked) {
+          checkedCount++;
+          localStorage.setItem(`ch12_task_${taskId}`, 'true');
+        } else {
+          localStorage.removeItem(`ch12_task_${taskId}`);
+        }
+      });
+      if (ch12ProgressText) {
+        ch12ProgressText.innerText = `ความคืบหน้าภารกิจ: ${checkedCount} / ${total} สำเร็จ`;
+      }
+    }
+
+    function initChecklist() {
+      ch12Checkboxes.forEach(cb => {
+        const taskId = cb.getAttribute('data-task');
+        if (localStorage.getItem(`ch12_task_${taskId}`) === 'true') {
+          cb.checked = true;
+        }
+        cb.addEventListener('change', updateProgress);
+      });
+      updateProgress();
+    }
+
+    function resetChecklist() {
+      if (confirm('ต้องการรีเซ็ตสถานะภารกิจทั้งหมดในบทนี้หรือไม่?')) {
+        ch12Checkboxes.forEach(cb => {
+          const taskId = cb.getAttribute('data-task');
+          cb.checked = false;
+          localStorage.removeItem(`ch12_task_${taskId}`);
+        });
+        updateProgress();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initChecklist);
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

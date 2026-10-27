@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 4: การจัดเตรียมชุดข้อมูลและการออกแบบขั้นตอนการประมวลผล (Data Pipeline) บน Edge Impulse | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* Custom Styling for Dedicated Lesson Page */
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    /* Smooth Callout Styles */
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+  <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=-X8y_aeMAFY&t=52s" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 4</span>
+          <span class="font-semibold text-white truncate">การจัดเตรียมชุดข้อมูลและการออกแบบขั้นตอนการประมวลผล (Data Pipeline) บน Edge Impulse</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. CHAPTER HERO BANNER                                         -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#0d2342] text-white py-10 sm:py-14 border-b-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-slate-300 mb-4 font-medium">
+        <a href="index.html" class="hover:text-yellow-300 transition">หน้าหลัก</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-white/40"></i>
+        <a href="index.html#section-lessons" class="hover:text-yellow-300 transition">บทเรียนออนไลน์</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-white/40"></i>
+        <span class="text-[#fff200] font-bold">บทที่ 4</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-4 max-w-3xl">
+        <div class="inline-flex items-center gap-2 bg-[#fff200] text-[#173b6b] text-xs font-black px-3.5 py-1 rounded-full shadow">
+          <i class="fa-solid fa-filter"></i> Data Pipeline & Studio Module • การจัดเตรียมชุดข้อมูลและการออกแบบขั้นตอนการประมวลผล
+        </div>
+        <h1 class="text-xl sm:text-3xl lg:text-4xl font-black font-heading leading-snug sm:leading-normal tracking-tight text-white">
+          การจัดเตรียมชุดข้อมูลและการออกแบบ <br class="hidden sm:inline">
+          <span class="text-[#fff200]">ขั้นตอนการประมวลผล (Data Pipeline) บน Edge Impulse</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-3xl">
+          เอกสารประกอบการจัดการเรียนรู้และแนวปฏิบัติการเชิงลึก มุ่งเน้นการศึกษาและฝึกปฏิบัติกระบวนการสร้างโครงการปัญญาประดิษฐ์บนแพลตฟอร์ม <strong>Edge Impulse Studio</strong> การเชื่อมต่ออุปกรณ์กล้องดิจิทัลเพื่อจัดเก็บภาพชิ้นงานตัวอย่าง (Data Acquisition) การจัดสรรสัดส่วนชุดข้อมูลฝึกสอนต่อชุดข้อมูลทดสอบ (Training Set ต่อ Testing Set ในอัตราส่วนมาตรฐาน <strong>80:20</strong>) เพื่อป้องกันปัญหาการท่องจำข้อมูล (Overfitting) กลวิธีการติดป้ายกำกับข้อมูล (Data Labeling) ทั้งแบบจำแนกประเภท (Single Label) และกำหนดพิกัดขอบเขตวัตถุ (Bounding Boxes) ตลอดจนการกำหนดพารามิเตอร์การประมวลผลภาพเบื้องต้น (Image Preprocessing: ขนาด 96x96 พิกเซล และ Color Depth) เพื่อเตรียมความพร้อมสู่การฝึกสอนโมเดลปัญญาประดิษฐ์บนระบบสมองกลฝังตัว
+        </p>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-2">
+          <a href="#section-ep1" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=-X8y_aeMAFY&t=52s" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: Edge Impulse Studio & Data Pipeline)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+      </div>
+
+        <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">3 คาบ (150 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">แพลตฟอร์มหลัก:</span>
+              <span class="font-bold text-white">Edge Impulse Studio</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">สัดส่วนชุดข้อมูล:</span>
+              <span class="font-bold text-white">Train 80% : Test 20%</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter04/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter04 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. MAIN LAYOUT: STICKY TOC SIDEBAR + ARTICLE CONTENT          -->
+  <!-- ============================================================== -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- ========================================================== -->
+      <!-- A. STICKY TABLE OF CONTENTS SIDEBAR (3 COLS)               -->
+      <!-- ========================================================== -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-24 space-y-6">
+        
+        <!-- Table of Contents Navigation -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex items-center gap-2 font-bold text-[#173b6b] text-sm border-b border-slate-100 pb-3 mb-3">
+            <i class="fa-solid fa-list-check text-yellow-500"></i>
+            <span>สารบัญเนื้อหาบทที่ 4</span>
+          </div>
+          <nav class="space-y-1 text-xs">
+            <a href="#section-outcomes" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              1. สาระสำคัญและผลการเรียนรู้
+            </a>
+            <a href="#section-ep1" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              2. สถาปัตยกรรมขั้นตอนการประมวลผลข้อมูล (Data Pipeline)
+            </a>
+            <a href="#section-ep2" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              3. การจัดเก็บและจัดสัดส่วนชุดข้อมูล 80:20
+            </a>
+            <a href="#section-ep3" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              4. วิธีการติดป้ายกำกับและการปรับขนาดภาพ
+            </a>
+            <a href="#section-ep4" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              5. การตรวจสอบความสมบูรณ์ของขั้นตอนข้อมูล
+            </a>
+            <a href="#section-checklist" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              6. การประเมินสมรรถนะการปฏิบัติการ (Performance Checklist)
+            </a>
+            <a href="#section-quiz" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              7. คำถามทบทวนองค์ความรู้ท้ายบทเรียน
+            </a>
+          </nav>
+        </div>
+
+        <!-- Hardware & Platform Checklist Card -->
+        <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] rounded-2xl shadow-md p-5 text-white text-xs space-y-3 border-2 border-yellow-400/40">
+          <div class="flex items-center gap-2 text-yellow-300 font-bold text-xs uppercase tracking-wider">
+            <i class="fa-solid fa-camera"></i> อุปกรณ์และเครื่องมือปฏิบัติการ (Laboratory Equipment)
+          </div>
+          <ul class="space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>บอร์ดพัฒนา <strong>Arduino UNO Q</strong> เชื่อมต่อเครือข่ายอินเทอร์เน็ต (Network Mode)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>กล้องดิจิทัล <strong>UVC USB Camera</strong> หรือกล้องเว็บแคมความละเอียด 720p/1080p</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>บัญชีผู้ใช้งานแพลตฟอร์ม <strong>Edge Impulse Studio</strong></span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>ชุดชิ้นงานตัวอย่างสำหรับฝึกสอน (ชิ้นงานปกติ, ชิ้นงานแตกร้าว, ชิ้นงานมีรอยขีดข่วน)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>ชุดคำสั่งตรวจสอบข้อมูล <strong><code>data_pipeline_check.py</code></strong></span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=4#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 4
+          </a>
+          <a href="index.html?chapter=4#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 4
+          </a>
+        </div>
+
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>กล้อง USB UVC Webcam สำหรับการบันทึกภาพตัวอย่างเข้าสู่ Data Acquisition</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บัญชีผู้ใช้งานแพลตฟอร์ม Edge Impulse Studio สำหรับจัดการ Data Pipeline</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>สายเชื่อมต่อ USB Type-C และโครงข่ายสัญญาณอินเทอร์เน็ต</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=4#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 4
+          </a>
+          <a href="index.html?chapter=4#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 4
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- ========================================================== -->
+      <!-- B. MAIN ARTICLE CONTENT (9 COLS)                           -->
+      <!-- ========================================================== -->
+      <article class="lg:col-span-9 space-y-10">
+
+        <!-- ======================================================== -->
+        <!-- SECTION 1: สาระสำคัญและผลการเรียนรู้                     -->
+        <!-- ======================================================== -->
+        <section id="section-outcomes" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              ในกระบวนการพัฒนาปัญญาประดิษฐ์และระบบการเรียนรู้ของเครื่อง ความถูกต้องและแม่นยำของโมเดลปลายทางขึ้นอยู่กับคุณภาพและการออกแบบ <strong>ขั้นตอนการประมวลผลข้อมูล (Data Pipeline)</strong> เป็นสำคัญ การจัดเตรียมข้อมูลภาพจำเป็นต้องมีการกำหนดเกณฑ์มาตรฐานอย่างเป็นระบบ ตั้งแต่การเก็บรวบรวมภาพในสภาวะแวดล้อมจริง (Data Acquisition) การแบ่งสัดส่วนชุดข้อมูลฝึกสอน (Training Set) ต่อชุดข้อมูลทดสอบ (Testing Set) ในอัตราส่วน <strong>80:20</strong> เพื่อป้องกันปัญหาการท่องจำข้อมูล (Overfitting) การเลือกวิธีการติดป้ายกำกับ (Labeling Method) ให้ถูกต้องตามประเภทของสถาปัตยกรรมโมเดล และการปรับขนาดความละเอียดภาพให้เหมาะสมกับขีดจำกัดหน่วยความจำของอุปกรณ์สมองกลฝังตัว (TinyML Optimization)
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายหลักการออกแบบขั้นตอนการประมวลผลข้อมูล (Data Pipeline), ความสำคัญเชิงสถิติของการแบ่งชุดข้อมูล 80:20 และความแตกต่างระหว่างการติดป้ายกำกับแบบจำแนกประเภทกับแบบกำหนดพิกัดขอบเขต (Bounding Boxes) ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการเก็บรวบรวมและจัดระเบียบข้อมูล (Data Acquisition)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถเชื่อมต่อกล้องดิจิทัลเข้ากับแพลตฟอร์ม Edge Impulse Studio บันทึกภาพตัวอย่างชิ้นงานได้อย่างหลากหลายมุมมอง และจัดสัดส่วน Train/Test ได้ตามเกณฑ์มาตรฐาน
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการติดป้ายกำกับและการประมวลผลภาพ (Labeling & Preprocessing)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถวาดกรอบ Bounding Box ระบุตำแหน่งวัตถุ กำหนดขนาดความละเอียดอินพุต 96x96 พิกเซล และเขียนสคริปต์ตรวจสอบความสมดุลของข้อมูลได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความซื่อสัตย์ทางวิชาการในการไม่ปะปนข้อมูลทดสอบกับข้อมูลฝึกสอน (Data Leakage Prevention) มีความประณีตในการติดป้ายกำกับ และคำนึงถึงจริยธรรมข้อมูลส่วนบุคคล
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: สถาปัตยกรรมขั้นตอนการประมวลผลข้อมูล (EP.7)     -->
+        <!-- ======================================================== -->
+        <section id="section-ep1" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-diagram-project mr-1 text-yellow-400"></i> ตอนที่ 1: ขั้นตอนการประมวลผลข้อมูล
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              สถาปัตยกรรมขั้นตอนการประมวลผลข้อมูลบน Edge Impulse (Data Pipeline Architecture)
+            </h2>
+          </div>
+
+          <!-- เนื้อหา Data Pipeline -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              คำว่า <strong>"ขั้นตอนการประมวลผลข้อมูล" (Data Pipeline)</strong> หมายถึง ชุดของกระบวนการเชิงลำดับที่นำพาข้อมูลดิบ (Raw Data) จากแหล่งกำเนิด ผ่านการคัดกรอง ทำความสะอาด แปลงสภาพ และจัดระเบียบ จนกระทั่งพร้อมเข้าสู่กระบวนการสกัดคุณลักษณะเด่น (Feature Extraction) และการฝึกสอนโครงข่ายประสาทเทียม (Neural Network Training)
+            </p>
+            <p>
+              บนแพลตฟอร์ม <strong>Edge Impulse Studio</strong> ขั้นตอนการประมวลผลข้อมูลสำหรับระบบการมองเห็นด้วยคอมพิวเตอร์ (Computer Vision) ประกอบด้วย 4 ลำดับขั้นตอนหลักตามมาตรฐานอุตสาหกรรม:
+            </p>
+          </div>
+
+          <!-- รูปภาพ Data Pipeline Diagram -->
+          <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+            <img src="images/chapters/ch04_edge_impulse_data_pipeline.jpg" alt="แผนภาพขั้นตอนการประมวลผลข้อมูลบนแพลตฟอร์ม Edge Impulse Studio" class="w-full h-auto object-cover max-h-[460px]">
+            <div class="bg-slate-900 text-slate-300 text-xs px-4 py-2.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-diagram-project mr-2 text-yellow-400"></i><strong>ภาพที่ 4.1:</strong> แผนภาพแสดง 4 ขั้นตอนการประมวลผลข้อมูล (Data Pipeline Design) บน Edge Impulse Studio: 1. เก็บรวบรวมข้อมูล, 2. จัดสัดส่วน 80:20, 3. ปรับขนาดภาพ, 4. ติดป้ายกำกับ</span>
+              <span class="text-yellow-400 font-medium text-[11px]">Data Pipeline</span>
+            </div>
+          </div>
+
+          <!-- 4 ขั้นตอนสรุปย่อ -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs pt-1">
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[10px]">1</span>
+                <span>Data Collection</span>
+              </div>
+              <p class="text-slate-600 text-[11px]">บันทึกภาพถ่ายจากกล้องเว็บแคมหรืออัปโหลดไฟล์ชุดภาพจากเครื่อง</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[10px]">2</span>
+                <span>Train/Test Split</span>
+              </div>
+              <p class="text-slate-600 text-[11px]">สุ่มแยกชุดข้อมูลในสัดส่วน 80% สำหรับฝึกสอน และ 20% สำหรับประเมินผล</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[10px]">3</span>
+                <span>Image Preprocessing</span>
+              </div>
+              <p class="text-slate-600 text-[11px]">ปรับขนาดภาพเป็น 96x96 พิกเซล และเลือกรูปแบบสี RGB หรือ Grayscale</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[10px]">4</span>
+                <span>Labeling Methods</span>
+              </div>
+              <p class="text-slate-600 text-[11px]">ระบุชื่อคลาสของภาพ หรือวาดกรอบ Bounding Box ล้อมรอบตำแหน่งวัตถุ</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: การจัดเก็บและจัดสัดส่วนชุดข้อมูล 80:20         -->
+        <!-- ======================================================== -->
+        <section id="section-ep2" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-chart-pie mr-1 text-yellow-400"></i> ตอนที่ 2: การจัดสรรชุดข้อมูล
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การจัดเก็บและจัดสัดส่วนชุดข้อมูลฝึกสอนต่อชุดข้อมูลทดสอบ (80:20 Ratio)
+            </h2>
+          </div>
+
+          <!-- เนื้อหา Train/Test Split -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              หนึ่งในความผิดพลาดที่พบบ่อยที่สุดของผู้เริ่มต้นพัฒนาปัญญาประดิษฐ์ คือการนำภาพทั้งหมดไปใช้ฝึกสอนโมเดลโดยไม่มีการแบ่งชุดข้อมูลไว้ทดสอบ ส่งผลให้ได้โมเดลที่มี <strong>ภาวะท่องจำข้อมูล (Overfitting)</strong> คือเมื่อทดสอบกับภาพเดิมที่เคยใช้สอน โมเดลจะให้ความแม่นยำ 100% แต่เมื่อนำไปติดตั้งใช้งานจริงบนสายพานโรงงาน โมเดลกลับไม่สามารถตรวจจับความผิดปกติของชิ้นงานใหม่ได้เลย
+            </p>
+            <p>
+              ตามหลักการทางสถิติและการเรียนรู้ของเครื่อง มาตรฐานสากลจึงกำหนดให้แบ่งชุดข้อมูลออกเป็น 2 ส่วนที่แยกขาดจากกัน:
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1.5">
+                <div class="font-bold text-emerald-800 text-xs flex items-center gap-2">
+                  <i class="fa-solid fa-graduation-cap"></i> 1. ชุดข้อมูลฝึกสอน (Training Set: 80%)
+                </div>
+                <p class="text-xs text-slate-700 leading-relaxed">
+                  เป็นข้อมูลชุดใหญ่ที่โมเดลใช้ในการคำนวณและปรับค่าน้ำหนัก (Weights & Biases) ภายในโครงข่ายประสาทเทียม เพื่อให้โมเดลสามารถเรียนรู้รูปแบบ (Patterns) และคุณลักษณะเด่นของชิ้นงานแต่ละประเภท
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-blue-50 border border-blue-200 space-y-1.5">
+                <div class="font-bold text-blue-800 text-xs flex items-center gap-2">
+                  <i class="fa-solid fa-vial-circle-check"></i> 2. ชุดข้อมูลทดสอบ (Testing Set: 20%)
+                </div>
+                <p class="text-xs text-slate-700 leading-relaxed">
+                  เป็นข้อมูลชุดที่ <strong>โมเดลต้องไม่เคยเห็นมาก่อนโดยเด็ดขาดในระหว่างการฝึกสอน</strong> ทำหน้าที่เป็น "ข้อสอบกลาง" สำหรับประเมินความสามารถในการสรุปนัยทั่วไป (Generalization Ability) ของโมเดลอย่างเที่ยงตรง
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ข้อควรระวัง Data Leakage -->
+          <div class="callout-danger p-4 rounded-xl text-xs sm:text-sm text-red-950 space-y-1">
+            <div class="font-bold flex items-center gap-2 text-red-800">
+              <i class="fa-solid fa-triangle-exclamation text-red-600"></i> ข้อพึงระวังขั้นวิกฤต: ภาวะข้อมูลรั่วไหล (Data Leakage)
+            </div>
+            <p>
+              ห้ามถ่ายภาพวัตถุชิ้นเดิมในมุมเดิมติดกันหลายสิบภาพแล้วให้ระบบสุ่มแบ่งเข้าทั้ง Train และ Test เพราะจะทำให้ภาพที่เหมือนกันเกือบทุกพิกเซลหลุดเข้าไปอยู่ในชุดทดสอบ ส่งผลให้คะแนนประเมินความแม่นยำสูงเกินจริง (False High Accuracy) <strong>ภาพใน Testing Set ควรเป็นชิ้นงานคนละชิ้น หรือถ่ายในช่วงเวลาและสภาวะแสงที่แตกต่างกัน</strong>
+            </p>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: การติดป้ายกำกับและการปรับขนาดภาพ             -->
+        <!-- ======================================================== -->
+        <section id="section-ep3" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-tags mr-1 text-yellow-400"></i> ตอนที่ 3: การติดป้ายกำกับและการปรับขนาดภาพ
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              วิธีการติดป้ายกำกับข้อมูลและการปรับขนาดภาพ (Data Labeling & Preprocessing)
+            </h2>
+          </div>
+
+          <!-- ภาพถ่ายห้องปฏิบัติการ Studio -->
+          <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+            <img src="images/chapters/ch04_data_acquisition_studio.jpg" alt="การทำงานบนหน้าต่าง Data Acquisition บน Edge Impulse Studio ในห้องปฏิบัติการ" class="w-full h-auto object-cover max-h-[460px]">
+            <div class="bg-slate-900 text-slate-300 text-xs px-4 py-2.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-camera mr-2 text-yellow-400"></i><strong>ภาพที่ 4.2:</strong> การปฏิบัติการจัดเก็บตัวอย่างภาพชิ้นงานผ่านกล้องดิจิทัล และการตรวจสอบสัดส่วน Train/Test ผ่านแดชบอร์ด Data Acquisition บน Edge Impulse Studio</span>
+              <span class="text-yellow-400 font-medium text-[11px]">Studio Interface</span>
+            </div>
+          </div>
+
+          <!-- เปรียบเทียบ 2 รูปแบบการ Label -->
+          <div class="space-y-3 pt-2">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">การเลือกวิธีการติดป้ายกำกับข้อมูล (Labeling Method Comparison)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="font-bold text-[#173b6b] text-sm flex items-center gap-2">
+                  <i class="fa-solid fa-image text-blue-600"></i> 1. การติดป้ายกำกับภาพรวม (One label per data item)
+                </div>
+                <p class="text-slate-600 leading-relaxed">
+                  เป็นการกำหนดป้ายชื่อ 1 ชื่อให้กับภาพถ่ายทั้งภาพ เหมาะสำหรับงาน <strong>การจำแนกประเภทภาพ (Image Classification)</strong> ในบทที่ 10 เช่น กำหนดให้ทั้งภาพเป็น 'pass' หรือ 'defect'
+                </p>
+                <div class="bg-white p-2.5 rounded border border-slate-200 text-slate-500 font-mono text-[11px]">
+                  ตัวอย่าง: sample_01.jpg -> Label: "Normal"
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="font-bold text-[#173b6b] text-sm flex items-center gap-2">
+                  <i class="fa-solid fa-vector-square text-emerald-600"></i> 2. การกำหนดกรอบพิกัดวัตถุ (Bounding Boxes)
+                </div>
+                <p class="text-slate-600 leading-relaxed">
+                  เป็นการวาดกรอบสี่เหลี่ยมล้อมรอบวัตถุแต่ละชิ้นในภาพ พร้อมระบุป้ายชื่อ เหมาะสำหรับงาน <strong>การตรวจจับวัตถุด้วยสถาปัตยกรรม FOMO (Object Detection)</strong> ในบทที่ 8 และ 9
+                </p>
+                <div class="bg-white p-2.5 rounded border border-slate-200 text-slate-500 font-mono text-[11px]">
+                  ตัวอย่าง: sample_01.jpg -> Box(x=48, y=52, w=16, h=16, label="screw")
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ทำไมต้องขนาด 96x96 -->
+          <div class="callout-note p-4 rounded-xl text-xs sm:text-sm text-blue-950 space-y-1">
+            <div class="font-bold flex items-center gap-2 text-[#173b6b]">
+              <i class="fa-solid fa-microchip text-blue-600"></i> ทำไมการประมวลผลบน Edge AI จึงนิยมปรับขนาดภาพเป็น 96x96 พิกเซล?
+            </div>
+            <p>
+              ภาพความละเอียดสูงระดับ Full HD (1920x1080) มีจำนวนพิกเซลมากกว่า 2 ล้านพิกเซล ซึ่งต้องใช้หน่วยความจำแรมและการประมวลผลมหาศาลเกินขีดจำกัดของระบบสมองกลฝังตัว การย่อขนาดภาพลงเป็น <strong>96 x 96 พิกเซล</strong> (RGB = 27,648 ไบต์) ช่วยลดปริมาณการคำนวณลงได้มากกว่า 95% ทำให้บอร์ดสามารถประมวลผลได้เร็วระดับ 30-60 เฟรมต่อวินาที (FPS) โดยยังคงรักษารูปทรงและคุณลักษณะเด่นของวัตถุไว้ได้อย่างเพียงพอ
+            </p>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: การตรวจสอบความสมบูรณ์ของขั้นตอนข้อมูล         -->
+        <!-- ======================================================== -->
+        <section id="section-ep4" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-code mr-1 text-yellow-400"></i> ตอนที่ 4: การตรวจสอบคุณภาพข้อมูล
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การตรวจสอบความสมบูรณ์ของขั้นตอนการประมวลผลข้อมูล (Pipeline Validation)
+            </h2>
+          </div>
+
+          <!-- โค้ดตัวอย่าง data_pipeline_check.py -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-file-code text-blue-600"></i> ชุดคำสั่งภาษาไพทอนตรวจสอบข้อมูล: <code>data_pipeline_check.py</code>
+              </h4>
+              <span class="text-xs font-mono text-[#173b6b] bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-semibold">Validation Script</span>
+            </div>
+
+            <!-- Terminal Window -->
+            <div class="terminal-window shadow-lg">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <div class="w-3 h-3 rounded-full bg-red-500 inline-block"></div>
+                  <div class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></div>
+                  <div class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></div>
+                  <span class="text-xs text-slate-300 font-mono ml-2 font-bold">data_pipeline_check.py</span>
+                </div>
+                <span class="text-[11px] text-yellow-300 font-mono">Edge Impulse Data Pipeline</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-slate-200 font-mono text-xs leading-relaxed">
+<span class="text-purple-400">import</span> os
+<span class="text-purple-400">import</span> sys
+
+<span class="text-blue-400">def</span> <span class="text-yellow-300">evaluate_data_pipeline</span>(mock_train=<span class="text-emerald-400">480</span>, mock_test=<span class="text-emerald-400">120</span>):
+    total = mock_train + mock_test
+    train_ratio = (mock_train / total) * <span class="text-emerald-400">100</span>
+    test_ratio = (mock_test / total) * <span class="text-emerald-400">100</span>
+    
+    print(<span class="text-green-300">"=========================================================="</span>)
+    print(<span class="text-green-300">" รายงานการตรวจสอบขั้นตอนการประมวลผลข้อมูล (Data Pipeline)"</span>)
+    print(<span class="text-green-300">"=========================================================="</span>)
+    print(<span class="text-green-300">f"[1] สัดส่วนการแบ่งชุดข้อมูล: Train={train_ratio:.1f}%, Test={test_ratio:.1f}%"</span>)
+    
+    <span class="text-slate-500"># ตรวจสอบเกณฑ์มาตรฐาน 80:20 (ยอมรับความคลาดเคลื่อน +-3%)</span>
+    <span class="text-purple-400">if</span> <span class="text-emerald-400">77.0</span> &lt;= train_ratio &lt;= <span class="text-emerald-400">83.0</span>:
+        print(<span class="text-green-300">"    >> [ผ่านเกณฑ์]: อัตราส่วนสอดคล้องกับมาตรฐาน 80:20"</span>)
+    <span class="text-purple-400">else</span>:
+        print(<span class="text-yellow-300">"    >> [แจ้งเตือน]: อัตราส่วนไม่สมดุล กรุณาปรับแต่งใหม่"</span>)
+        
+    print(<span class="text-green-300">"\n[2] พารามิเตอร์การประมวลผลภาพอินพุต (Input Parameters):"</span>)
+    print(<span class="text-green-300">"    - ความละเอียดภาพ: 96 x 96 พิกเซล"</span>)
+    print(<span class="text-green-300">"    - ความลึกของสี:   RGB (3 Channels)"</span>)
+    print(<span class="text-green-300">"    - รูปแบบการจัดกลุ่ม: Balanced Multi-class"</span>)
+</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 6: การประเมินสมรรถนะการปฏิบัติการ                -->
+        <!-- ======================================================== -->
+        <section id="section-checklist" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 6</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              การประเมินสมรรถนะการปฏิบัติการ (Performance Assessment Checklist)
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">รายการเกณฑ์การตรวจสอบสมรรถนะที่ผู้เรียนต้องผ่านการประเมินผลในบทเรียนที่ 4</p>
+          </div>
+
+          <div class="space-y-3">
+            
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 1: การสร้างโครงการใหม่และกำหนดเป้าหมายโครงการบน Edge Impulse Studio</span>
+                <p class="text-slate-500 mt-0.5 text-xs">สร้างโครงการภายใต้ชื่อ <code>Student_QC_Pipeline</code> และเลือกประเภทข้อมูลเป็น Images ได้ถูกต้อง</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 2: การบันทึกภาพถ่ายตัวอย่างชิ้นงานจริงผ่านอุปกรณ์กล้องดิจิทัล</span>
+                <p class="text-slate-500 mt-0.5 text-xs">รวบรวมภาพถ่ายชิ้นงานที่ครอบคลุมความหลากหลายของสภาพแสงและมุมมองได้ครบถ้วนตามจำนวนที่กำหนด</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 3: การจัดสรรสัดส่วนชุดข้อมูล Training และ Testing ตามเกณฑ์ 80:20</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ใช้เครื่องมือ Rebalance Dataset เพื่อแบ่งสัดส่วนชุดข้อมูลให้ได้อัตราส่วน 80:20 อย่างสมบูรณ์</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 4: การติดป้ายกำกับข้อมูลแบบ Bounding Boxes อย่างถูกต้องแม่นยำ</span>
+                <p class="text-slate-500 mt-0.5 text-xs">วาดกรอบสี่เหลี่ยมแนบสนิทกับขอบเขตของชิ้นงานตัวอย่างและกำหนดป้ายชื่อคลาสอย่างมีมาตรฐาน</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 5: การประเมินผลสัมฤทธิ์ทางการเรียนท้ายบทเรียนที่ 4 ผ่านเกณฑ์ร้อยละ 70</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ทำแบบทดสอบวัดผลสัมฤทธิ์ทางการเรียนประจำบทที่ 4 ในศูนย์ทดสอบออนไลน์ของระบบครบถ้วนและผ่านเกณฑ์ที่กำหนด</p>
+              </div>
+            </label>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 7: คำถามทบทวนองค์ความรู้ท้ายบทเรียน              -->
+        <!-- ======================================================== -->
+        <section id="section-quiz" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 7</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              คำถามทบทวนองค์ความรู้ท้ายบทเรียน (Academic Review Questions)
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">แบบฝึกหัดสำหรับประเมินตนเองและทบทวนเนื้อหาสำคัญเพื่อเตรียมความพร้อมสู่การปฏิบัติการขั้นสูง</p>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>1. ในขั้นตอนการออกแบบขั้นตอนการประมวลผลข้อมูล (Data Pipeline) เหตุใดจึงต้องกำหนดสัดส่วนชุดข้อมูลฝึกสอน (Training) ต่อชุดข้อมูลทดสอบ (Testing) ในอัตราส่วน 80:20?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เพื่อให้มีข้อมูลในปริมาณที่เพียงพอ (80%) สำหรับให้โมเดลโครงข่ายประสาทเทียมเรียนรู้ลักษณะเด่นและปรับค่าน้ำหนักได้อย่างมีประสิทธิภาพ ในขณะเดียวกันก็กันข้อมูลอีก 20% ไว้เป็นชุดข้อมูลทดสอบอิสระที่โมเดลไม่เคยเห็นในระหว่างการสอน เพื่อใช้ประเมินความสามารถในการสรุปนัยทั่วไป (Generalization Ability) และป้องกันภาวะการท่องจำข้อมูล (Overfitting)
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>2. การเลือกรูปแบบความลึกของสี (Color Depth) ระหว่าง RGB และ Grayscale มีผลกระทบต่อประสิทธิภาพและการทำงานของระบบ Edge AI อย่างไร?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ภาพแบบ <strong>Grayscale</strong> มีข้อมูลเพียง 1 แชนแนล (ระดับความสว่างสีเทา) จึงใช้หน่วยความจำและรอบการคำนวณน้อยกว่าภาพ <strong>RGB</strong> ถึง 3 เท่า เหมาะสำหรับงานที่รูปทรงหรือโครงร่างเป็นปัจจัยตัดสินหลัก (เช่น การตรวจนับจำนวนสกรู) ส่วนภาพ <strong>RGB</strong> มี 3 แชนแนลสี (แดง, เขียว, น้ำเงิน) แม้จะใช้หน่วยความจำสูงกว่า แต่จำเป็นอย่างยิ่งในงานที่สีมีผลต่อการตัดสินใจ เช่น การตรวจจับผลไม้สุก/ดิบ หรือการคัดแยกสีสายไฟ
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>3. ภาวะข้อมูลรั่วไหล (Data Leakage) คืออะไร และวิศวกรข้อมูลมีวิธีการป้องกันปัญหานี้อย่างไรในการจัดเตรียมชุดข้อมูล?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ภาวะข้อมูลรั่วไหล (Data Leakage) คือการที่ข้อมูลตัวอย่างจากชุดทดสอบ (Testing Set) เกิดความคล้ายคลึงหรือซ้ำซ้อนกับข้อมูลในชุดฝึกสอน (Training Set) เช่น การตัดแบ่งเฟรมจากวิดีโอต่อเนื่องเดียวกันเข้าทั้งสองชุด ทำให้คะแนนประเมินความแม่นยำสูงเกินจริง วิธีการป้องกันคือการแบ่งชุดข้อมูลตามสภาพแวดล้อม กลุ่มตัวอย่าง หรือช่วงเวลาการบันทึกที่แยกขาดจากกันอย่างชัดเจน เพื่อให้มั่นใจว่าชุดทดสอบเป็นข้อมูลใหม่จริง ๆ
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 4 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=4#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 5: การฝึกสอนโมเดลตรวจจับความผิดปกติจากภาพ (Visual Anomaly Detection)</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">ศึกษาการสร้างโมเดลตรวจจับความผิดปกติ One-class Learning และการอ่านค่าคะแนน Anomaly Score</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter03.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 3</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter05.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>เข้าสู่บทเรียนที่ 5</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

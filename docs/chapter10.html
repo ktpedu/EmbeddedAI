@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 10: การพัฒนาและประมวลผลโมเดลจำแนกประเภทภาพ (Image Classification) | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+    <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=3EmkC1QBZK0&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=32" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 10</span>
+          <span class="font-semibold text-white truncate">การพัฒนาและประมวลผลโมเดลจำแนกประเภทภาพ (Image Classification)</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. HERO / BREADCRUMB HEADER                                    -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#1e4985] text-white py-10 px-4 sm:px-6 lg:px-8 border-b-4 border-[#fff200] relative overflow-hidden">
+    <div class="absolute right-0 top-0 w-96 h-96 bg-[#fff200]/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+    <div class="max-w-7xl mx-auto relative z-10">
+      
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-slate-300 mb-4 whitespace-nowrap flex-shrink-0">
+        <a href="index.html" class="hover:text-yellow-300">หน้าหลัก</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <a href="index.html#section-curriculum" class="hover:text-yellow-300">หลักสูตร</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <span class="text-[#fff200] font-semibold">บทที่ 10</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#fff200] text-[#173b6b] shadow">
+            <i class="fa-solid fa-camera"></i> ภาคการประมวลผลสัญญาณภาพขั้นสูง (Computer Vision & Classification)
+          </div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            บทที่ 10: การพัฒนาและประมวลผลโมเดลจำแนกประเภทภาพ (Image Classification)
+          </h1>
+          <p class="text-sm sm:text-base text-slate-200 max-w-3xl leading-relaxed">
+            Training & Deploying Image Classification Models with Webcams: การพัฒนาโมเดลจำแนกประเภทภาพด้วยเทคนิคการเรียนรู้แบบถ่ายโอน (Transfer Learning) การจัดเตรียมชุดข้อมูลพร้อมคลาสฉากหลัง (Background) การใช้งาน Image Classification Brick และการวัดความหน่วงเวลาในการประมวลผล (Inference Latency)
+          </p>
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-3">
+          <a href="#section-objectives" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=3EmkC1QBZK0" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: Image Classification Transfer Learning)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+        </div>
+
+                <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">3 คาบ (150 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">สถาปัตยกรรมเป้าหมาย:</span>
+              <span class="font-bold text-white">MobileNetV2 Transfer Learning</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">ซอฟต์แวร์/มอดูลหลัก:</span>
+              <span class="font-bold text-white">Image Classification Brick</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter10/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter10 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. MAIN CONTENT AREA (2 COLUMNS)                               -->
+  <!-- ============================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- STICKY TABLE OF CONTENTS (LEFT COLUMN - 3 COLS) -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-20 space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 overflow-hidden">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h2 class="text-sm font-extrabold text-[#173b6b] uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-[#fff200] bg-[#173b6b] p-1.5 rounded-md text-xs"></i> สารบัญเนื้อหา
+            </h2>
+            <span class="text-[11px] bg-slate-100 text-slate-500 font-semibold px-2 py-0.5 rounded">7 ส่วน</span>
+          </div>
+          <nav class="mt-4 space-y-1 text-xs">
+            <a href="#section-objectives" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+                1. สาระสำคัญและผลการเรียนรู้
+              </a>
+            <a href="#section-architecture" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              2. สถาปัตยกรรมระบบจำแนกภาพ
+            </a>
+            <a href="#section-ep1" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              3. ตอนที่ 1: การเรียนรู้แบบถ่ายโอน (Transfer Learning)
+            </a>
+            <a href="#section-ep2" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              4. ตอนที่ 2: กลยุทธ์คลาสฉากหลัง (Background Strategy)
+            </a>
+            <a href="#section-ep3" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              5. ตอนที่ 3: การกำหนดค่า Image Classification Brick
+            </a>
+            <a href="#section-ep4" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              6. ตอนที่ 4: การคำนวณ Softmax และวัดความหน่วงเวลา
+            </a>
+            <a href="#section-code" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              7. โค้ดตัวอย่างและการทดสอบปฏิบัติ
+            </a>
+            <a href="#section-checklist" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              8. ใบงานภารกิจปฏิบัติการ
+            </a>
+            <a href="#section-review" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              9. คำถามทบทวนท้ายบทเรียน
+            </a>
+          </nav>
+        </div>
+
+        <!-- System Status Banner -->
+        <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] text-white p-4 rounded-xl border border-blue-900 shadow text-xs space-y-2">
+          <div class="font-bold flex items-center gap-1.5 text-yellow-300">
+            <i class="fa-solid fa-circle-check text-green-400"></i> มอดูลที่เกี่ยวข้อง
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            มอดูล Image Classification Brick, Edge Impulse Transfer Learning (MobileNetV2), มอดูลกล้องเว็บแคม UVC และ Web UI Dashboard (พอร์ต 7000)
+          </p>
+        </div>
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>กล้อง USB UVC Webcam สำหรับการทดสอบ Inference สดผ่านหน้ากล้อง</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>ชุดข้อมูลจำแนกประเภทภาพพร้อมคลาสฉากหลัง (Background / Unknown Class)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>สายเชื่อมต่อ USB Type-C และโปรแกรม Arduino App Lab</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=10#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 10
+          </a>
+          <a href="index.html?chapter=10#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 10
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- ARTICLE BODY (RIGHT COLUMN - 9 COLS) -->
+      <article class="lg:col-span-9 space-y-10 min-w-0">
+
+        <!-- ======================================================== -->
+        <!-- 1. OBJECTIVES SECTION (K-P1-P2-A)                        -->
+        <!-- ======================================================== -->
+        <section id="section-objectives" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              การจำแนกประเภทภาพ (Image Classification) ในสภาวะแวดล้อมจริงจำเป็นต้องอาศัยเทคนิค <strong>การเรียนรู้แบบถ่ายโอน (Transfer Learning)</strong> บนโครงข่ายประสาทเทียมแบบคอนโวลูชัน MobileNetV2 เพื่อช่วยลดเวลาในการฝึกสอนและคงความแม่นยำสูงแม้มีชุดข้อมูลจำกัด สิ่งสำคัญในการประยุกต์ใช้งานแบบเวลาจริงผ่านกล้องเว็บแคมคือ <strong>กลยุทธ์การจัดการคลาสฉากหลัง (Background Class Strategy)</strong> เพื่อป้องกันไม่ให้ฟังก์ชัน Softmax พยากรณ์คลาสผิดพลาดเมื่อไม่มีวัตถุเป้าหมายปรากฏหน้ากล้อง พร้อมทั้งการกำหนดค่าขีดเริ่มเปลี่ยนความมั่นใจ (Confidence Threshold) เพื่อให้ระบบทำงานได้อย่างเสถียรและแม่นยำ
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายหลักการของ Transfer Learning, โครงสร้างโมเดล MobileNetV2, การคำนวณความน่าจะเป็นด้วย Softmax และบทบาทสำคัญของคลาส Background ได้อย่างถูกต้องตามหลักวิชาการ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการจัดการชุดข้อมูลภาพ (Dataset & Augmentation)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถบันทึกภาพตัวอย่างสดผ่านกล้องเว็บแคม จัดหมวดหมู่ชุดข้อมูลภาพตามคลาสเป้าหมายควบคู่กับคลาสฉากหลังว่างเปล่า และเปิดใช้งาน Data Augmentation เพื่อป้องกัน Overfitting ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการประมวลผลภาพสด (Real-time Vision Inference)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถติดตั้งโมเดลจำแนกภาพลงสู่บอร์ด UNO Q กำหนดค่าตัวแปร EI_CLASSIFICATION_MODEL ในไฟล์ app.yaml และเขียนโปรแกรมคัดกรองความมั่นใจเพื่อตรวจวัดความหน่วงเวลา (Latency) ได้อย่างสมบูรณ์
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความละเอียดรอบคอบในการทดสอบระบบซ้ำหลายสภาวะแสง ตระหนักถึงความเสถียรของระบบตรวจจับที่ไม่สร้างการแจ้งเตือนเท็จ (False Triggering) และมีวินัยในการจัดเก็บข้อมูลภาพ
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 2. ARCHITECTURE SECTION                                  -->
+        <!-- ======================================================== -->
+        <section id="section-architecture" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 2: สถาปัตยกรรมระบบ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              สถาปัตยกรรมการจำแนกประเภทภาพด้วยการเรียนรู้แบบถ่ายโอน (Image Classification Architecture)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              โครงสร้างการส่งผ่านข้อมูลจากกล้องเว็บแคมผ่านชั้นสังวัตนาการของ MobileNetV2 สู่การกระจายความน่าจะเป็น Softmax
+            </p>
+          </div>
+
+          <!-- Architecture Image -->
+          <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+            <img src="images/chapters/ch10_image_classification_architecture.jpg" alt="แผนภาพสถาปัตยกรรมการจำแนกประเภทภาพด้วย Transfer Learning" class="w-full h-auto object-cover max-h-[420px]">
+            <div class="p-3 text-[11px] text-slate-500 bg-slate-100 text-center border-t border-slate-200">
+              รูปที่ 10.1: แผนภาพสถาปัตยกรรมโครงข่ายประสาทเทียม MobileNetV2 และการประมวลผลผ่าน Image Classification Brick บนระบบสมองกลฝังตัว
+            </div>
+          </div>
+
+          <!-- Comparison Table -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">การเปรียบเทียบภารกิจด้านการมองเห็นของคอมพิวเตอร์ (Computer Vision Tasks):</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse border border-slate-200 rounded-xl overflow-hidden">
+                <thead class="bg-[#173b6b] text-white">
+                  <tr>
+                    <th class="p-3 border-b border-slate-300">ภารกิจ (Task)</th>
+                    <th class="p-3 border-b border-slate-300">ผลลัพธ์ที่ได้ (Output)</th>
+                    <th class="p-3 border-b border-slate-300">สถาปัตยกรรมโมเดล</th>
+                    <th class="p-3 border-b border-slate-300">การใช้งานที่เหมาะสม</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  <tr class="hover:bg-slate-50 font-medium">
+                    <td class="p-3 text-[#173b6b] font-bold">Image Classification (บทที่ 10)</td>
+                    <td class="p-3">ฉลากหมวดหมู่ 1 คลาส + ความน่าจะเป็น</td>
+                    <td class="p-3">MobileNetV1 / MobileNetV2</td>
+                    <td class="p-3 text-slate-600">จำแนกชนิดชิ้นส่วนเดี่ยวบนถาดตรวจ</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="p-3 text-[#173b6b] font-bold">Object Detection (บทที่ 8-9)</td>
+                    <td class="p-3">พิกัดจุดกึ่งกลาง (Centroid) + ฉลากหลายชิ้น</td>
+                    <td class="p-3">FOMO (MobileNetV2 0.35)</td>
+                    <td class="p-3 text-slate-600">ตรวจนับและคัดแยกชิ้นงานหลายชิ้นบนสายพาน</td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="p-3 text-[#173b6b] font-bold">Visual Anomaly Detection (บทที่ 5-7)</td>
+                    <td class="p-3">ค่าความผิดปกติ (Anomaly Score)</td>
+                    <td class="p-3">FOMO-AD (GMM Feature Extraction)</td>
+                    <td class="p-3 text-slate-600">ตรวจหาตำหนิหรือสิ่งแปลกปลอมบนพื้นผิว</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 3. EP.1: TRANSFER LEARNING CONCEPTS                     -->
+        <!-- ======================================================== -->
+        <section id="section-ep1" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 1 (EP.1)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การเรียนรู้แบบถ่ายโอน (Transfer Learning) และโครงสร้างโมเดล MobileNetV2
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การนำองค์ความรู้จากโครงข่ายประสาทที่ผ่านการฝึกสอนบนชุดข้อมูลขนาดใหญ่มาปรับประยุกต์ใช้งานบนอุปกรณ์ขอบ
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            การฝึกสอนโครงข่ายประสาทเทียมสำหรับการประมวลผลภาพตั้งแต่เริ่มต้น (Training from scratch) จำเป็นต้องใช้ภาพตัวอย่างจำนวนหลายหมื่นภาพและคอมพิวเตอร์สมรรถนะสูง แต่ในการพัฒนาบนระบบสมองกลฝังตัว เราใช้เทคนิค <strong>การเรียนรู้แบบถ่ายโอน (Transfer Learning)</strong> โดยนำโครงข่าย <strong>MobileNetV2</strong> ที่ผ่านการฝึกฝนล่วงหน้า (Pre-trained) บนชุดข้อมูลสากล <em>ImageNet</em> (มากกว่า 1.4 ล้านภาพ) มาเป็นฐานในการสกัดคุณลักษณะเด่น (Feature Extractor)
+          </p>
+
+          <!-- Core Advantages Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-solid fa-images text-blue-600"></i> ใช้ภาพจำนวนน้อย
+              </div>
+              <p class="text-slate-600 text-[11px] leading-relaxed">
+                ต้องการภาพเพียง <strong>50–100 ภาพต่อคลาส</strong> ก็สามารถฝึกสอนโมเดลให้มีความแม่นยำสูงได้ เพราะชั้นล่างได้เรียนรู้เส้น ขอบ และรูปทรงเรขาคณิตมาแล้ว
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt-lightning text-emerald-600"></i> ฝึกสอนรวดเร็ว
+              </div>
+              <p class="text-slate-600 text-[11px] leading-relaxed">
+                เราทำการตรึงน้ำหนัก (Freeze Weights) ของชั้นสกัดคุณลักษณะ และปรับจูนเฉพาะชั้นจำแนกผลลัพธ์ (Classification Head) ทำให้การฝึกสอนเสร็จสิ้นภายใน <strong>2–5 นาที</strong>
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-purple-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-microchip text-purple-600"></i> ขนาดกะทัดรัด
+              </div>
+              <p class="text-slate-600 text-[11px] leading-relaxed">
+                สถาปัตยกรรม Depthwise Separable Convolution ทำให้โมเดลมีขนาดไบนารีเพียง <strong>1.5–3.5 MB</strong> เหมาะสำหรับชิปประมวลผลของบอร์ดพัฒนา Arduino UNO Q
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 4. EP.2: BACKGROUND CLASS STRATEGY                      -->
+        <!-- ======================================================== -->
+        <section id="section-ep2" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 2 (EP.2)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              กลยุทธ์การจัดการคลาสฉากหลัง (Background Class Strategy)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การแก้ปัญหาการทำนายผิดพลาดเมื่อไม่มีชิ้นงานอยู่หน้ากล้อง (Closed-world Assumption Problem)
+            </p>
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              โมเดลจำแนกประเภทภาพที่ใช้ฟังก์ชัน <strong>Softmax</strong> มีข้อจำกัดสำคัญคือ <em>"ผลรวมของความน่าจะเป็นทุกคลาสต้องเท่ากับ 1.0 (100%) เสมอ"</em> หากเราฝึกสอนเฉพาะคลาสชิ้นงาน เช่น <code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-blue-900">Capacitor</code>, <code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-blue-900">Resistor</code>, <code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-blue-900">IC_Chip</code> โดยไม่มีคลาสฉากหลัง ในเวลาที่ไม่มีวัตถุอยู่หน้ากล้อง (ฉากหลังว่างเปล่า) โมเดลจะถูกบีบให้สุ่มเลือกชิ้นงานใดชิ้นงานหนึ่งที่มีคะแนนสูงสุดเสมอ ก่อให้เกิดข้อผิดพลาด <strong>False Positive</strong> อย่างรุนแรง
+            </p>
+
+            <!-- Studio Image -->
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+              <img src="images/chapters/ch10_image_classification_studio.jpg" alt="การจัดเก็บข้อมูลและการฝึกสอนบน Edge Impulse Studio" class="w-full h-auto object-cover max-h-[380px]">
+              <div class="p-3 text-[11px] text-slate-500 bg-slate-100 text-center border-t border-slate-200">
+                รูปที่ 10.2: การจัดเตรียมชุดข้อมูลบน Edge Impulse Studio พร้อมการกำหนดหมวดหมู่ฉากหลังว่างเปล่า (Background)
+              </div>
+            </div>
+
+            <!-- Callout Tip -->
+            <div class="callout-tip p-4 rounded-xl text-xs space-y-1">
+              <div class="font-bold text-emerald-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-lightbulb text-emerald-600"></i> แนวทางปฏิบัติที่ดีที่สุด (Best Practice):
+              </div>
+              <p class="text-emerald-800 leading-relaxed">
+                ต้องเก็บภาพฉากหลังที่ว่างเปล่าในหลากหลายสภาพแสง (เช่น แสงไฟเปิด แสงไฟหรี่ เงาตกกระทบ มือผู้ปฏิบัติงานที่ว่างเปล่า) และตั้งชื่อคลาสว่า <code class="font-mono bg-emerald-100 px-1 py-0.5 rounded text-emerald-900 font-bold">Background</code> โดยให้มีสัดส่วนประมาณ <strong>ร้อยละ 20–25</strong> ของชุดข้อมูลทั้งหมด
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 5. EP.3: IMAGE CLASSIFICATION BRICK CONFIG               -->
+        <!-- ======================================================== -->
+        <section id="section-ep3" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 3 (EP.3)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การกำหนดค่า Image Classification Brick ในไฟล์ app.yaml
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การเชื่อมโยงไฟล์ไบนารีโมเดล .eim เข้าสู่สถาปัตยกรรมมอดูลาร์บนบอร์ดพัฒนา Arduino UNO Q
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            บนระบบปฏิบัติการของบอร์ดพัฒนา Arduino UNO Q มอดูล <strong>Image Classification Brick</strong> ทำหน้าที่เป็นบริดจ์ตัวกลางระหว่างไดรเวอร์กล้อง USB และโมเดลปัญญาประดิษฐ์ โดยทำหน้าที่แคปเจอร์เฟรม ปรับขนาดให้ตรงกับขนาดอินพุตของโมเดล (เช่น 96x96 หรือ 160x160 RGB) และส่งผลลัพธ์เป็นโครงสร้างข้อมูลพจนานุกรม (Dictionary) ให้กับโค้ดไพทอน
+          </p>
+
+          <!-- App.yaml Structure -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">โครงสร้างไฟล์คอนฟิกูเรชัน app.yaml สำหรับงานจำแนกประเภทภาพ:</h3>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-xs text-yellow-300 font-mono font-bold flex items-center gap-2">
+                  <i class="fa-solid fa-file-code"></i> app.yaml (Configuration)
+                </span>
+                <span class="text-[10px] text-slate-400">YAML Config</span>
+              </div>
+              <pre class="terminal-body"><code><span class="text-purple-400">name:</span> <span class="text-green-300">"Webcam Image Classification App"</span>
+<span class="text-purple-400">description:</span> <span class="text-slate-300">"ระบบจำแนกประเภทชิ้นงานจากกล้องเว็บแคมด้วยโมเดล MobileNetV2"</span>
+<span class="text-purple-400">ports:</span>
+  - <span class="text-yellow-300">7000:7000</span>
+
+<span class="text-purple-400">bricks:</span>
+  - <span class="text-blue-400">arduino:image_classification:</span>
+      <span class="text-purple-400">variables:</span>
+        <span class="text-yellow-400">EI_CLASSIFICATION_MODEL:</span> <span class="text-green-300">"/home/arduino/.arduino-bricks/ei-models/image_classifier.eim"</span>
+        <span class="text-yellow-400">CONFIDENCE_THRESHOLD:</span> <span class="text-green-300">"0.80"</span>
+  - <span class="text-blue-400">arduino:web_ui:</span> {}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 6. EP.4: SOFTMAX & INFERENCE LATENCY MEASUREMENT         -->
+        <!-- ======================================================== -->
+        <section id="section-ep4" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 4 (EP.4)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การคำนวณ Softmax และการตรวจวัดความหน่วงเวลาในการประมวลผล (Inference Latency)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การแปลงคะแนนลอจิต (Logits) สู่ค่าความน่าจะเป็น และเทคนิคการวัดสมรรถนะความเร็วแบบเวลาจริง
+            </p>
+          </div>
+
+          <!-- Mathematical Formula Box -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3">
+            <div class="text-xs font-bold text-[#173b6b] flex items-center gap-2">
+              <i class="fa-solid fa-square-root-variable"></i> ฟังก์ชันการแจกแจงความน่าจะเป็น Softmax (Softmax Probability Function):
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-slate-200 font-mono text-center text-xs sm:text-sm text-slate-800 shadow-inner">
+              P(y = i \mid \mathbf{x}) = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}
+            </div>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              เมื่อ <span class="font-mono text-slate-700 font-bold">z_i</span> คือค่า Logit ของคลาสที่ <span class="font-mono text-slate-700">i</span> และ <span class="font-mono text-slate-700 font-bold">K</span> คือจำนวนหมวดหมู่ทั้งหมดในระบบ
+            </p>
+          </div>
+
+          <!-- Latency Metrics Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-solid fa-stopwatch text-blue-600"></i> การวัดความหน่วงเวลาในการประมวลผล (Inference Latency)
+              </div>
+              <p class="text-slate-600 leading-relaxed">
+                เวลาที่ใช้ในการประมวลผลโมเดลต่อ 1 เฟรม คำนวณจากผลต่างของเวลายูนิกซ์:
+              </p>
+              <div class="bg-white p-2 rounded border border-slate-200 font-mono text-slate-700">
+                latency_ms = (t_end - t_start) * 1000.0
+              </div>
+              <p class="text-[11px] text-slate-500">
+                ค่ามาตรฐานบน Arduino UNO Q สำหรับโมเดล MobileNetV2 0.35 จะอยู่ที่ประมาณ <strong>25–35 มิลลิวินาที (ms)</strong>
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-amber-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-gauge-high text-amber-600"></i> อัตราเร็วเฟรมภาพ (Frame Rate - FPS)
+              </div>
+              <p class="text-slate-600 leading-relaxed">
+                จำนวนเฟรมภาพที่ระบบสามารถรับภาพและพยากรณ์ผลลัพธ์ได้ใน 1 วินาที:
+              </p>
+              <div class="bg-white p-2 rounded border border-slate-200 font-mono text-slate-700">
+                FPS = total_frames / elapsed_seconds
+              </div>
+              <p class="text-[11px] text-slate-500">
+                อัตราเร็วที่เหมาะสมสำหรับงานสายพานคัดแยกชิ้นงานควรอยู่ที่ <strong>20 FPS ขึ้นไป</strong>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 7. SOURCE CODE SECTION                                   -->
+        <!-- ======================================================== -->
+        <section id="section-code" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 4: ตัวอย่างโค้ดและการทดสอบภาคปฏิบัติ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              โค้ดโปรแกรมจำแนกประเภทภาพสด (image_classify_live.py)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              สคริปต์ไพทอนฉบับสมบูรณ์ รองรับการทำงานทั้งบนบอร์ดพัฒนา Arduino UNO Q และโหมดจำลองคอนโซล
+            </p>
+          </div>
+
+          <!-- Code Box -->
+          <div class="terminal-window">
+            <div class="terminal-header">
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="text-xs text-yellow-300 font-mono font-bold ml-2">code_examples/chapter10/image_classify_live.py</span>
+              </div>
+              <button onclick="navigator.clipboard.writeText(document.getElementById('classifyCode').innerText); alert('คัดลอกโค้ดเรียบร้อยแล้ว');" class="text-xs bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded transition flex items-center gap-1.5">
+                <i class="fa-regular fa-copy"></i> คัดลอกโค้ด
+              </button>
+            </div>
+            <pre class="terminal-body" id="classifyCode"><code><span class="text-slate-500">#!/usr/bin/env python3</span>
+<span class="text-slate-500"># -*- coding: utf-8 -*-</span>
+<span class="text-blue-400">import</span> sys, time
+
+<span class="text-blue-400">try</span>:
+    <span class="text-blue-400">from</span> arduino.app_bricks.image_classification <span class="text-blue-400">import</span> ImageClassification
+    <span class="text-blue-400">from</span> arduino.app_utils <span class="text-blue-400">import</span> App
+    IS_ARDUINO_ENV = <span class="text-yellow-400">True</span>
+<span class="text-blue-400">except</span> ImportError:
+    IS_ARDUINO_ENV = <span class="text-yellow-400">False</span>
+
+
+<span class="text-purple-400">class</span> <span class="text-yellow-300 font-bold">LiveImageClassifier</span>:
+    <span class="text-slate-500">"""คลาสจัดการผลการจำแนกประเภทภาพแบบเวลาจริงและการคำนวณสถิติ"""</span>
+    <span class="text-blue-400">def</span> <span class="text-blue-300">__init__</span>(self, confidence_threshold=0.80):
+        self.threshold = confidence_threshold
+        self.summary_stats = {<span class="text-green-300">"Capacitor"</span>: 0, <span class="text-green-300">"Resistor"</span>: 0, <span class="text-green-300">"IC_Chip"</span>: 0, <span class="text-green-300">"Background"</span>: 0}
+
+    <span class="text-blue-400">def</span> <span class="text-blue-300">process_result</span>(self, result, latency_ms=32.0):
+        <span class="text-blue-400">if</span> <span class="text-blue-400">not</span> result:
+            <span class="text-blue-400">return</span>
+
+        top_label = result.get(<span class="text-green-300">"label"</span>, <span class="text-green-300">"Unknown"</span>)
+        confidence = result.get(<span class="text-green-300">"confidence"</span>, 0.0)
+        scores = result.get(<span class="text-green-300">"scores"</span>, {})
+
+        <span class="text-slate-500"># 1. คัดกรองกรณีฉากหลังว่างเปล่า</span>
+        <span class="text-blue-400">if</span> top_label.lower() <span class="text-blue-400">in</span> [<span class="text-green-300">"background"</span>, <span class="text-green-300">"nothing"</span>, <span class="text-green-300">"none"</span>]:
+            self.summary_stats[<span class="text-green-300">"Background"</span>] += 1
+            print(<span class="text-green-300">f"[-] ฉากหลังว่างเปล่า (Background: {confidence*100:.1f}%) | Latency: {latency_ms:.1f} ms"</span>)
+            <span class="text-blue-400">return</span>
+
+        <span class="text-slate-500"># 2. ตรวจสอบเกณฑ์ความเชื่อมั่นขั้นต่ำ</span>
+        <span class="text-blue-400">if</span> confidence &gt;= self.threshold:
+            self.summary_stats[top_label] = self.summary_stats.get(top_label, 0) + 1
+            print(<span class="text-green-300">f"\n[+] [MATCH] จำแนกพบ: '{top_label}' | ความเชื่อมั่น: {confidence*100:.2f}% | Latency: {latency_ms:.1f} ms"</span>)
+            score_str = <span class="text-green-300">", "</span>.join([<span class="text-green-300">f"{k}: {v*100:.1f}%"</span> <span class="text-blue-400">for</span> k, v <span class="text-blue-400">in</span> scores.items()])
+            print(<span class="text-green-300">f"    -> Softmax: [{score_str}]"</span>)
+        <span class="text-blue-400">else</span>:
+            print(<span class="text-green-300">f"[?] ความเชื่อมั่นไม่เพียงพอ ({top_label}: {confidence*100:.1f}% &lt; {self.threshold*100:.0f}%)"</span>)</code></pre>
+          </div>
+
+          <!-- Terminal Run Output -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">ผลการทดสอบการทำงานผ่านคอนโซล (Execution Console Output):</h3>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-xs text-green-400 font-mono flex items-center gap-2">
+                  <i class="fa-solid fa-terminal"></i> python code_examples/chapter10/image_classify_live.py
+                </span>
+                <span class="text-[10px] text-slate-400">Terminal Output</span>
+              </div>
+              <pre class="terminal-body font-mono text-xs"><code>========================================================================
+   ระบบจำแนกประเภทภาพชิ้นงานอิเล็กทรอนิกส์ (Image Classification)
+   หลักสูตร: การพัฒนาปัญญาประดิษฐ์บนอุปกรณ์ขอบ (บทเรียนที่ 10)
+========================================================================
+[*] เริ่มต้นการทดสอบในโหมดจำลองสถานการณ์คอนโซล (Console Simulation)...
+[*] กำหนดค่าเกณฑ์ความเชื่อมั่นขั้นต่ำ (Confidence Threshold): 0.80 (80%)
+------------------------------------------------------------------------
+
+--- [รอบการประเมินผลที่ 1 / 5] ---
+[14:22:22] [FPS: 30.2] [-] ฉากหลังว่างเปล่า (Background: 96.0%) | ความหน่วงเวลา: 28.4 ms
+
+--- [รอบการประเมินผลที่ 2 / 5] ---
+[14:22:22] [FPS: 30.5] [+] [MATCH] จำแนกพบชิ้นงาน: 'Capacitor'
+    - ระดับความเชื่อมั่น: 92.00% (ผ่านเกณฑ์ >= 80%)
+    - ความหน่วงเวลาในการประมวลผล: 31.8 ms
+    - การกระจายความน่าจะเป็น (Softmax): [Background: 3.0%, Capacitor: 92.0%, Resistor: 3.0%, IC_Chip: 2.0%]
+    -> คำสั่งปฏิบัติการ: ส่งสัญญาณบันทึกคลังชิ้นส่วนตัวเก็บประจุ (Capacitor Tray A)
+
+--- [รอบการประเมินผลที่ 3 / 5] ---
+[14:22:23] [FPS: 29.8] [+] [MATCH] จำแนกพบชิ้นงาน: 'Resistor'
+    - ระดับความเชื่อมั่น: 88.00% (ผ่านเกณฑ์ >= 80%)
+    - ความหน่วงเวลาในการประมวลผล: 30.5 ms
+    - การกระจายความน่าจะเป็น (Softmax): [Background: 5.0%, Capacitor: 4.0%, Resistor: 88.0%, IC_Chip: 3.0%]
+    -> คำสั่งปฏิบัติการ: ส่งสัญญาณบันทึกคลังชิ้นส่วนตัวต้านทาน (Resistor Tray B)
+
+--- [รอบการประเมินผลที่ 4 / 5] ---
+[14:22:23] [FPS: 30.1] [?] ความเชื่อมั่นไม่เพียงพอ (Capacitor: 54.0% < 80%)
+
+--- [รอบการประเมินผลที่ 5 / 5] ---
+[14:22:23] [FPS: 31.0] [+] [MATCH] จำแนกพบชิ้นงาน: 'IC_Chip'
+    - ระดับความเชื่อมั่น: 94.00% (ผ่านเกณฑ์ >= 80%)
+    - ความหน่วงเวลาในการประมวลผล: 29.7 ms
+    - การกระจายความน่าจะเป็น (Softmax): [Background: 2.0%, Capacitor: 2.0%, Resistor: 2.0%, IC_Chip: 94.0%]
+    -> คำสั่งปฏิบัติการ: ส่งสัญญาณบันทึกคลังชิ้นส่วนไอซี (IC_Chip Tray C)
+
+========================================================================
+   สรุปสถิติผลการจำแนกประเภทชิ้นงานประจำรอบการผลิต
+========================================================================
+  - หมวดหมู่วัตถุ Capacitor     :  1 ครั้ง
+  - หมวดหมู่วัตถุ Resistor      :  1 ครั้ง
+  - หมวดหมู่วัตถุ IC_Chip       :  1 ครั้ง
+  - หมวดหมู่วัตถุ Background    :  1 ครั้ง
+  - หมวดหมู่วัตถุ Uncertain     :  1 ครั้ง
+========================================================================
+[✓] การทดสอบระบบจำแนกประเภทภาพเสร็จสมบูรณ์ พร้อมติดตั้งใช้งานจริง</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 8. HANDS-ON LAB CHECKLIST (INTERACTIVE)                  -->
+        <!-- ======================================================== -->
+        <section id="section-checklist" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 5: ใบงานภารกิจภาคปฏิบัติ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              ภารกิจปฏิบัติการประจำบทเรียน (Hands-on Lab Checklist)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ทำเครื่องหมายในช่องสี่เหลี่ยมเมื่อปฏิบัติตามขั้นตอนสำเร็จ เพื่อบันทึกความก้าวหน้าการเรียนรู้
+            </p>
+          </div>
+
+          <div class="space-y-3" id="ch10-checklist">
+            
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch10-task" data-task="1">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 1: ถ่ายภาพชิ้นงาน 3 คลาส และคลาส Background บน Edge Impulse</span>
+                <span class="text-slate-500">เก็บภาพตัวอย่างชิ้นงาน Capacitor, Resistor, IC_Chip และถ่ายภาพฉากหลังว่างเปล่า Background คลาสละไม่ต่ำกว่า 50 ภาพ</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch10-task" data-task="2">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 2: ฝึกสอนโมเดล Transfer Learning (MobileNetV2)</span>
+                <span class="text-slate-500">เลือกโมเดล MobileNetV2 0.35 ปรับจูน Learning Rate และ Epochs จนได้คะแนนความแม่นยำ (Accuracy) มากกว่า 85%</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch10-task" data-task="3">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 3: คอมไพล์และติดตั้งไฟล์ .eim บนบอร์ดพัฒนา Arduino UNO Q</span>
+                <span class="text-slate-500">ดาวน์โหลดไบนารีโมเดล คัดลอกไปยังพาธ <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">/home/arduino/.arduino-bricks/ei-models/</code> และกำหนดสิทธิ์รัน</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch10-task" data-task="4">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 4: กำหนดค่า app.yaml และรันสคริปต์ image_classify_live.py</span>
+                <span class="text-slate-500">กำหนดตัวแปร <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">EI_CLASSIFICATION_MODEL</code> และทดสอบการจำแนกชิ้นงานสดผ่านกล้องเว็บแคม</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch10-task" data-task="5">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 5: ตรวจวัดความหน่วงเวลาและทดสอบการคัดกรองฉากหลัง</span>
+                <span class="text-slate-500">บันทึกค่าความหน่วงเวลาเฉลี่ย (Inference Latency ในหน่วย ms) และทดสอบว่าเมื่อนำชิ้นงานออก ระบบไม่ส่งสัญญาณแจ้งเตือนผิดพลาด</span>
+              </div>
+            </label>
+
+          </div>
+
+          <div class="flex items-center justify-between pt-2">
+            <span class="text-xs text-slate-500" id="ch10-progress-text">ความคืบหน้าภารกิจ: 0 / 5 สำเร็จ</span>
+            <button onclick="resetChecklist()" class="text-xs text-slate-400 hover:text-red-500 transition">
+              <i class="fa-solid fa-rotate-right mr-1"></i> รีเซ็ตภารกิจ
+            </button>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 9. REVIEW QUESTIONS SECTION                              -->
+        <!-- ======================================================== -->
+        <section id="section-review" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 6: คำถามทบทวนความรู้</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              คำถามทบทวนองค์ความรู้ท้ายบทเรียน (Review Questions)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ทดสอบความเข้าใจเชิงลึกเกี่ยวกับหลักการจำแนกภาพและการประยุกต์ใช้งานบนระบบสมองกลฝังตัว
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                1. การจำแนกประเภทภาพ (Image Classification) แตกต่างจากการตรวจจับวัตถุ (Object Detection) ในแง่ของข้อมูลอินพุตและผลลัพธ์เอาต์พุตอย่างไร และงานลักษณะใดจึงควรเลือกใช้ Image Classification?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> <strong>Image Classification</strong> จะพิจารณาภาพรวมทั้งภาพและทำนายว่าภาพนั้นคือวัตถุหมวดหมู่ใดเพียง 1 คำตอบหลัก พร้อมความน่าจะเป็น โดยไม่ระบุตำแหน่งหรือพิกัดบนภาพ ในขณะที่ <strong>Object Detection</strong> จะสามารถระบุได้ว่ามีวัตถุอะไรบ้าง อยู่ตำแหน่งใด (พิกัด Centroid หรือ Bounding Box) และมีกี่ชิ้นพร้อมกันใน 1 ภาพ งานที่เหมาะกับ Image Classification คือกรณีที่มีวัตถุเป้าหมายวางอยู่ตรงกลางเฟรมทีละ 1 ชิ้น เช่น จุดตรวจสอบคุณภาพชิ้นส่วนอิเล็กทรอนิกส์บนถาดนิ่ง ซึ่งช่วยประหยัดหน่วยความจำและประมวลผลได้รวดเร็วกว่า
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                2. หากไม่สร้างคลาสฉากหลังว่างเปล่า (Background Class) ในชุดข้อมูลฝึกสอน จะส่งผลกระทบต่อการทำงานของระบบจำแนกภาพแบบเวลาจริงอย่างไร และเพราะเหตุใดฟังก์ชัน Softmax จึงทำให้เกิดปัญหานี้?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ฟังก์ชัน Softmax จะบีบให้ผลรวมของความน่าจะเป็นของทุกคลาสรวมกันได้เท่ากับ 1.0 (100%) เสมอ หากไม่มีคลาส Background เมื่อไม่มีวัตถุวางอยู่หน้ากล้อง โมเดลจะถูกบังคับให้กระจายคะแนนไปยังคลาสชิ้นงานที่มีอยู่ ทำให้คลาสชิ้นงานใดชิ้นงานหนึ่งได้คะแนนสูงสุดและเกิดการแจ้งเตือนผิดพลาด (False Positive) อย่างต่อเนื่อง การเพิ่มคลาส Background ทำให้โมเดลมีทางเลือกในการทำนายเมื่อไม่มีวัตถุเป้าหมายปรากฏ
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                3. ในไฟล์ app.yaml ตัวแปร EI_CLASSIFICATION_MODEL ทำหน้าที่อะไร และการกำหนด CONFIDENCE_THRESHOLD มีผลต่อความแม่นยำและความเร็วของระบบอย่างไร?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ตัวแปร <code class="font-mono bg-slate-100 px-1 py-0.5 rounded">EI_CLASSIFICATION_MODEL</code> ทำหน้าที่กำหนดตำแหน่งพาธสัมบูรณ์ของไฟล์ไบนารีโมเดล (.eim) เพื่อให้ Image Classification Brick โหลดเข้าสู่หน่วยความจำ ส่วน <code class="font-mono bg-slate-100 px-1 py-0.5 rounded">CONFIDENCE_THRESHOLD</code> (เช่น 0.80) ทำหน้าที่เป็นตัวกรองขั้นสุดท้าย โดยระบบจะยอมรับผลการทำนายและส่งสัญญาณปฏิบัติการเฉพาะเมื่อโมเดลมีความเชื่อมั่นตั้งแต่ร้อยละ 80 ขึ้นไปเท่านั้น ช่วยตัดสัญญาณรบกวนในจังหวะที่วัตถุกำลังเคลื่อนที่เข้าสู่เฟรมกล้อง
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 10 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=10#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 11: การรู้จำคำสั่งเสียงภาษาไทยผ่านไมโครโฟน (Thai Keyword Spotting)</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">การสกัดคุณลักษณะเสียงด้วย MFCC การฝึกสอนโมเดลจำแนกคำสั่งเสียงภาษาไทย และการสั่งการอุปกรณ์ด้วยเสียงผ่านไมโครโฟนดิจิทัล</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter09.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 9</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter11.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>บทที่ 11</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Interactive Checklist Logic with LocalStorage
+    const ch10Checkboxes = document.querySelectorAll('.ch10-task');
+    const ch10ProgressText = document.getElementById('ch10-progress-text');
+
+    function updateProgress() {
+      const total = ch10Checkboxes.length;
+      let checkedCount = 0;
+      ch10Checkboxes.forEach(cb => {
+        const taskId = cb.getAttribute('data-task');
+        if (cb.checked) {
+          checkedCount++;
+          localStorage.setItem(`ch10_task_${taskId}`, 'true');
+        } else {
+          localStorage.removeItem(`ch10_task_${taskId}`);
+        }
+      });
+      if (ch10ProgressText) {
+        ch10ProgressText.innerText = `ความคืบหน้าภารกิจ: ${checkedCount} / ${total} สำเร็จ`;
+      }
+    }
+
+    function initChecklist() {
+      ch10Checkboxes.forEach(cb => {
+        const taskId = cb.getAttribute('data-task');
+        if (localStorage.getItem(`ch10_task_${taskId}`) === 'true') {
+          cb.checked = true;
+        }
+        cb.addEventListener('change', updateProgress);
+      });
+      updateProgress();
+    }
+
+    function resetChecklist() {
+      if (confirm('ต้องการรีเซ็ตสถานะภารกิจทั้งหมดในบทนี้หรือไม่?')) {
+        ch10Checkboxes.forEach(cb => {
+          const taskId = cb.getAttribute('data-task');
+          cb.checked = false;
+          localStorage.removeItem(`ch10_task_${taskId}`);
+        });
+        updateProgress();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initChecklist);
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

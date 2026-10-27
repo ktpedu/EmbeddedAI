@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 3: การจัดการระบบฐานข้อมูลบนอุปกรณ์ด้วย Database-SQL Brick | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* Custom Styling for Dedicated Lesson Page */
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    /* Smooth Callout Styles */
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+  <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://youtube.com/playlist?list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 3</span>
+          <span class="font-semibold text-white truncate">การจัดการระบบฐานข้อมูลบนอุปกรณ์ด้วย Database-SQL Brick</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. CHAPTER HERO BANNER                                         -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#0d2342] text-white py-10 sm:py-14 border-b-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-slate-300 mb-4 font-medium">
+        <a href="index.html" class="hover:text-yellow-300 transition">หน้าหลัก</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-white/40"></i>
+        <a href="index.html#section-lessons" class="hover:text-yellow-300 transition">บทเรียนออนไลน์</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-white/40"></i>
+        <span class="text-[#fff200] font-bold">บทที่ 3</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-4 max-w-3xl">
+        <div class="inline-flex items-center gap-2 bg-[#fff200] text-[#173b6b] text-xs font-black px-3.5 py-1 rounded-full shadow">
+          <i class="fa-solid fa-database"></i> Edge Database & Data Logging Module • ระบบฐานข้อมูลอุปกรณ์และการจัดเก็บบันทึกข้อมูล AI
+        </div>
+        <h1 class="text-xl sm:text-3xl lg:text-4xl font-black font-heading leading-snug sm:leading-normal tracking-tight text-white">
+          การจัดการระบบฐานข้อมูลบนอุปกรณ์ <br class="hidden sm:inline">
+          <span class="text-[#fff200]">ด้วย Database-SQL Brick</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-3xl">
+          เอกสารประกอบการจัดการเรียนรู้และแนวปฏิบัติการเชิงลึก มุ่งเน้นการศึกษาการประยุกต์ใช้งาน <strong>Database-SQL Brick</strong> บนโปรแกรม <strong>Arduino App Lab</strong> เพื่อบริหารจัดการระบบฐานข้อมูลเชิงสัมพันธ์ <strong>SQLite</strong> บนหน่วยประมวลผล Qualcomm Dragonwing QRB2210 ภายใต้ระบบปฏิบัติการ Debian Linux AArch64 การออกแบบโครงสร้างตารางข้อมูล (Database Schema) เพื่อรองรับการบันทึกประวัติเหตุการณ์การทำนายของโมเดลปัญญาประดิษฐ์ (Inference Event Logging) ได้แก่ Anomaly Detection, FOMO Object Detection และ Keyword Spotting ตลอดจนการเขียนคำสั่งภาษา SQL ในการสืบค้นและวิเคราะห์สถิติสรุปผลแบบเรียลไทม์เพื่อสนับสนุนระบบอัตโนมัติในงานอุตสาหกรรม
+        </p>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-2">
+          <a href="#section-ep1" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=N-tZirbAWCE" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/jk0x5i37qc670f0kmwuisougd3kj8j4p" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: Database-SQL & Time Series Brick)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+      </div>
+
+        <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">3 คาบ (150 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">ระบบฐานข้อมูล:</span>
+              <span class="font-bold text-white">SQLite 3 (SQL Brick)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการจัดเก็บ:</span>
+              <span class="font-bold text-white">AI Inference Event Logs</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter03/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter03 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. MAIN LAYOUT: STICKY TOC SIDEBAR + ARTICLE CONTENT          -->
+  <!-- ============================================================== -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- ========================================================== -->
+      <!-- A. STICKY TABLE OF CONTENTS SIDEBAR (3 COLS)               -->
+      <!-- ========================================================== -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-24 space-y-6">
+        
+        <!-- Table of Contents Navigation -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex items-center gap-2 font-bold text-[#173b6b] text-sm border-b border-slate-100 pb-3 mb-3">
+            <i class="fa-solid fa-list-check text-yellow-500"></i>
+            <span>สารบัญเนื้อหาบทที่ 3</span>
+          </div>
+          <nav class="space-y-1 text-xs">
+            <a href="#section-outcomes" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              1. สาระสำคัญและผลการเรียนรู้
+            </a>
+            <a href="#section-ep1" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              2. สถาปัตยกรรมระบบฐานข้อมูลบนอุปกรณ์ (Edge Database)
+            </a>
+            <a href="#section-ep2" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              3. การออกแบบโครงสร้างตารางข้อมูลเพื่อรองรับ AI
+            </a>
+            <a href="#section-ep3" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              4. การเขียนชุดคำสั่งบันทึกและสืบค้นข้อมูล (Python SQL)
+            </a>
+            <a href="#section-ep4" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              5. การสืบค้นและวิเคราะห์สถิติสรุปผล (SQL Analytics)
+            </a>
+            <a href="#section-checklist" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              6. การประเมินสมรรถนะการปฏิบัติการ (Performance Checklist)
+            </a>
+            <a href="#section-quiz" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              7. คำถามทบทวนองค์ความรู้ท้ายบทเรียน
+            </a>
+          </nav>
+        </div>
+
+        <!-- Hardware & Software Checklist Card -->
+        <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] rounded-2xl shadow-md p-5 text-white text-xs space-y-3 border-2 border-yellow-400/40">
+          <div class="flex items-center gap-2 text-yellow-300 font-bold text-xs uppercase tracking-wider">
+            <i class="fa-solid fa-server"></i> สภาพแวดล้อมระบบและเครื่องมือปฏิบัติการ (Environment & Tools)
+          </div>
+          <ul class="space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>บอร์ดพัฒนา <strong>Arduino UNO Q</strong> (พื้นที่จัดเก็บ eMMC และหน่วยความจำระบบ)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>ระบบฐานข้อมูลเชิงสัมพันธ์ <strong>SQLite 3</strong> บนระบบปฏิบัติการ Debian Linux AArch64</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>ไดเรกทอรีจัดเก็บข้อมูล: <code>/home/arduino/.arduino-bricks/data/</code></span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>โมดูลภาษาไพทอน <strong><code>sqlite3</code></strong> และไลบรารี <strong>Database-SQL Brick</strong></span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>ไฟล์การกำหนดค่า <strong><code>app.yaml</code></strong> และสคริปต์ <strong><code>db_logger.py</code></strong></span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=3#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 3
+          </a>
+          <a href="index.html?chapter=3#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 3
+          </a>
+        </div>
+
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>สายเชื่อมต่อ USB Type-C (ชนิดรับส่งข้อมูลและจ่ายกำลังไฟฟ้า 3A)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>ระบบหน่วยความจำ Flash Storage 16GB สำหรับจัดเก็บฐานข้อมูล SQLite 3</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>เครื่องคอมพิวเตอร์พร้อมโปรแกรมสภาพแวดล้อม Arduino App Lab และ SQLite Viewer</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=3#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 3
+          </a>
+          <a href="index.html?chapter=3#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 3
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- ========================================================== -->
+      <!-- B. MAIN ARTICLE CONTENT (9 COLS)                           -->
+      <!-- ========================================================== -->
+      <article class="lg:col-span-9 space-y-10">
+
+        <!-- ======================================================== -->
+        <!-- SECTION 1: สาระสำคัญและผลการเรียนรู้                     -->
+        <!-- ======================================================== -->
+        <section id="section-outcomes" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              ในระบบปัญญาประดิษฐ์บนอุปกรณ์ปลายทางระดับวิศวกรรม การประมวลผลโมเดล AI เพียงอย่างเดียวไม่เพียงพอต่อการนำไปใช้งานจริง จำเป็นต้องมีกลไกจัดเก็บประวัติเหตุการณ์การทำนาย (Inference Event Logging) เพื่อให้ระบบสามารถตรวจสอบย้อนหลัง (Audit Trail & Traceability) ได้อย่างแม่นยำ <strong>Database-SQL Brick</strong> บนบอร์ดพัฒนา <strong>Arduino UNO Q</strong> ทำหน้าที่ผสานพลังของระบบจัดการฐานข้อมูลเชิงสัมพันธ์ <strong>SQLite</strong> บนหน่วยประมวลผล 64 บิต Qualcomm QRB2210 ทำให้อุปกรณ์สามารถบันทึกผลการคัดแยกชิ้นงาน พิกัดของวัตถุ หรือคำสั่งเสียงลงในไฟล์ฐานข้อมูลภายในเครื่องได้อย่างรวดเร็วและปลอดภัยภายใต้สถาปัตยกรรม <strong>Offline-First</strong> โดยไม่ต้องพึ่งพาระบบคลาวด์หรือการเชื่อมต่ออินเทอร์เน็ตภายนอกตลอดเวลา
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายหลักการทำงานของ Database-SQL Brick, สถาปัตยกรรมฐานข้อมูลแบบ Serverless (SQLite), และความจำเป็นของการบันทึกประวัติการตรวจจับ AI บนอุปกรณ์ปลายทางได้อย่างถูกต้องตามหลักวิชาการ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการออกแบบและจัดการฐานข้อมูล (Database Schema)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถออกแบบโครงสร้างตารางข้อมูลเชิงสัมพันธ์ (SQL Tables) และเขียนคำสั่ง <code>CREATE TABLE</code> เพื่อจัดเก็บพารามิเตอร์ของโมเดล AI (เช่น Anomaly Scores, Bounding Boxes, และ Voice Keywords) ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการเขียนโปรแกรมและการสืบค้นข้อมูล (SQL Analytics)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถเขียนชุดคำสั่งภาษาไพทอนเพื่อแทรกบันทึกข้อมูล (<code>INSERT</code>) และสืบค้นรายงานสรุปผลเชิงสถิติ (<code>SELECT ... GROUP BY</code>) เพื่อแสดงอัตราส่วนของดี/ของเสียได้อย่างมีประสิทธิภาพ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนตระหนักถึงความสำคัญของความถูกต้องและครบถ้วนของข้อมูล (Data Integrity) มีความรอบคอบในการจัดสรรพื้นที่จัดเก็บบนอุปกรณ์ และมีความรับผิดชอบต่อการจัดการข้อมูลตามหลักจริยธรรมข้อมูล
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: สถาปัตยกรรมระบบฐานข้อมูลบนอุปกรณ์            -->
+        <!-- ======================================================== -->
+        <section id="section-ep1" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-server mr-1 text-yellow-400"></i> ตอนที่ 1: สถาปัตยกรรมฐานข้อมูลบนอุปกรณ์ปลายทาง
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              สถาปัตยกรรมระบบฐานข้อมูลบนอุปกรณ์ปลายทาง (Edge Database Architecture)
+            </h2>
+          </div>
+
+          <!-- คำอธิบายความจำเป็นของ Edge Database -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              ในระบบอัตโนมัติภาคอุตสาหกรรม (Industry 4.0) การส่งข้อมูลผลการวิเคราะห์ของ AI กลับไปบันทึกบนคลาวด์ทุกวินาทีไม่สามารถทำได้เสมอไป เนื่องจากข้อจำกัดด้านความหน่วงของเครือข่าย (Network Latency), ปัญหาความไม่เสถียรของสัญญาณอินเทอร์เน็ต และต้นทุนค่าบริการคลาวด์ที่สูง ดังนั้น การมี <strong>ระบบฐานข้อมูลท้องถิ่นในตัวอุปกรณ์ (Embedded On-Device Database)</strong> จึงเป็นหัวใจสำคัญของการออกแบบระบบ Edge AI
+            </p>
+            <p>
+              <strong>SQLite</strong> เป็นระบบจัดการฐานข้อมูลเชิงสัมพันธ์แบบฝังตัว (Embedded Relational Database Management System) ที่ได้รับความนิยมสูงสุดในระดับสากล เนื่องจากมีคุณลักษณะเฉพาะที่โดดเด่น:
+            </p>
+            <ul class="list-disc list-inside space-y-1.5 pl-2 text-slate-600">
+              <li><strong>ไร้เซิร์ฟเวอร์ (Serverless Architecture):</strong> ไม่จำเป็นต้องเปิดรัน Background Service หรือดาต้าเบสเซิร์ฟเวอร์แยกต่างหาก โดยไบนารีและเอนจินของฐานข้อมูลจะรวมเป็นส่วนหนึ่งของกระบวนการทำงานในโปรแกรมภาษาไพทอนโดยตรง</li>
+              <li><strong>ไฟล์เดี่ยวจัดเก็บสมบูรณ์ (Single File Storage):</strong> ฐานข้อมูล ตาราง ดัชนี และข้อมูลทั้งหมดจะถูกบันทึกเป็นไฟล์ไบนารีเดี่ยว เช่น <code>edgeai_records.db</code> ทำให้การสำรองข้อมูล (Backup) หรือการโอนย้ายไฟล์ทำได้อย่างสะดวกง่ายดาย</li>
+              <li><strong>มาตรฐานความถูกต้องปลอดภัย (ACID Compliant):</strong> รองรับคุณสมบัติ Atomicity, Consistency, Isolation, และ Durability ทำให้มั่นใจได้ว่าข้อมูลจะไม่เสียหาย แม้จะเกิดเหตุการณ์ไฟดับกะทันหันในโรงงาน</li>
+            </ul>
+          </div>
+
+          <!-- รูปภาพสถาปัตยกรรม Database-SQL Brick -->
+          <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+            <img src="images/chapters/ch03_database_sql_architecture.jpg" alt="แผนภาพสถาปัตยกรรม Database-SQL Brick บนบอร์ดพัฒนา Arduino UNO Q" class="w-full h-auto object-cover max-h-[460px]">
+            <div class="bg-slate-900 text-slate-300 text-xs px-4 py-2.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-diagram-project mr-2 text-yellow-400"></i><strong>ภาพที่ 3.1:</strong> แผนภาพสถาปัตยกรรม Database-SQL Brick แสดงขั้นตอนการรับผลทำนายจาก Edge Impulse โมเดล (.eim) บันทึกลงฐานข้อมูล SQLite และการสืบค้นรายงานสถิติ</span>
+              <span class="text-yellow-400 font-medium text-[11px]">Database Architecture</span>
+            </div>
+          </div>
+
+          <!-- การกำหนดค่าไฟล์ app.yaml -->
+          <div class="space-y-3 pt-2">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-file-code text-blue-600"></i> ข้อกำหนดการกำหนดค่าไฟล์ <code>app.yaml</code> สำหรับ Database-SQL Brick
+            </h4>
+            <div class="terminal-window shadow-md">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <div class="w-3 h-3 rounded-full bg-red-500 inline-block"></div>
+                  <div class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></div>
+                  <div class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></div>
+                  <span class="text-xs text-slate-300 font-mono ml-2 font-bold">app.yaml</span>
+                </div>
+                <span class="text-[11px] text-yellow-300 font-mono">Arduino App Lab Configuration</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-slate-200 font-mono text-xs leading-relaxed">
+<span class="text-slate-500"># การกำหนดค่าระบบ Database-SQL Brick บน Arduino App Lab</span>
+name: <span class="text-green-300">database-sql-logger</span>
+version: <span class="text-green-300">1.0.0</span>
+description: <span class="text-green-300">ระบบจัดการฐานข้อมูล SQL สำหรับบันทึกประวัติการตรวจจับ AI บน Arduino UNO Q</span>
+
+variables: {
+  DB_FILE_PATH: <span class="text-yellow-300">"/home/arduino/.arduino-bricks/data/edgeai_records.db"</span>,
+  TABLE_NAME: <span class="text-yellow-300">"anomaly_logs"</span>,
+  LOG_RETENTION_DAYS: <span class="text-yellow-300">"30"</span>
+}
+</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: การออกแบบโครงสร้างตารางข้อมูล                -->
+        <!-- ======================================================== -->
+        <section id="section-ep2" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-table mr-1 text-yellow-400"></i> ตอนที่ 2: การออกแบบฐานข้อมูลเชิงสัมพันธ์
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การออกแบบโครงสร้างตารางข้อมูลเพื่อรองรับโมเดล AI (Database Schema Design)
+            </h2>
+          </div>
+
+          <!-- เนื้อหา Schema Design -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              เพื่อให้ระบบ Edge AI สามารถจัดเก็บผลลัพธ์ของโมเดลปัญญาประดิษฐ์ประเภทต่าง ๆ ในหลักสูตรได้อย่างครอบคลุม โครงสร้างฐานข้อมูลจึงได้รับการออกแบบแยกเป็น 3 ตารางหลักตามประเภทของภารกิจ AI:
+            </p>
+          </div>
+
+          <!-- 3 ตารางข้อมูล -->
+          <div class="space-y-4">
+            
+            <!-- ตาราง 1: Anomaly Logs -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-[#173b6b] text-xs font-mono uppercase flex items-center gap-1.5">
+                  <i class="fa-solid fa-eye text-blue-600"></i> 1. ตาราง <code>anomaly_logs</code> (Visual Anomaly Detection)
+                </span>
+                <span class="text-[11px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded">งานตรวจสอบคุณภาพชิ้นงาน</span>
+              </div>
+              <p class="text-xs text-slate-600">ใช้บันทึกผลการตรวจสอบพื้นผิวชิ้นงานผิดปกติจากโมเดล Visual Anomaly Detection (บทที่ 5 และ 7)</p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border-collapse border border-slate-200 bg-white rounded-lg overflow-hidden">
+                  <thead class="bg-slate-100 text-slate-700 font-bold">
+                    <tr>
+                      <th class="p-2 border border-slate-200">ชื่อฟิลด์ (Field)</th>
+                      <th class="p-2 border border-slate-200">ชนิดข้อมูล (Type)</th>
+                      <th class="p-2 border border-slate-200">ข้อกำหนด (Constraint)</th>
+                      <th class="p-2 border border-slate-200">คำอธิบาย</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-[11px]">
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">id</td><td class="p-2 font-mono">INTEGER</td><td class="p-2 text-purple-600 font-bold">PRIMARY KEY AUTOINCREMENT</td><td>รหัสลำดับรายการแบบอัตโนมัติ</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">timestamp</td><td class="p-2 font-mono">DATETIME</td><td class="p-2">DEFAULT CURRENT_TIMESTAMP</td><td>วันเวลาที่ทำการตรวจจับ</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">model_name</td><td class="p-2 font-mono">TEXT</td><td class="p-2 text-red-600 font-bold">NOT NULL</td><td>ชื่อไฟล์โมเดลที่ใช้ตรวจจับ เช่น vad_model.eim</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">anomaly_mean_score</td><td class="p-2 font-mono">REAL</td><td class="p-2">-</td><td>ค่าคะแนนความผิดปกติเฉลี่ยของภาพ</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">anomaly_max_score</td><td class="p-2 font-mono">REAL</td><td class="p-2 text-red-600 font-bold">NOT NULL</td><td>ค่าคะแนนความผิดปกติสูงสุดในภาพ</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">status</td><td class="p-2 font-mono">TEXT</td><td class="p-2 text-red-600 font-bold">NOT NULL</td><td>สถานะผลการตัดสิน: 'NORMAL' หรือ 'DEFECT'</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">alert_triggered</td><td class="p-2 font-mono">INTEGER</td><td class="p-2">DEFAULT 0</td><td>สถานะสั่งเตือนภัย: 0 (ปกติ), 1 (ส่งเสียง/ไฟเตือน)</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- ตาราง 2: Object Detection Logs -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-[#173b6b] text-xs font-mono uppercase flex items-center gap-1.5">
+                  <i class="fa-solid fa-shapes text-emerald-600"></i> 2. ตาราง <code>object_detection_logs</code> (FOMO Object Detection)
+                </span>
+                <span class="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">งานตรวจจับพิกัดวัตถุ</span>
+              </div>
+              <p class="text-xs text-slate-600">ใช้บันทึกพิกัดตำแหน่ง (X, Y) และค่าความมั่นใจ (Confidence) ของวัตถุที่โมเดล FOMO ตรวจพบ (บทที่ 8 และ 9)</p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border-collapse border border-slate-200 bg-white rounded-lg overflow-hidden">
+                  <thead class="bg-slate-100 text-slate-700 font-bold">
+                    <tr>
+                      <th class="p-2 border border-slate-200">ชื่อฟิลด์</th>
+                      <th class="p-2 border border-slate-200">ชนิดข้อมูล</th>
+                      <th class="p-2 border border-slate-200">ข้อกำหนด</th>
+                      <th class="p-2 border border-slate-200">คำอธิบาย</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-[11px]">
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">id</td><td class="p-2 font-mono">INTEGER</td><td class="p-2 text-purple-600 font-bold">PRIMARY KEY AUTOINCREMENT</td><td>รหัสลำดับการตรวจจับ</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">label</td><td class="p-2 font-mono">TEXT</td><td class="p-2 text-red-600 font-bold">NOT NULL</td><td>ป้ายกำกับวัตถุ เช่น 'screw', 'bottle', 'pcb'</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">confidence</td><td class="p-2 font-mono">REAL</td><td class="p-2 text-red-600 font-bold">NOT NULL</td><td>ความน่าจะเป็นของโมเดล (0.00 – 1.00)</td></tr>
+                    <tr><td class="p-2 font-mono font-bold text-[#173b6b]">pos_x, pos_y</td><td class="p-2 font-mono">INTEGER</td><td class="p-2 text-red-600 font-bold">NOT NULL</td><td>พิกัดจุดกึ่งกลางวัตถุบนระนาบภาพพิกเซล</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: การเขียนชุดคำสั่งบันทึกและสืบค้นข้อมูล         -->
+        <!-- ======================================================== -->
+        <section id="section-ep3" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-code mr-1 text-yellow-400"></i> ตอนที่ 3: การเขียนโปรแกรมภาษาไพทอน
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การเขียนชุดคำสั่งบันทึกและสืบค้นข้อมูลด้วยภาษาไพทอน (Python SQL Integration)
+            </h2>
+          </div>
+
+          <!-- รูปภาพแสดงผลการตรวจจับจริง -->
+          <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+            <img src="images/chapters/ch03_sqlite_edge_logging.jpg" alt="การปฏิบัติการบันทึกและสืบค้นฐานข้อมูล SQLite บนบอร์ดพัฒนา Arduino UNO Q" class="w-full h-auto object-cover max-h-[460px]">
+            <div class="bg-slate-900 text-slate-300 text-xs px-4 py-2.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-camera mr-2 text-yellow-400"></i><strong>ภาพที่ 3.2:</strong> การปฏิบัติการรันชุดคำสั่งบันทึกประวัติการตรวจจับชิ้นงานลงฐานข้อมูล SQLite ในเครื่อง และแสดงผลรายงานอัตราส่วนของเสีย (Defect Rate) ผ่านหน้าต่างคอนโซล</span>
+              <span class="text-yellow-400 font-medium text-[11px]">Laboratory Experiment</span>
+            </div>
+          </div>
+
+          <!-- โค้ดตัวอย่าง db_logger.py -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-file-code text-blue-600"></i> โค้ดตัวอย่างฉบับสมบูรณ์: <code>db_logger.py</code>
+              </h4>
+              <span class="text-xs font-mono text-[#173b6b] bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-semibold">SQLite3 + Python</span>
+            </div>
+
+            <!-- Terminal Window -->
+            <div class="terminal-window shadow-lg">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <div class="w-3 h-3 rounded-full bg-red-500 inline-block"></div>
+                  <div class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></div>
+                  <div class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></div>
+                  <span class="text-xs text-slate-300 font-mono ml-2 font-bold">db_logger.py</span>
+                </div>
+                <span class="text-[11px] text-yellow-300 font-mono">Database-SQL Brick</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-slate-200 font-mono text-xs leading-relaxed">
+<span class="text-purple-400">import</span> os
+<span class="text-purple-400">import</span> sqlite3
+
+<span class="text-slate-500"># ดึงตำแหน่งไฟล์ฐานข้อมูลจากตัวแปรสภาพแวดล้อมที่ระบุใน app.yaml</span>
+DB_PATH = os.environ.get(<span class="text-green-300">"DB_FILE_PATH"</span>, <span class="text-green-300">"edgeai_records.db"</span>)
+
+<span class="text-blue-400">def</span> <span class="text-yellow-300">init_database</span>():
+    <span class="text-slate-400">"""สร้างไดเรกทอรีและตารางฐานข้อมูลหากยังไม่มีในระบบ"""</span>
+    os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=<span class="text-emerald-400">True</span>)
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    <span class="text-slate-500"># 1. ตารางบันทึกประวัติการตรวจจับความผิดปกติ (Visual Anomaly)</span>
+    cursor.execute(<span class="text-green-300">'''
+        CREATE TABLE IF NOT EXISTS anomaly_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            model_name TEXT NOT NULL,
+            anomaly_mean_score REAL,
+            anomaly_max_score REAL NOT NULL,
+            status TEXT NOT NULL,
+            alert_triggered INTEGER DEFAULT 0
+        )
+    '''</span>)
+    
+    conn.commit()
+    conn.close()
+    print(<span class="text-green-300">f"[Database-SQL Brick] เริ่มต้นโครงสร้างฐานข้อมูลสำเร็จ: {DB_PATH}"</span>)
+
+<span class="text-blue-400">def</span> <span class="text-yellow-300">log_anomaly_event</span>(model_name, mean_score, max_score, threshold=<span class="text-emerald-400">15.0</span>):
+    <span class="text-slate-400">"""ฟังก์ชันบันทึกผลการทำนายของโมเดล AI ลงฐานข้อมูล"""</span>
+    status = <span class="text-green-300">"DEFECT"</span> <span class="text-purple-400">if</span> max_score &gt;= threshold <span class="text-purple-400">else</span> <span class="text-green-300">"NORMAL"</span>
+    alert = <span class="text-emerald-400">1</span> <span class="text-purple-400">if</span> status == <span class="text-green-300">"DEFECT"</span> <span class="text-purple-400">else</span> <span class="text-emerald-400">0</span>
+    
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    <span class="text-slate-500"># ใช้พารามิเตอร์ (?) เพื่อป้องกัน SQL Injection และความผิดพลาดของชนิดข้อมูล</span>
+    cursor.execute(<span class="text-green-300">'''
+        INSERT INTO anomaly_logs (model_name, anomaly_mean_score, anomaly_max_score, status, alert_triggered)
+        VALUES (?, ?, ?, ?, ?)
+    '''</span>, (model_name, mean_score, max_score, status, alert))
+    conn.commit()
+    conn.close()
+    print(<span class="text-green-300">f"[SQL Insert] บันทึกผล: {status} (Max Score: {max_score:.2f}, Alert: {alert})"</span>)
+</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parameterized Query Callout -->
+          <div class="callout-tip p-4 rounded-xl text-xs sm:text-sm text-emerald-900 space-y-1">
+            <div class="font-bold flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-emerald-600"></i> มาตรฐานความปลอดภัย: Parameterized Queries
+            </div>
+            <p>
+              ในการเขียนคำสั่ง SQL ผ่านภาษาไพทอน ห้ามใช้การต่อสตริงโดยตรง เช่น <code>f"INSERT INTO ... VALUES ('{status}')"</code> เพราะอาจเกิดข้อผิดพลาดจากอักขระพิเศษ (เช่น เครื่องหมายคำพูดเดี่ยว) และเสี่ยงต่อช่องโหว่ความปลอดภัย <strong>ต้องใช้เครื่องหมายคำถามปรนัย <code>?</code> เป็น Placeholder เสมอ</strong>
+            </p>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: การสืบค้นและวิเคราะห์สถิติสรุปผล             -->
+        <!-- ======================================================== -->
+        <section id="section-ep4" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-chart-pie mr-1 text-yellow-400"></i> ตอนที่ 4: การสืบค้นและวิเคราะห์ข้อมูล
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การสืบค้นและวิเคราะห์สถิติสรุปผล (SQL Analytics & Daily Summary Report)
+            </h2>
+          </div>
+
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              จุดเด่นสำคัญของการใช้ฐานข้อมูลเชิงสัมพันธ์บนระบบสมองกลฝังตัว คือความสามารถในการ <strong>รวบรวมและวิเคราะห์ข้อมูลเชิงสถิติ (Aggregate Functions)</strong> ได้ทันทีบนตัวบอร์ด โดยไม่ต้องส่งข้อมูลดิบทั้งหมดไปยังเซิร์ฟเวอร์ภายนอก:
+            </p>
+
+            <!-- ตัวอย่างคำสั่ง SQL Analytics -->
+            <div class="terminal-window shadow-md">
+              <div class="terminal-header">
+                <span class="text-xs text-slate-300 font-mono font-bold"><i class="fa-solid fa-magnifying-glass mr-2 text-yellow-400"></i>SQL Analytics Query: การสรุปอัตราส่วนของดีและของเสียประจำวัน</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-slate-200 font-mono text-xs leading-relaxed">
+<span class="text-blue-400">SELECT</span> 
+    status, 
+    <span class="text-yellow-300">COUNT</span>(*) <span class="text-blue-400">AS</span> total_count,
+    <span class="text-yellow-300">ROUND</span>(<span class="text-yellow-300">AVG</span>(anomaly_max_score), <span class="text-emerald-400">2</span>) <span class="text-blue-400">AS</span> avg_max_score
+<span class="text-blue-400">FROM</span> anomaly_logs
+<span class="text-blue-400">WHERE</span> DATE(timestamp) = DATE(<span class="text-green-300">'now'</span>)
+<span class="text-blue-400">GROUP BY</span> status;
+</pre>
+              </div>
+            </div>
+
+            <!-- ผลลัพธ์ตัวอย่างในรูปแบบ Report -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs uppercase flex items-center gap-1.5">
+                <i class="fa-solid fa-clipboard-list text-blue-600"></i> ตัวอย่างรายงานสรุปผลการตรวจสอบชิ้นงานประจำกะ (Inspection Summary)
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                  <div class="text-emerald-800 font-bold">ชิ้นงานปกติ (NORMAL)</div>
+                  <div class="text-2xl font-black text-emerald-600 mt-1">482 <span class="text-xs font-normal text-slate-500">ชิ้น</span></div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">คะแนนเฉลี่ย: 2.14</div>
+                </div>
+                <div class="p-3 rounded-lg bg-red-50 border border-red-200">
+                  <div class="text-red-800 font-bold">ชิ้นงานชำรุด (DEFECT)</div>
+                  <div class="text-2xl font-black text-red-600 mt-1">18 <span class="text-xs font-normal text-slate-500">ชิ้น</span></div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">คะแนนเฉลี่ย: 38.65</div>
+                </div>
+                <div class="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <div class="text-blue-800 font-bold">อัตราส่วนของเสีย (Defect Rate)</div>
+                  <div class="text-2xl font-black text-[#173b6b] mt-1">3.60%</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">รวมตรวจสอบ: 500 ชิ้น</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 6: การประเมินสมรรถนะการปฏิบัติการ                -->
+        <!-- ======================================================== -->
+        <section id="section-checklist" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 6</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              การประเมินสมรรถนะการปฏิบัติการ (Performance Assessment Checklist)
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">รายการเกณฑ์การตรวจสอบสมรรถนะที่ผู้เรียนต้องผ่านการประเมินผลในบทเรียนที่ 3</p>
+          </div>
+
+          <div class="space-y-3">
+            
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 1: การกำหนดค่าไฟล์ app.yaml เพื่อระบุตำแหน่งไดเรกทอรีจัดเก็บฐานข้อมูล SQLite</span>
+                <p class="text-slate-500 mt-0.5 text-xs">กำหนดตัวแปร <code>DB_FILE_PATH</code> ในไฟล์ <code>app.yaml</code> ได้ถูกต้องตามโครงสร้างของระบบ Arduino App Lab</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 2: การเขียนคำสั่ง DDL สร้างตาราง anomaly_logs และ object_detection_logs</span>
+                <p class="text-slate-500 mt-0.5 text-xs">กำหนดคีย์หลัก (Primary Key), ตัวแปรเวลาอัตโนมัติ (Default Current Timestamp) และชนิดข้อมูลได้อย่างถูกต้อง</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 3: การเขียนฟังก์ชันภาษาไพทอนเพื่อบันทึกผลการทำนายด้วย Parameterized Queries</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ใช้เครื่องหมาย Placeholder <code>?</code> เพื่อแทรกข้อมูลผลการตัดสินสถานะ 'NORMAL' และ 'DEFECT' ลงในฐานข้อมูลได้สำเร็จ</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 4: การสืบค้นข้อมูลสรุปผลเชิงสถิติผ่านคำสั่ง SELECT ร่วมกับฟังก์ชัน COUNT และ GROUP BY</span>
+                <p class="text-slate-500 mt-0.5 text-xs">คำนวณและแสดงจำนวนชิ้นงานปกติ ชิ้นงานชำรุด และอัตราส่วนของเสีย (Defect Rate) ออกทางหน้าต่างคอนโซลได้ถูกต้อง</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 5: การประเมินผลสัมฤทธิ์ทางการเรียนท้ายบทเรียนที่ 3 ผ่านเกณฑ์ร้อยละ 70</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ทำแบบทดสอบวัดผลสัมฤทธิ์ทางการเรียนประจำบทที่ 3 ในศูนย์ทดสอบออนไลน์ของระบบครบถ้วนและผ่านเกณฑ์ที่กำหนด</p>
+              </div>
+            </label>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 7: คำถามทบทวนองค์ความรู้ท้ายบทเรียน              -->
+        <!-- ======================================================== -->
+        <section id="section-quiz" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 7</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              คำถามทบทวนองค์ความรู้ท้ายบทเรียน (Academic Review Questions)
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">แบบฝึกหัดสำหรับประเมินตนเองและทบทวนเนื้อหาสำคัญเพื่อเตรียมความพร้อมสู่การปฏิบัติการขั้นสูง</p>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>1. เหตุใดระบบจัดการฐานข้อมูล SQLite จึงเหมาะสมสำหรับการนำมาใช้งานบนอุปกรณ์สมองกลฝังตัว เช่น บอร์ด Arduino UNO Q มากกว่าระบบ MySQL หรือ PostgreSQL?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เนื่องจาก SQLite มีสถาปัตยกรรมแบบ <strong>ไร้เซิร์ฟเวอร์ (Serverless)</strong> และใช้พื้นที่หน่วยความจำน้อยมาก (Lightweight) โดยเอนจินของฐานข้อมูลจะรวมเป็นส่วนหนึ่งของไลบรารีในโปรแกรมภาษาไพทอน ข้อมูลทั้งหมดจัดเก็บอยู่ในไฟล์เดี่ยวบนระบบไฟล์ของลีนุกซ์ ไม่ต้องมีการเปิดพอร์ตหรือรัน Background Daemon Services ตลอดเวลา จึงช่วยประหยัดทั้งแรม (RAM) และพลังงานของบอร์ดพัฒนา แตกต่างจาก MySQL หรือ PostgreSQL ที่ต้องมีเซิร์ฟเวอร์แยกต่างหากและกินทรัพยากรระบบสูง
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>2. ในงานตรวจสอบคุณภาพผลิตภัณฑ์ด้วยปัญญาประดิษฐ์ (Edge AI Quality Control) การบันทึกค่า Anomaly Score และสถานะการตรวจจับลงฐานข้อมูลในเครื่องมีประโยชน์เชิงวิศวกรรมอย่างไร?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> มีประโยชน์หลัก 3 ประการ:
+                  1) <strong>การตรวจสอบย้อนหลัง (Audit Trail & Traceability):</strong> สามารถตรวจสอบประวัติได้ว่าชิ้นงานชิ้นใดมีรอยตำหนิ ตรวจพบเมื่อเวลาใด และด้วยคะแนนความผิดปกติเท่าใด
+                  2) <strong>การวิเคราะห์แนวโน้มและการบำรุงรักษาเชิงคาดการณ์ (Predictive Maintenance):</strong> หากค่าเฉลี่ยของ Anomaly Score ค่อยๆ สูงขึ้นตามช่วงเวลา แม้จะยังไม่เกินเกณฑ์ Threshold ก็สามารถแจ้งเตือนให้วิศวกรเข้าตรวจสอบใบมีดหรือความเสื่อมสภาพของเครื่องจักรได้ล่วงหน้า
+                  3) <strong>การทำงานแบบออฟไลน์ (Offline Resilience):</strong> ระบบสามารถบันทึกข้อมูลได้อย่างต่อเนื่องแม้สัญญาณอินเทอร์เน็ตของโรงงานจะหยุดชะงัก
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>3. ในคำสั่ง SQL การใช้ <code>GROUP BY status</code> ร่วมกับฟังก์ชัน <code>COUNT(*)</code> มีหลักการทำงานอย่างไร และนำมาประยุกต์ใช้ในงานอุตสาหกรรมอย่างไร?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> คำสั่ง <code>GROUP BY status</code> จะจัดกลุ่มแถวข้อมูลที่มีค่าในคอลัมน์ status เหมือนกันเข้าด้วยกัน (เช่น กลุ่ม 'NORMAL' และกลุ่ม 'DEFECT') จากนั้นฟังก์ชัน <code>COUNT(*)</code> จะนับจำนวนรายการทั้งหมดในแต่ละกลุ่ม ในงานอุตสาหกรรม คำสั่งนี้ช่วยให้เราคำนวณ <strong>อัตราส่วนของเสีย (Defect Rate Percentage)</strong> และสรุปรายงานผลการผลิตประจำวันได้ทันทีด้วยการรันคำสั่งเพียงบรรทัดเดียว
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 3 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=3#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 4: การจัดเตรียมชุดข้อมูลและการออกแบบขั้นตอนการประมวลผล (Data Pipeline) บน Edge Impulse</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">ศึกษาการเชื่อมโยงระบบบันทึกภาพ การสกัดคุณลักษณะเด่น และการตั้งค่า Data Pipeline</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter02.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 2</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter04.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>เข้าสู่บทเรียนที่ 4</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

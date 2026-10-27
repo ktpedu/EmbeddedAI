@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 9: การนำโมเดล FOMO ไปใช้งานและการควบคุมอุปกรณ์ขับเคลื่อน (Actuator) | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+    <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=6DlVYQzgrEw&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=41" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 9</span>
+          <span class="font-semibold text-white truncate">การนำโมเดล FOMO ไปใช้งานและการควบคุมอุปกรณ์ขับเคลื่อน (Actuator)</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. HERO / BREADCRUMB HEADER                                    -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#1e4985] text-white py-10 px-4 sm:px-6 lg:px-8 border-b-4 border-[#fff200] relative overflow-hidden">
+    <div class="absolute right-0 top-0 w-96 h-96 bg-[#fff200]/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+    <div class="max-w-7xl mx-auto relative z-10">
+      
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-slate-300 mb-4 whitespace-nowrap flex-shrink-0">
+        <a href="index.html" class="hover:text-yellow-300">หน้าหลัก</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <a href="index.html#section-curriculum" class="hover:text-yellow-300">หลักสูตร</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <span class="text-[#fff200] font-semibold">บทที่ 9</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#fff200] text-[#173b6b] shadow">
+            <i class="fa-solid fa-robot"></i> ภาคการประยุกต์ใช้โมเดลและระบบควบคุม (Edge AI Deployment & Actuation)
+          </div>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
+            บทที่ 9: การนำโมเดล FOMO ไปใช้งานและการควบคุมอุปกรณ์ขับเคลื่อน (Actuator)
+          </h1>
+          <p class="text-sm sm:text-base text-slate-200 max-w-3xl leading-relaxed">
+            Deploying FOMO Object Detection & Actuator Integration: การนำโมเดล FOMO .eim ไปประมวลผลบนบอร์ดพัฒนา Arduino UNO Q การตั้งค่าตัวแปรสภาพแวดล้อมในไฟล์ app.yaml การดึงพิกัดกึ่งกลาง (Centroid X, Y) และการส่งสัญญาณควบคุมอุปกรณ์ขับเคลื่อนเพื่อคัดแยกชิ้นงานตามตำแหน่งอย่างแม่นยำ
+          </p>
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-3">
+          <a href="#section-objectives" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=6DlVYQzgrEw" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/13lyv179wa2fo0igkep1i977e13dv6kd" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: FOMO Centroid Tracking & Actuator Control)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+        </div>
+
+                <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">4 คาบ (200 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">สถาปัตยกรรมเป้าหมาย:</span>
+              <span class="font-bold text-white">Arduino UNO Q + Actuators</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">ซอฟต์แวร์/มอดูลหลัก:</span>
+              <span class="font-bold text-white">FOMO .eim & Servo Control App</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter09/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter09 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. MAIN CONTENT AREA (2 COLUMNS)                               -->
+  <!-- ============================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- STICKY TABLE OF CONTENTS (LEFT COLUMN - 3 COLS) -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-20 space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 overflow-hidden">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h2 class="text-sm font-extrabold text-[#173b6b] uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-[#fff200] bg-[#173b6b] p-1.5 rounded-md text-xs"></i> สารบัญเนื้อหา
+            </h2>
+            <span class="text-[11px] bg-slate-100 text-slate-500 font-semibold px-2 py-0.5 rounded">7 ส่วน</span>
+          </div>
+          <nav class="mt-4 space-y-1 text-xs">
+            <a href="#section-objectives" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+                1. สาระสำคัญและผลการเรียนรู้
+              </a>
+            <a href="#section-architecture" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              2. สถาปัตยกรรมระบบตรวจจับและควบคุม
+            </a>
+            <a href="#section-ep1" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              3. ตอนที่ 1: การติดตั้งโมเดล FOMO (.eim)
+            </a>
+            <a href="#section-ep2" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              4. ตอนที่ 2: การสกัดพิกัดจุดกึ่งกลาง (Centroid)
+            </a>
+            <a href="#section-ep3" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              5. ตอนที่ 3: การควบคุมอุปกรณ์ขับเคลื่อน (Actuator)
+            </a>
+            <a href="#section-ep4" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              6. ตอนที่ 4: การจัดการวงจรปิดและความผิดพลาด
+            </a>
+            <a href="#section-code" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              7. โค้ดตัวอย่างและการทดสอบปฏิบัติ
+            </a>
+            <a href="#section-checklist" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              8. ใบงานภารกิจปฏิบัติการ
+            </a>
+            <a href="#section-review" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+              9. คำถามทบทวนท้ายบทเรียน
+            </a>
+          </nav>
+        </div>
+
+        <!-- System Status Banner -->
+        <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] text-white p-4 rounded-xl border border-blue-900 shadow text-xs space-y-2">
+          <div class="font-bold flex items-center gap-1.5 text-yellow-300">
+            <i class="fa-solid fa-circle-check text-green-400"></i> สภาพแวดล้อมที่รองรับ
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            บอร์ดพัฒนา Arduino UNO Q, มอดูลกล้องเว็บแคม USB (UVC), เซอร์โวมอเตอร์ (SG90/MG996R) และมอดูลรีเลย์ควบคุมระบบคัดแยก
+          </p>
+        </div>
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>กล้อง USB UVC Webcam สำหรับตรวจจับพิกัดวัตถุสด</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>ชุดเซอร์โวมอเตอร์ (Servo Motor / Actuator) หรือโมดูลรีเลย์สำหรับคัดแยกชิ้นงาน</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>สายเชื่อมต่อ USB Type-C, สายสัญญาณ Jumper Wires และแหล่งจ่ายไฟภายนอก 5V</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=9#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 9
+          </a>
+          <a href="index.html?chapter=9#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 9
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- ARTICLE BODY (RIGHT COLUMN - 9 COLS) -->
+      <article class="lg:col-span-9 space-y-10 min-w-0">
+
+        <!-- ======================================================== -->
+        <!-- 1. OBJECTIVES SECTION (K-P1-P2-A)                        -->
+        <!-- ======================================================== -->
+        <section id="section-objectives" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              การแปลงผลลัพธ์การมองเห็นของปัญญาประดิษฐ์ไปสู่การทำงานเชิงกลในโลกจริง คือหัวใจสำคัญของระบบอัตโนมัติ โดยการนำโมเดล <strong>FOMO (.eim)</strong> มาประมวลผลภาพสดจากกล้องเว็บแคม USB แบบเวลาจริง จากนั้นเขียนโปรแกรมภาษาไพทอนเพื่อสกัดพิกัดจุดกึ่งกลางของวัตถุ (Centroid Coordinates X, Y) นำมาเปรียบเทียบกับพื้นที่สนใจเสมือน (Virtual ROI) และแปลงเป็นสัญญาณสั่งการอุปกรณ์ขับเคลื่อน (Actuators) เช่น เซอร์โวมอเตอร์หรือกระบอกสูบลม ในการผลักหรือหยิบชิ้นงานคัดแยกตามพิกัดที่กำหนด พร้อมทั้งส่งสตรีมภาพผลลัพธ์ขึ้นแสดงบน Web UI มอนิเตอร์ผ่านเครือข่าย
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายกระบวนการแปลงผลลัพธ์พิกัดตรวจจับของโมเดล FOMO สู่สัญญาณควบคุมอุปกรณ์ขับเคลื่อน (Actuator) เชิงกล และเข้าใจบทบาทของตัวแปรสภาพแวดล้อมในไฟล์ app.yaml ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการกำหนดค่าและการสตรีม (Configuration & Web Streaming)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถกำหนดค่าตัวแปร EI_OBJ_DETECTION_MODEL ในไฟล์ app.yaml เชื่อมต่อกล้องเว็บแคมเข้ากับบอร์ด Arduino UNO Q และเปิดมอนิเตอร์ภาพผลลัพธ์ผ่านพอร์ต 7000 ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการควบคุมอุปกรณ์ขับเคลื่อน (Actuator Control & Closed-Loop)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถพัฒนาโปรแกรมภาษาไพทอนเพื่อสกัดพิกัดจุดกึ่งกลาง (Centroid) และส่งสัญญาณควบคุมเซอร์โวมอเตอร์เพื่อผลักชิ้นงานคัดแยกตามตำแหน่งในพื้นที่เสมือน (Virtual ROI) ได้อย่างแม่นยำ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความตระหนักถึงความปลอดภัยในการควบคุมระบบกลไกอัตโนมัติ การแยกแหล่งจ่ายไฟของอุปกรณ์ขับเคลื่อนเพื่อป้องกันสัญญาณรบกวน และมีความรับผิดชอบต่อการปฏิบัติงานในห้องปฏิบัติการ
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 2. ARCHITECTURE SECTION                                  -->
+        <!-- ======================================================== -->
+        <section id="section-architecture" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 2: สถาปัตยกรรมระบบ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              สถาปัตยกรรมการตรวจจับวัตถุและสั่งการอุปกรณ์ขับเคลื่อน (Actuator Integration Architecture)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การผสานงานระหว่างโมเดล FOMO บนระบบประมวลผลความเร็วสูง เข้ากับอุปกรณ์ขับเคลื่อนเชิงกลผ่าน Modular Brick
+            </p>
+          </div>
+
+          <!-- Architecture Image -->
+          <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+            <img src="images/chapters/ch09_fomo_actuator_architecture.jpg" alt="แผนภาพสถาปัตยกรรมระบบตรวจจับ FOMO และควบคุมอุปกรณ์ขับเคลื่อน" class="w-full h-auto object-cover max-h-[420px]">
+            <div class="p-3 text-[11px] text-slate-500 bg-slate-100 text-center border-t border-slate-200">
+              รูปที่ 9.1: แผนภาพสถาปัตยกรรมการเชื่อมต่อระหว่างบอร์ดพัฒนา Arduino UNO Q, มอดูลกล้อง USB, โมเดล FOMO .eim และอุปกรณ์ขับเคลื่อน (Actuator)
+            </div>
+          </div>
+
+          <!-- Flow Explanation -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">ขั้นตอนการไหลของข้อมูลและสัญญาณควบคุม (Data & Signal Flow):</h3>
+            <ol class="list-decimal list-inside text-xs text-slate-600 space-y-2 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <li><strong class="text-slate-800">การรับสัญญาณภาพ (Image Ingestion):</strong> มอดูลกล้องเว็บแคม USB ส่งเฟรมภาพสดเข้าสู่ Linux Core ผ่าน Video Driver</li>
+              <li><strong class="text-slate-800">การประมวลผลด้วยโมเดล FOMO (.eim):</strong> โมเดลแปลงภาพเป็นสเกลสีเทา (Grayscale) ทำการพยากรณ์โครงข่ายประสาทเพื่อหาตำแหน่ง Heatmap Peak</li>
+              <li><strong class="text-slate-800">การสกัดพิกัดจุดกึ่งกลาง (Centroid Extraction):</strong> สคริปต์ไพทอนแปลงตำแหน่ง Grid Cell เป็นพิกัดพิกเซลจริง $(cx, cy)$ และขนาดกรอบขอบเขต $(w, h)$</li>
+              <li><strong class="text-slate-800">การตัดสินใจเชิงตรรกะ (Decision Engine):</strong> เปรียบเทียบชนิดของวัตถุและพิกัดตำแหน่ง เพื่อกำหนดองศาการหมุนของเซอร์โวมอเตอร์</li>
+              <li><strong class="text-slate-800">การส่งคำสั่งสู่อุปกรณ์ขับเคลื่อน (Actuator Control):</strong> ส่งสัญญาณคำสั่งดิจิทัลหรือ PWM ผ่านพิน GPIO ไปยังเซอร์โวมอเตอร์เพื่อผลักชิ้นงานลงช่องคัดแยกที่ถูกต้อง</li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 3. EP.1: EIM DEPLOYMENT & APP.YAML                       -->
+        <!-- ======================================================== -->
+        <section id="section-ep1" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 1 (EP.1)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การติดตั้งโมเดล FOMO (.eim) และการกำหนดค่าในไฟล์ app.yaml
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ทำความเข้าใจไฟล์ไบนารี .eim และการตั้งค่าตัวแปรสภาพแวดล้อมเพื่อเตรียมความพร้อมให้กับ Video Object Detection Brick
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            หลังจากเสร็จสิ้นการฝึกสอนโมเดล FOMO บน Edge Impulse Studio ในบทที่ 8 ขั้นตอนถัดมาคือการนำโมเดลไปใช้งานบนอุปกรณ์จริง โดยคอมไพล์ออกมาในรูปแบบไฟล์ไบนารีชนิด <strong>.eim (Edge Impulse Model)</strong> ซึ่งเป็นรูปแบบไบนารีแบบเนทีฟ (Native Binary Executable) ที่ผ่านการปรับแต่งประสิทธิภาพ (Optimization) ด้วยชุดคำสั่งเฉพาะของซีพียู ทำให้ประมวลผลได้รวดเร็วสูงสุดโดยใช้หน่วยความจำต่ำ
+          </p>
+
+          <!-- App.yaml Structure -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">โครงสร้างไฟล์คอนฟิกูเรชัน app.yaml สำหรับระบบตรวจจับวัตถุและคัดแยก:</h3>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-xs text-yellow-300 font-mono font-bold flex items-center gap-2">
+                  <i class="fa-solid fa-file-code"></i> app.yaml (Configuration)
+                </span>
+                <span class="text-[10px] text-slate-400">YAML Config</span>
+              </div>
+              <pre class="terminal-body"><code><span class="text-purple-400">name:</span> <span class="text-green-300">"FOMO Object Detection & Actuator Sorter"</span>
+<span class="text-purple-400">description:</span> <span class="text-slate-300">"ระบบตรวจจับตำแหน่งวัตถุด้วยโมเดล FOMO และควบคุมอุปกรณ์ขับเคลื่อนคัดแยกชิ้นงาน"</span>
+<span class="text-purple-400">ports:</span>
+  - <span class="text-yellow-300">7000:7000</span>
+
+<span class="text-purple-400">bricks:</span>
+  - <span class="text-blue-400">arduino:video_object_detection:</span>
+      <span class="text-purple-400">variables:</span>
+        <span class="text-yellow-400">EI_OBJ_DETECTION_MODEL:</span> <span class="text-green-300">"/home/arduino/.arduino-bricks/ei-models/fomo_sorter.eim"</span>
+        <span class="text-yellow-400">CONFIDENCE_THRESHOLD:</span> <span class="text-green-300">"0.65"</span>
+  - <span class="text-blue-400">arduino:web_ui:</span> {}
+  - <span class="text-blue-400">arduino:actuator_control:</span>
+      <span class="text-purple-400">variables:</span>
+        <span class="text-yellow-400">SERVO_PIN:</span> <span class="text-green-300">"9"</span>
+        <span class="text-yellow-400">RELAY_PIN:</span> <span class="text-green-300">"7"</span></code></pre>
+            </div>
+          </div>
+
+          <!-- Callout Note -->
+          <div class="callout-note p-4 rounded-xl text-xs space-y-1">
+            <div class="font-bold text-blue-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> ข้อสำคัญเกี่ยวกับตัวแปร EI_OBJ_DETECTION_MODEL
+            </div>
+            <p class="text-blue-800 leading-relaxed">
+              พาธของไฟล์โมเดลที่ระบุใน <code class="font-mono bg-blue-100 px-1 py-0.5 rounded text-blue-900">EI_OBJ_DETECTION_MODEL</code> ต้องเป็นพาธสัมบูรณ์ (Absolute Path) บนระบบปฏิบัติการของบอร์ดพัฒนา และไฟล์โมเดลจะต้องได้รับสิทธิ์การรัน (Execution Permission) โดยใช้คำสั่ง <code class="font-mono bg-blue-100 px-1 py-0.5 rounded text-blue-900">chmod +x &lt;filename&gt;.eim</code> ก่อนเริ่มระบบ
+            </p>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 4. EP.2: CENTROID EXTRACTION & VIRTUAL ROI               -->
+        <!-- ======================================================== -->
+        <section id="section-ep2" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 2 (EP.2)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การสกัดพิกัดจุดกึ่งกลาง (Centroid Coordinates) และพื้นที่เสมือน (Virtual ROI)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              สูตรทางคณิตศาสตร์ในการคำนวณตำแหน่งจุดศูนย์กลางของวัตถุ และการกำหนดขอบเขตคัดแยกบนภาพ
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            สถาปัตยกรรม FOMO ให้ผลลัพธ์เป็นตารางกริดที่ระบุตำแหน่งกึ่งกลางของวัตถุ ซึ่งต่างจากสถาปัตยกรรม Bounding Box ขนาดใหญ่ทั่วไป โดยค่าพิกัดที่ได้รับจากมอดูลจะประกอบด้วยตำแหน่งมุมซ้ายบน $(x, y)$ ขนาดความกว้าง $(w)$ และความสูง $(h)$ ในการนำไปควบคุมอุปกรณ์ขับเคลื่อนเชิงกล เราจำเป็นต้องคำนวณหา <strong>พิกัดจุดกึ่งกลาง (Centroid)</strong> เพื่อเป็นตัวแทนตำแหน่งที่แท้จริงของชิ้นงาน
+          </p>
+
+          <!-- Mathematical Formula Box -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3">
+            <div class="text-xs font-bold text-[#173b6b] flex items-center gap-2">
+              <i class="fa-solid fa-square-root-variable"></i> สูตรการคำนวณพิกัดจุดกึ่งกลาง (Centroid Formula):
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-slate-200 font-mono text-center text-xs sm:text-sm text-slate-800 shadow-inner">
+              <span class="text-blue-700 font-bold">cx</span> = x + \lfloor \frac{w}{2} \rfloor \quad , \quad <span class="text-emerald-700 font-bold">cy</span> = y + \lfloor \frac{h}{2} \rfloor
+            </div>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              เมื่อ <span class="font-mono text-slate-700 font-bold">x, y</span> คือพิกัดเริ่มต้นมุมซ้ายบน และ <span class="font-mono text-slate-700 font-bold">w, h</span> คือความกว้างและความสูงของกรอบตรวจจับ หน่วยเป็นพิกเซล (Pixels)
+            </p>
+          </div>
+
+          <!-- Virtual ROI Zones -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">การกำหนดพื้นที่คัดแยกเสมือนบนสายพานลำเลียง (Virtual Sorting Zones):</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div class="p-3 rounded-xl bg-blue-50 border border-blue-200 space-y-1">
+                <div class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrow-left"></i> โซนซ้าย (Left Zone: cx &lt; 100)
+                </div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">
+                  สำหรับชิ้นงานกลุ่ม <strong>Bolt (สลักเกลียว)</strong> สั่งการเซอร์โวมอเตอร์หมุนก้านปัดไปยังมุม <strong>45°</strong> เพื่อปัดชิ้นงานลงกล่องคัดแยก A
+                </p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
+                <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrows-up-down"></i> โซนกลาง (Center: 100 &le; cx &le; 220)
+                </div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">
+                  สำหรับชิ้นงานกลุ่ม <strong>Bearing (ตลับลูกปืน)</strong> เซอร์โวมอเตอร์คงตำแหน่ง <strong>90°</strong> (กึ่งกลาง) เพื่อปล่อยให้ชิ้นงานไหลผ่านสายพานตรง C
+                </p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+                <div class="font-bold text-amber-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrow-right"></i> โซนขวา (Right Zone: cx &gt; 220)
+                </div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">
+                  สำหรับชิ้นงานกลุ่ม <strong>Nut (แป้นเกลียว)</strong> สั่งการเซอร์โวมอเตอร์หมุนก้านปัดไปยังมุม <strong>135°</strong> เพื่อปัดชิ้นงานลงกล่องคัดแยก B
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 5. EP.3: ACTUATOR CONTROL & HARDWARE                     -->
+        <!-- ======================================================== -->
+        <section id="section-ep3" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 3 (EP.3)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การควบคุมอุปกรณ์ขับเคลื่อน (Actuator) และการเชื่อมต่อฮาร์ดแวร์
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              การสร้างสัญญาณควบคุมมุมองศาเซอร์โวมอเตอร์ และการออกแบบวงจรแยกแหล่งจ่ายกำลังเพื่อความปลอดภัย
+            </p>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            อุปกรณ์ขับเคลื่อน (Actuator) คือส่วนประกอบทางกายภาพที่เปลี่ยนสัญญาณไฟฟ้าจากการประมวลผลของปัญญาประดิษฐ์ให้กลายเป็นการเคลื่อนไหวเชิงกล เช่น เซอร์โวมอเตอร์ (Servo Motor) โซลินอยด์วาล์ว (Solenoid Valve) หรือกระบอกสูบลม ในบทเรียนนี้เราใช้เซอร์โวมอเตอร์ที่มีแกนหมุนก้านปัดในการคัดแยกชิ้นงานบนสายพาน
+          </p>
+
+          <!-- Servo Wiring & PWM Specs -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-2 text-xs">
+              <div class="font-bold text-[#173b6b] flex items-center gap-2">
+                <i class="fa-solid fa-wave-square text-blue-600"></i> สัญญาณควบคุมแบบ PWM (Pulse Width Modulation)
+              </div>
+              <ul class="list-disc list-inside text-slate-600 space-y-1 leading-relaxed">
+                <li>ความถี่สัญญาณมาตรฐาน: <strong>50 Hz</strong> (คาบเวลา 20 ms)</li>
+                <li>ความกว้างพัลส์ <strong>1.0 ms</strong>: ควบคุมแกนหมุนไปยังมุม <strong>0°</strong></li>
+                <li>ความกว้างพัลส์ <strong>1.5 ms</strong>: ควบคุมแกนหมุนไปยังมุม <strong>90°</strong> (ตรงกลาง)</li>
+                <li>ความกว้างพัลส์ <strong>2.0 ms</strong>: ควบคุมแกนหมุนไปยังมุม <strong>180°</strong></li>
+              </ul>
+            </div>
+
+            <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-2 text-xs">
+              <div class="font-bold text-amber-800 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> ข้อควรระวังด้านแหล่งจ่ายไฟ (Power Supply)
+              </div>
+              <ul class="list-disc list-inside text-slate-600 space-y-1 leading-relaxed">
+                <li><strong>ห้าม</strong> ดึงไฟเลี้ยง 5V ของเซอร์โวมอเตอร์โดยตรงจากขาของบอร์ด Arduino</li>
+                <li>ให้ใช้ <strong>แหล่งจ่ายไฟแยกภายนอก (External 5V/2A)</strong> สำหรับอุปกรณ์ขับเคลื่อน</li>
+                <li>ต้อง <strong>เชื่อมต่อขั้วกราวด์ (Common Ground)</strong> ระหว่างบอร์ดและแหล่งจ่ายไฟเสมอ</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Inspection Image -->
+          <div class="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+            <img src="images/chapters/ch09_fomo_live_inspection.jpg" alt="ระบบตรวจจับวัตถุสดและสั่งการอุปกรณ์ขับเคลื่อน" class="w-full h-auto object-cover max-h-[380px]">
+            <div class="p-3 text-[11px] text-slate-500 bg-slate-100 text-center border-t border-slate-200">
+              รูปที่ 9.2: ภาพการทำงานแบบเวลาจริง แสดงการคำนวณพิกัดจุดกึ่งกลาง (Centroid) และสถานะการสั่งการอุปกรณ์ขับเคลื่อน
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 6. EP.4: CLOSED-LOOP & ERROR HANDLING                   -->
+        <!-- ======================================================== -->
+        <section id="section-ep4" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold badge-ep mb-2">
+              ตอนที่ 4 (EP.4)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900">
+              การจัดการวงจรปิด (Closed-Loop) และการจัดการข้อผิดพลาดในการตรวจจับ
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ตรรกะการตรวจสอบสถานะของอุปกรณ์ขับเคลื่อน การกรองความผิดพลาด (False Detection) และการบันทึกประวัติการทำงาน
+            </p>
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              ในสภาพแวดล้อมการผลิตจริง การสั่งการอุปกรณ์ขับเคลื่อนโดยปราศจากการตรวจสอบสถานะการทำงาน (Open-Loop Control) อาจก่อให้เกิดปัญหาชิ้นงานติดขัด (Jam) หรือก้านปัดชนกับชิ้นงานถัดไป ระบบที่สมบูรณ์จึงต้องมีโครงสร้างการควบคุมแบบวงจรปิด (Closed-Loop Control) ซึ่งประกอบด้วย 3 องค์ประกอบสำคัญ:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs mt-3">
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                  <i class="fa-solid fa-stopwatch text-blue-600"></i> 1. การล็อกสถานะ (Actuator Busy Lock)
+                </div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">
+                  เมื่อสั่งการเซอร์โวมอเตอร์ ระบบจะตั้งค่าสถานะ <code class="font-mono bg-slate-200 px-1 py-0.5 rounded">is_busy = True</code> เพื่อป้องกันไม่ให้คำสั่งใหม่เข้าแทรกแซงในระหว่างที่กลไกกำลังหมุนคัดแยก
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="font-bold text-amber-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-filter text-amber-600"></i> 2. การกรองความเชื่อมั่น (Confidence Thresholding)
+                </div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">
+                  ตัดสัญญาณรบกวนที่มีค่าความเชื่อมั่นต่ำกว่าเกณฑ์ (เช่น &lt; 0.65) เพื่อป้องกันการหมุนก้านปัดโดยไม่จำเป็นจากวัตถุเงาหรือการสั่นไหวของแสง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+                  <i class="fa-solid fa-bell text-emerald-600"></i> 3. การแจ้งเตือนฉุกเฉิน (Relay Alarm / Defect Ejection)
+                </div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">
+                  หากพบชิ้นส่วนแปลกปลอม (Unknown Object) ที่มีขนาดผิดปกติ ระบบจะสั่งเปิดรีเลย์ไฟสัญญาณเตือนและผลักชิ้นงานลงช่องคัดแยกพิเศษทันที
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 7. SOURCE CODE SECTION                                   -->
+        <!-- ======================================================== -->
+        <section id="section-code" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 4: ตัวอย่างโค้ดและการทดสอบภาคปฏิบัติ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              โค้ดโปรแกรมตรวจจับวัตถุสดและสั่งการอุปกรณ์ขับเคลื่อน (fomo_live.py)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              สคริปต์ภาษาไพทอนฉบับสมบูรณ์ รองรับการทำงานทั้งบนบอร์ดพัฒนา Arduino UNO Q และโหมดจำลองคอนโซล
+            </p>
+          </div>
+
+          <!-- Code Box -->
+          <div class="terminal-window">
+            <div class="terminal-header">
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="text-xs text-yellow-300 font-mono font-bold ml-2">code_examples/chapter09/fomo_live.py</span>
+              </div>
+              <button onclick="navigator.clipboard.writeText(document.getElementById('fomoCode').innerText); alert('คัดลอกโค้ดเรียบร้อยแล้ว');" class="text-xs bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded transition flex items-center gap-1.5">
+                <i class="fa-regular fa-copy"></i> คัดลอกโค้ด
+              </button>
+            </div>
+            <pre class="terminal-body" id="fomoCode"><code><span class="text-slate-500">#!/usr/bin/env python3</span>
+<span class="text-slate-500"># -*- coding: utf-8 -*-</span>
+<span class="text-blue-400">import</span> sys, time
+
+<span class="text-blue-400">try</span>:
+    <span class="text-blue-400">from</span> arduino.app_bricks.video_object_detection <span class="text-blue-400">import</span> VideoObjectDetection
+    <span class="text-blue-400">from</span> arduino.app_utils <span class="text-blue-400">import</span> App
+    IS_ARDUINO_ENV = <span class="text-yellow-400">True</span>
+<span class="text-blue-400">except</span> ImportError:
+    IS_ARDUINO_ENV = <span class="text-yellow-400">False</span>
+
+
+<span class="text-purple-400">class</span> <span class="text-yellow-300 font-bold">ActuatorController</span>:
+    <span class="text-slate-500">"""คลาสควบคุมอุปกรณ์ขับเคลื่อน (Actuator / Servo Motor / Relay) สำหรับคัดแยกชิ้นงาน"""</span>
+    <span class="text-blue-400">def</span> <span class="text-blue-300">__init__</span>(self, servo_pin=9, relay_pin=7):
+        self.servo_pin = servo_pin
+        self.relay_pin = relay_pin
+        self.current_angle = 90  <span class="text-slate-500"># องศาตั้งต้น (ตรงกลาง)</span>
+
+    <span class="text-blue-400">def</span> <span class="text-blue-300">move_servo</span>(self, target_angle, action_name=<span class="text-green-300">""</span>):
+        self.current_angle = target_angle
+        print(<span class="text-green-300">f"    [Actuator] สั่งการพิน {self.servo_pin}: หมุนก้านปัดไปยังมุม {target_angle}° ({action_name})"</span>)
+        time.sleep(0.05)
+
+    <span class="text-blue-400">def</span> <span class="text-blue-300">trigger_relay</span>(self, state=<span class="text-yellow-400">True</span>):
+        status = <span class="text-green-300">"เปิดทำงาน (ON)"</span> <span class="text-blue-400">if</span> state <span class="text-blue-400">else</span> <span class="text-green-300">"ปิดทำงาน (OFF)"</span>
+        print(<span class="text-green-300">f"    [Relay] สั่งการพิน {self.relay_pin}: {status}"</span>)
+
+
+<span class="text-purple-400">class</span> <span class="text-yellow-300 font-bold">FomoLiveInspector</span>:
+    <span class="text-slate-500">"""คลาสประมวลผลผลลัพธ์จากโมเดล FOMO และสั่งการอุปกรณ์ขับเคลื่อน"""</span>
+    <span class="text-blue-400">def</span> <span class="text-blue-300">__init__</span>(self, confidence_threshold=0.65):
+        self.threshold = confidence_threshold
+        self.actuator = ActuatorController(servo_pin=9, relay_pin=7)
+        self.total_sorted = {<span class="text-green-300">"Bolt"</span>: 0, <span class="text-green-300">"Nut"</span>: 0, <span class="text-green-300">"Bearing"</span>: 0, <span class="text-green-300">"Unknown"</span>: 0}
+
+    <span class="text-blue-400">def</span> <span class="text-blue-300">process_detections</span>(self, detections):
+        <span class="text-blue-400">if</span> <span class="text-blue-400">not</span> detections:
+            <span class="text-blue-400">return</span>
+
+        valid = [item <span class="text-blue-400">for</span> item <span class="text-blue-400">in</span> detections <span class="text-blue-400">if</span> getattr(item, <span class="text-green-300">'confidence'</span>, 0.0) &gt;= self.threshold]
+        <span class="text-blue-400">for</span> item <span class="text-blue-400">in</span> valid:
+            label = getattr(item, <span class="text-green-300">'label'</span>, <span class="text-green-300">'Unknown'</span>)
+            conf = getattr(item, <span class="text-green-300">'confidence'</span>, 0.0)
+            x = getattr(item, <span class="text-green-300">'x'</span>, 0)
+            y = getattr(item, <span class="text-green-300">'y'</span>, 0)
+            w = getattr(item, <span class="text-green-300">'width'</span>, 0)
+            h = getattr(item, <span class="text-green-300">'height'</span>, 0)
+            cx, cy = x + (w // 2), y + (h // 2)
+
+            print(<span class="text-green-300">f"  - พบวัตถุ: [{label}] ความเชื่อมั่น: {conf*100:.1f}% | พิกัดกึ่งกลาง: ({cx}, {cy})"</span>)
+
+            <span class="text-blue-400">if</span> label.lower() == <span class="text-green-300">"bolt"</span>:
+                self.actuator.move_servo(45, <span class="text-green-300">"ปัดสลักเกลียว -> ลงกล่องซ้าย A"</span>)
+                self.total_sorted[<span class="text-green-300">"Bolt"</span>] += 1
+            <span class="text-blue-400">elif</span> label.lower() == <span class="text-green-300">"nut"</span>:
+                self.actuator.move_servo(135, <span class="text-green-300">"ปัดแป้นเกลียว -> ลงกล่องขวา B"</span>)
+                self.total_sorted[<span class="text-green-300">"Nut"</span>] += 1
+            <span class="text-blue-400">elif</span> label.lower() == <span class="text-green-300">"bearing"</span>:
+                self.actuator.move_servo(90, <span class="text-green-300">"ตลับลูกปืน -> ปล่อยผ่านสายพานตรง C"</span>)
+                self.total_sorted[<span class="text-green-300">"Bearing"</span>] += 1
+            <span class="text-blue-400">else</span>:
+                self.actuator.move_servo(0, <span class="text-green-300">"วัตถุแปลกปลอม -> ผลักลงกล่องตรวจสอบ D"</span>)
+                self.actuator.trigger_relay(<span class="text-yellow-400">True</span>)
+                self.total_sorted[<span class="text-green-300">"Unknown"</span>] += 1</code></pre>
+          </div>
+
+          <!-- Terminal Run Output -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">ผลการทดสอบการทำงานผ่านคอนโซล (Execution Console Output):</h3>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-xs text-green-400 font-mono flex items-center gap-2">
+                  <i class="fa-solid fa-terminal"></i> python code_examples/chapter09/fomo_live.py
+                </span>
+                <span class="text-[10px] text-slate-400">Terminal Output</span>
+              </div>
+              <pre class="terminal-body font-mono text-xs"><code>========================================================================
+   ระบบตรวจจับตำแหน่งวัตถุ FOMO และควบคุมอุปกรณ์ขับเคลื่อน (Actuator)
+   หลักสูตร: การพัฒนาปัญญาประดิษฐ์บนอุปกรณ์ขอบ (บทเรียนที่ 9)
+========================================================================
+[*] กำลังเริ่มต้นการทดสอบในโหมดจำลองสถานการณ์คอนโซล (Console Simulation)...
+[*] กำหนดค่าเกณฑ์ความเชื่อมั่น (Confidence Threshold): 0.65
+------------------------------------------------------------------------
+
+--- [รอบการตรวจสอบที่ 1 / 5] ---
+[14:13:02] [FPS: 28.5] ตรวจพบวัตถุผ่านเกณฑ์จำนวน 1 ชิ้นงาน:
+  ชิ้นที่ 1: วัตถุ [Bolt] ความเชื่อมั่น: 94.0%
+    - พิกัดจุดกึ่งกลาง (Centroid): (101, 126) | ขอบเขตกรอบ: 32x32 พิกเซล
+    [Actuator] สั่งการพิน 9: หมุนก้านปัดไปยังมุม 45° (คัดแยกสลักเกลียว -> ลงกล่องซ้าย A)
+
+--- [รอบการตรวจสอบที่ 2 / 5] ---
+[14:13:02] [FPS: 29.1] ตรวจพบวัตถุผ่านเกณฑ์จำนวน 1 ชิ้นงาน:
+  ชิ้นที่ 1: วัตถุ [Nut] ความเชื่อมั่น: 89.0%
+    - พิกัดจุดกึ่งกลาง (Centroid): (154, 110) | ขอบเขตกรอบ: 24x24 พิกเซล
+    [Actuator] สั่งการพิน 9: หมุนก้านปัดไปยังมุม 135° (คัดแยกแป้นเกลียว -> ลงกล่องขวา B)
+
+--- [รอบการตรวจสอบที่ 3 / 5] ---
+[14:13:03] [FPS: 28.8] ตรวจพบวัตถุผ่านเกณฑ์จำนวน 2 ชิ้นงาน:
+  ชิ้นที่ 1: วัตถุ [Bolt] ความเชื่อมั่น: 91.0%
+    - พิกัดจุดกึ่งกลาง (Centroid): (75, 120) | ขอบเขตกรอบ: 30x30 พิกเซล
+    [Actuator] สั่งการพิน 9: หมุนก้านปัดไปยังมุม 45° (คัดแยกสลักเกลียว -> ลงกล่องซ้าย A)
+  ชิ้นที่ 2: วัตถุ [Bearing] ความเชื่อมั่น: 87.0%
+    - พิกัดจุดกึ่งกลาง (Centroid): (198, 133) | ขอบเขตกรอบ: 36x36 พิกเซล
+    [Actuator] สั่งการพิน 9: หมุนก้านปัดไปยังมุม 90° (ชิ้นงานตลับลูกปืน -> ปล่อยผ่านสายพานตรง C)
+
+========================================================================
+   สรุปผลการคัดแยกวัตถุโดยระบบอุปกรณ์ขับเคลื่อนอัตโนมัติ
+========================================================================
+  - กลุ่มชิ้นงาน Bolt        :  2 ชิ้น
+  - กลุ่มชิ้นงาน Nut         :  1 ชิ้น
+  - กลุ่มชิ้นงาน Bearing     :  1 ชิ้น
+  - กลุ่มชิ้นงาน Unknown     :  1 ชิ้น
+  รวมทั้งสิ้น: 5 ชิ้นงาน
+========================================================================
+[✓] การทดสอบระบบสมบูรณ์ พร้อมนำไปเชื่อมต่อบนบอร์ดพัฒนา Arduino UNO Q</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 8. HANDS-ON LAB CHECKLIST (INTERACTIVE)                  -->
+        <!-- ======================================================== -->
+        <section id="section-checklist" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 5: ใบงานภารกิจภาคปฏิบัติ</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              ภารกิจปฏิบัติการประจำบทเรียน (Hands-on Lab Checklist)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ทำเครื่องหมายในช่องสี่เหลี่ยมเมื่อปฏิบัติตามขั้นตอนสำเร็จ เพื่อบันทึกความก้าวหน้าการเรียนรู้
+            </p>
+          </div>
+
+          <div class="space-y-3" id="ch9-checklist">
+            
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch9-task" data-task="1">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 1: ตรวจสอบและติดตั้งไฟล์โมเดล .eim บนบอร์ดพัฒนา</span>
+                <span class="text-slate-500">คัดลอกไฟล์โมเดล FOMO ไบนารีไปยัง <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">/home/arduino/.arduino-bricks/ei-models/</code> และกำหนดสิทธิ์ <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">chmod +x</code></span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch9-task" data-task="2">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 2: กำหนดค่าคอนฟิกูเรชันในไฟล์ app.yaml</span>
+                <span class="text-slate-500">กำหนดตัวแปร <code class="font-mono text-slate-700 bg-slate-100 px-1 py-0.5 rounded">EI_OBJ_DETECTION_MODEL</code> และกำหนดพินเชื่อมต่ออุปกรณ์ขับเคลื่อน (SERVO_PIN: 9, RELAY_PIN: 7)</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch9-task" data-task="3">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 3: ต่อสายสัญญาณฮาร์ดแวร์และแหล่งจ่ายไฟภายนอก</span>
+                <span class="text-slate-500">ต่อสายสัญญาณ PWM ขา 9 เข้าเซอร์โวมอเตอร์ โดยต่อไฟเลี้ยง 5V จากแหล่งจ่ายภายนอกและต่อขั้วกราวด์ร่วม (Common GND)</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch9-task" data-task="4">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 4: รันสคริปต์ fomo_live.py และทดสอบการคัดแยก</span>
+                <span class="text-slate-500">นำชิ้นงานตัวอย่าง (Bolt, Nut, Bearing) ผ่านหน้ากล้อง และตรวจสอบการหมุนของก้านปัดเซอร์โวมอเตอร์ตามมุมที่กำหนด</span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-[#fff200] ch9-task" data-task="5">
+              <div class="text-xs">
+                <span class="font-bold text-slate-800 block">ภารกิจที่ 5: ปรับจูนค่าเกณฑ์ความเชื่อมั่น (Threshold Tuning)</span>
+                <span class="text-slate-500">ทดสอบปรับค่าเกณฑ์ความเชื่อมั่นตั้งแต่ 0.50 ถึง 0.85 เพื่อหาค่าที่สามารถคัดแยกชิ้นงานได้แม่นยำที่สุดโดยไม่มี False Positive</span>
+              </div>
+            </label>
+
+          </div>
+
+          <div class="flex items-center justify-between pt-2">
+            <span class="text-xs text-slate-500" id="ch9-progress-text">ความคืบหน้าภารกิจ: 0 / 5 สำเร็จ</span>
+            <button onclick="resetChecklist()" class="text-xs text-slate-400 hover:text-red-500 transition">
+              <i class="fa-solid fa-rotate-right mr-1"></i> รีเซ็ตภารกิจ
+            </button>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- 9. REVIEW QUESTIONS SECTION                              -->
+        <!-- ======================================================== -->
+        <section id="section-review" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-[#173b6b] uppercase tracking-wider block">ส่วนที่ 6: คำถามทบทวนความรู้</span>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+              คำถามทบทวนองค์ความรู้ท้ายบทเรียน (Review Questions)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              ทดสอบความเข้าใจเชิงลึกเกี่ยวกับหลักการทำงานของระบบคัดแยกวัตถุด้วย Edge AI
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                1. เหตุใดโมเดลสถาปัตยกรรม FOMO จึงเหมาะสำหรับการนำมาเชื่อมต่อกับอุปกรณ์ขับเคลื่อน (Actuator) ในระบบคัดแยกแบบเวลาจริงมากกว่าโมเดลตรวจจับวัตถุประเภท Bounding Box ขนาดใหญ่ทั่วไป?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เนื่องจากโมเดล FOMO ถูกออกแบบมาเพื่อทำนายจุดศูนย์กลางของวัตถุโดยตรง (Centroid Heatmap) โดยตัดขั้นตอนการคำนวณสเกลของ Anchor Boxes ที่ซับซ้อนออกไป ส่งผลให้โมเดลมีขนาดเล็กมาก ประมวลผลได้ด้วยอัตราเร็วเฟรมสูง (25–35 FPS ขึ้นไป) และมีความหน่วงเวลาต่ำมาก ทำให้สัญญาณส่งไปยังอุปกรณ์ขับเคลื่อน (เซอร์โวมอเตอร์หรือก้านปัด) ได้ทันท่วงทีในขณะที่วัตถุกำลังเคลื่อนที่ผ่านสายพานโดยไม่หลุดตำแหน่ง
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                2. เพราะเหตุใดในการต่อใช้งานอุปกรณ์ขับเคลื่อน เช่น เซอร์โวมอเตอร์ หรือ โซลินอยด์ จึงห้ามใช้ไฟเลี้ยง 5V จากบอร์ดพัฒนาโดยตรง และจะต้องต่อขั้วสายแบบใดเพื่อความปลอดภัย?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> อุปกรณ์ขับเคลื่อนประเภทมอเตอร์เหนี่ยวนำจะดึงกระแสไฟฟ้าสูงมากในจังหวะเริ่มหมุน (Stall Current) และอาจเกิดแรงดันไฟฟ้าย้อนกลับ (Back EMF) ซึ่งหากดึงไฟจากบอร์ดพัฒนาโดยตรง จะทำให้ระดับแรงดันไฟฟ้าของไมโครคอนโทรลเลอร์ตก (Voltage Drop) ส่งผลให้บอร์ดเกิดการรีเซ็ตตัวเอง หรือชิปประมวลผลเสียหายได้ จึงจำเป็นต้องใช้ <strong>แหล่งจ่ายไฟแยกภายนอก (External Power Supply)</strong> และต้อง <strong>เชื่อมต่อขั้วกราวด์ร่วมกัน (Common Ground)</strong> เพื่อให้อ้างอิงระดับแรงดันของสัญญาณควบคุม PWM ได้อย่างถูกต้อง
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">
+                3. ในไฟล์ app.yaml ตัวแปร EI_OBJ_DETECTION_MODEL มีหน้าที่อะไร และหากระบุพาธผิดพลาด ระบบจะมีพฤติกรรมการทำงานอย่างไร?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ตัวแปร <code class="font-mono bg-slate-100 px-1 py-0.5 rounded">EI_OBJ_DETECTION_MODEL</code> มีหน้าที่ชี้บอกตำแหน่งไฟล์ไบนารีโมเดล (.eim) ที่ติดตั้งอยู่บนระบบไฟล์ เพื่อให้ Video Object Detection Brick โหลดเข้าสู่หน่วยความจำตอนเริ่มระบบ หากระบุพาธผิดหรือไม่พบไฟล์ มอดูลจะไม่สามารถเริ่มกระบวนการ Inference ได้ และระบบจะส่งข้อผิดพลาด <code class="font-mono bg-slate-100 px-1 py-0.5 rounded">FileNotFoundError</code> หรือ Brick Daemon จะหยุดทำงานและเข้าสู่สถานะ Failed
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 9 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=9#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 10: การพัฒนาและประมวลผลโมเดลจำแนกประเภทภาพ (Image Classification)</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">การฝึกสอนและประมวลผลโมเดลจำแนกภาพแบบ Multi-Class การส่งออกผลสู่แดชบอร์ด Web UI และการจำแนกสถานะชิ้นงาน</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter08.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 8</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter10.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>บทที่ 10</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Interactive Checklist Logic with LocalStorage
+    const ch9Checkboxes = document.querySelectorAll('.ch9-task');
+    const ch9ProgressText = document.getElementById('ch9-progress-text');
+
+    function updateProgress() {
+      const total = ch9Checkboxes.length;
+      let checkedCount = 0;
+      ch9Checkboxes.forEach(cb => {
+        const taskId = cb.getAttribute('data-task');
+        if (cb.checked) {
+          checkedCount++;
+          localStorage.setItem(`ch09_task_${taskId}`, 'true');
+        } else {
+          localStorage.removeItem(`ch09_task_${taskId}`);
+        }
+      });
+      if (ch9ProgressText) {
+        ch9ProgressText.innerText = `ความคืบหน้าภารกิจ: ${checkedCount} / ${total} สำเร็จ`;
+      }
+    }
+
+    function initChecklist() {
+      ch9Checkboxes.forEach(cb => {
+        const taskId = cb.getAttribute('data-task');
+        if (localStorage.getItem(`ch09_task_${taskId}`) === 'true') {
+          cb.checked = true;
+        }
+        cb.addEventListener('change', updateProgress);
+      });
+      updateProgress();
+    }
+
+    function resetChecklist() {
+      if (confirm('ต้องการรีเซ็ตสถานะภารกิจทั้งหมดในบทนี้หรือไม่?')) {
+        ch9Checkboxes.forEach(cb => {
+          const taskId = cb.getAttribute('data-task');
+          cb.checked = false;
+          localStorage.removeItem(`ch09_task_${taskId}`);
+        });
+        updateProgress();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initChecklist);
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

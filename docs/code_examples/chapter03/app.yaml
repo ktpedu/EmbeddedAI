@@ -1,0 +1,13 @@
+# Arduino App Lab Configuration
+# Chapter 3: Database-SQL Brick & Inference Event Logging
+# อ้างอิงคลิป Arduino UNO Q รู้จักกับ "Database-SQL Brick" บน Arduino App Lab
+
+name: database-sql-logger
+version: 1.0.0
+description: ระบบจัดการฐานข้อมูล SQL ท้องถิ่นบน Arduino UNO Q สำหรับบันทึกประวัติการตรวจจับของ AI
+
+variables: {
+  DB_FILE_PATH: "/home/arduino/.arduino-bricks/data/edgeai_records.db",
+  TABLE_NAME: "ai_inference_logs",
+  LOG_RETENTION_DAYS: "30"
+}

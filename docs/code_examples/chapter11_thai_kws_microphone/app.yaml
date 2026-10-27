@@ -1,0 +1,8 @@
+name: Thai Voice Command App
+description: "แอปพลิเคชันควบคุมอุปกรณ์ด้วยเสียงภาษาไทยผ่านไมโครโฟนบนบอร์ด Arduino UNO Q"
+ports: []
+variables: {
+  EI_KEYWORD_SPOTTING_MODEL: "/home/arduino/.arduino-bricks/ei-models/thai_kws.eim"
+}
+bricks:
+- arduino:keyword_spotting: {}

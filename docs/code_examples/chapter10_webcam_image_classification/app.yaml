@@ -1,0 +1,8 @@
+name: Webcam Image Classification App
+description: "แอปพลิเคชันจำแนกประเภทภาพจากกล้องเว็บแคมด้วย Image Classification Brick บนบอร์ด Arduino UNO Q"
+ports: []
+variables: {
+  EI_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/webcam_cls.eim"
+}
+bricks:
+- arduino:image_classification: {}

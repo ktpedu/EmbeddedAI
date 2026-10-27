@@ -1,0 +1,24 @@
+# ==============================================================================
+# โครงการสื่อการเรียนรู้ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI Learning Platform)
+# ไฟล์คอนฟิกูเรชัน: app.yaml
+# บทเรียนที่ 7: การประมวลผลโมเดลตรวจจับความผิดปกติจากภาพ และการบันทึกข้อมูลลง Database-SQL Brick
+# ==============================================================================
+
+name: Visual Anomaly Detection with SQL Logger
+description: "ระบบตรวจจับความผิดปกติของภาพแบบเรียลไทม์พร้อมการบันทึกประวัติลงฐานข้อมูล SQL บน Arduino UNO Q"
+ports: []
+variables: {
+  EI_V_ANOMALY_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim",
+  DB_SQL_PATH: "/home/arduino/.arduino-bricks/databases/production_qc.db",
+  ANOMALY_THRESHOLD: "20.0",
+  CAMERA_DEVICE_INDEX: "0",
+  LED_MATRIX_FEEDBACK: "true",
+  ACTUATOR_RELAY_PIN: "7"
+}
+bricks:
+  - id: "visual_anomaly_brick"
+    type: "visual_anomaly_detection"
+    enabled: true
+  - id: "database_sql_brick"
+    type: "database_sql"
+    enabled: true

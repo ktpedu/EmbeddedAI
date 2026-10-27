@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 6: การนำโมเดล .eim ไปใช้งานและการกำหนดค่าไฟล์ app.yaml บนบอร์ดพัฒนา Arduino UNO Q | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+    <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=3mAwLsQjv6U&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=31" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 6</span>
+          <span class="font-semibold text-white truncate">การนำโมเดล .eim ไปใช้งานและการกำหนดค่าไฟล์ app.yaml บนบอร์ดพัฒนา Arduino UNO Q</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. CHAPTER HERO BANNER                                         -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#1e4b8a] text-white py-10 px-4 sm:px-6 lg:px-8 border-b-4 border-[#fff200] relative overflow-hidden">
+    <div class="absolute -right-16 -top-16 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-yellow-300 mb-3">
+        <a href="index.html" class="hover:underline flex items-center gap-1"><i class="fa-solid fa-house text-[10px]"></i> หน้าหลัก</a>
+        <span>/</span>
+        <a href="index.html#section-curriculum" class="hover:underline">หลักสูตร 12 บทเรียน</a>
+        <span>/</span>
+        <span class="text-white font-medium">บทที่ 6: การนำโมเดล .eim ไปใช้งานและการกำหนดค่าไฟล์ app.yaml บน Arduino UNO Q</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-2 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-ep text-xs font-bold uppercase tracking-wider">
+            <i class="fa-solid fa-rocket text-[#fff200]"></i> หมวดการติดตั้งโมเดลและการกำหนดค่าระบบ (Deployment & Configuration)
+          </div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
+            บทที่ 6: การนำโมเดล .eim ไปใช้งานและการกำหนดค่าไฟล์ app.yaml <br class="hidden sm:inline">
+            <span class="text-[#fff200] text-xl sm:text-2xl font-bold">บนบอร์ดพัฒนา Arduino UNO Q (Deploying Native .eim Models & Configuring app.yaml)</span>
+          </h1>
+          <p class="text-sm sm:text-base text-slate-200 leading-relaxed pt-1">
+            ศึกษากระบวนการคอมไพล์แบบจำลองปัญญาประดิษฐ์เป็นไฟล์ไบนารีระดับระบบ (.eim) สำหรับสถาปัตยกรรม Linux AArch64 การถ่ายโอนไฟล์ผ่านการเชื่อมต่อที่ปลอดภัย การบริหารจัดการสิทธิ์คำสั่ง (chmod +x) และการกำหนดค่าพารามิเตอร์ตัวแปรสภาพแวดล้อมในไฟล์ app.yaml ตามมาตรฐานไวยากรณ์ล่าสุด
+          </p>
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-3">
+          <a href="#sec-objectives" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=3mAwLsQjv6U" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: Deploy .eim & app.yaml Configuration)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+        </div>
+
+        <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">4 คาบ (200 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">สถาปัตยกรรมเป้าหมาย:</span>
+              <span class="font-bold text-white">Linux AArch64 (ARMv8)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบไฟล์โมเดล:</span>
+              <span class="font-bold text-white">Native Binary (.eim)</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter06/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter06 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. CONTENT WRAPPER & SIDEBAR LAYOUT                            -->
+  <!-- ============================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- STICKY TABLE OF CONTENTS (LEFT SIDEBAR) -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-24 space-y-6">
+        <div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#173b6b] mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-yellow-500"></i> สารบัญเนื้อหาบทที่ 6
+            </h3>
+            <nav class="space-y-1 text-xs">
+              <a href="#sec-objectives" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition"> 1. สาระสำคัญและผลการเรียนรู้</a>
+              <a href="#sec-architecture" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">2. ขั้นตอนการคอมไพล์และติดตั้ง .eim</a>
+              <a href="#sec-content" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">3. เนื้อหาบทเรียน 4 ตอน</a>
+              <a href="#sec-code" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">4. โค้ดตัวอย่าง fix_app_yaml.py</a>
+              <a href="#sec-checklist" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">5. ภารกิจปฏิบัติการ 5 ขั้นตอน</a>
+              <a href="#sec-questions" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">6. คำถามประเมินความเข้าใจ</a>
+            </nav>
+          </div>
+
+          <!-- Practical Download Card -->
+          <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] text-white rounded-2xl p-4 shadow-sm border-t-2 border-[#fff200] text-xs space-y-2">
+            <div class="font-bold flex items-center gap-1.5 text-yellow-300">
+              <i class="fa-solid fa-wrench"></i> ยูทิลิตีประจำบทเรียน
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              ตรวจสอบโครงสร้างไวยากรณ์ app.yaml และสิทธิ์การประมวลผลโมเดลไบนารี
+            </p>
+            <div class="font-mono text-[10px] bg-black/40 p-2 rounded border border-white/10 text-yellow-200">
+              python code_examples/chapter06/fix_app_yaml.py
+            </div>
+          </div>
+        </div>
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q พร้อมระบบปฏิบัติการ Debian Linux 12 AArch64</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>ไฟล์ไบนารีโมเดลปัญญาประดิษฐ์ .eim ที่ผ่านการคอมไพล์สำหรับ Linux AArch64</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>โปรแกรมสภาพแวดล้อม Arduino App Lab และระบบคอนโซลคำสั่ง Terminal (SSH)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>สายเชื่อมต่อ USB Type-C และระบบเครือข่าย Wi-Fi/LAN</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=6#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 6
+          </a>
+          <a href="index.html?chapter=6#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 6
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- MAIN CONTENT ARTICLE (3 COLS) -->
+      <article class="lg:col-span-9 space-y-8">
+        
+        <!-- ======================================================== -->
+        <!-- SECTION 1: OBJECTIVES (K-P1-P2-A)                        -->
+        <!-- ======================================================== -->
+        <section id="sec-objectives" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              การนำแบบจำลองปัญญาประดิษฐ์ที่ผ่านการฝึกสอนแล้วไปประมวลผลบนบอร์ดสมองกลฝังตัวที่มีทรัพยากรจำกัด จำเป็นต้องคอมไพล์เป็นไฟล์ปฏิบัติการไบนารีระดับระบบ (Native Executable Binary) ในรูปแบบ <strong>.eim (Edge Impulse Model)</strong> สำหรับสถาปัตยกรรมหน่วยประมวลผล <strong>Qualcomm Dragonwing QRB2210 (Linux AArch64)</strong> ซึ่งให้ความเร็วในการประมวลผลสูงสุดและใช้หน่วยความจำน้อยกว่าการรันผ่านตัวแปลภาษาทั่วไป พร้อมทั้งกำหนดค่าพารามิเตอร์สภาพแวดล้อมในไฟล์ <strong>app.yaml</strong> ตามมาตรฐานไวยากรณ์พจนานุกรม <code>variables: { ... }</code> เพื่อให้โมดูล Brick สามารถเรียกใช้งานโมเดลได้อย่างถูกต้องและมีเสถียรภาพ
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายโครงสร้างไฟล์ไบนารี .eim สถาปัตยกรรมระบบปฏิบัติการ Debian Linux AArch64 (ARMv8 64-bit) และโครงสร้างไวยากรณ์ของไฟล์กำหนดค่า app.yaml ในระบบ Arduino App Lab ได้อย่างถูกต้องตามหลักวิชาการ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการติดตั้งระบบ (System Deployment)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถคอมไพล์และดาวน์โหลดไฟล์ .eim ถ่ายโอนไฟล์เข้าสู่ไดเรกทอรี /home/arduino/.arduino-bricks/ei-models/ และบริหารจัดการสิทธิ์คำสั่งรันระบบ (chmod +x) ผ่าน Terminal ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการกำหนดค่าและดีบัก (Configuration & Debugging)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถแก้ไขและตรวจสอบความถูกต้องของโครงสร้างตัวแปรในไฟล์ app.yaml ภายใต้บล็อก variables: { ... } ตลอดจนวินิจฉัยและแก้ไขข้อผิดพลาดของระบบปฏิบัติการลินุกซ์ได้อย่างมีตรรกะ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความละเอียดรอบคอบในการตรวจสอบไวยากรณ์ไฟล์คอนฟิกูเรชัน ตระหนักถึงความปลอดภัยของระบบไฟล์บนระบบสมองกลฝังตัว และมีวินัยในการสำรองไฟล์โมเดลตามมาตรฐานวิศวกรรม
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: ARCHITECTURE & FUNDAMENTALS                   -->
+        <!-- ======================================================== -->
+        <section id="sec-architecture" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">2</span>
+            <h2 class="text-xl font-bold text-slate-900">สถาปัตยกรรมโมเดล .eim และขั้นตอนการติดตั้งสู่ระบบสมองกลฝังตัว</h2>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              ในการนำแบบจำลองปัญญาประดิษฐ์ไปใช้งานจริงบนอุปกรณ์ปลายทาง การประมวลผลผ่านตัวแปลคำสั่งภาษาไพทอน (Python Interpreter) ทั่วไปมักมีข้อจำกัดเรื่อง <strong>ระยะเวลาหน่วงในการประมวลผล (Latency)</strong> และการใช้พื้นที่หน่วยความจำแรม (RAM) ที่สูง เพื่อแก้ปัญหานี้ แพลตฟอร์ม Edge Impulse จึงมีระบบ <strong>Cloud Compiler</strong> ที่แปลงโมเดลโครงข่ายประสาทเทียมให้กลายเป็นไลบรารีภาษา C++ ประสิทธิภาพสูง แล้วคอมไพล์ผ่าน GCC Toolchain ตรงสู่สถาปัตยกรรมซีพียู <strong>Linux AArch64 (ARMv8 64-bit)</strong> ของบอร์ด Arduino UNO Q ได้ไฟล์ผลลัพธ์เป็นไฟล์ไบนารีระดับระบบที่มีนามสกุล <strong>.eim (Edge Impulse Model)</strong>
+            </p>
+            <p>
+              ไฟล์โมเดล <code class="font-mono text-blue-900 font-bold">.eim</code> คือโปรแกรมไบนารีที่สามารถรันได้โดยตรงในระดับระบบปฏิบัติการ (Native ELF Executable) ซึ่งบรรจุทั้งตัวถ่วงน้ำหนัก (Weights), อัลกอริทึมการคำนวณเทนเซอร์ (Tensor Engine) และขั้นตอนการปรับสภาพข้อมูลภาพเข้าไว้ด้วยกัน ทำให้การประมวลผลมีความเร็วสูงกว่าโมเดลแบบสคริปต์ถึง <strong>4 - 10 เท่า</strong>
+            </p>
+          </div>
+
+          <!-- Infographic Compilation Workflow Diagram -->
+          <div class="space-y-2">
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+              <img src="images/chapters/ch06_eim_compilation_workflow.jpg" alt="EIM Model Compilation & Deployment Workflow" class="w-full object-cover">
+            </div>
+            <p class="text-[11px] text-slate-500 text-center italic">
+              รูปที่ 6.1: แผนภาพแสดงขั้นตอนการคอมไพล์ไฟล์ .eim บนคลาวด์ การถ่ายโอนไฟล์ผ่าน SSH สู่ไดเรกทอรีมาตรฐาน และการกำหนดสิทธิ์คำสั่ง chmod +x
+            </p>
+          </div>
+
+          <!-- Key Deployment Stages -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2">
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">ขั้นตอนที่ 1</span>
+              <div class="font-bold text-[#173b6b] text-xs">Cloud Export</div>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                เลือกคอมไพล์แบบ Linux AArch64 บน Edge Impulse Studio เพื่อสร้างไฟล์ไบนารีระดับระบบ
+              </p>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">ขั้นตอนที่ 2</span>
+              <div class="font-bold text-[#173b6b] text-xs">Secure Transfer</div>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                ส่งไฟล์ .eim เข้าสู่บอร์ด Arduino UNO Q ผ่านโปรโตคอล SSH/SCP หรือผ่านระบบจัดการของ Arduino App Lab
+              </p>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">ขั้นตอนที่ 3</span>
+              <div class="font-bold text-[#173b6b] text-xs">chmod +x</div>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                เปิดสิทธิ์ Executable Permission บนระบบปฏิบัติการลินุกซ์ เพื่ออนุญาตให้ระบบเรียกประมวลผลคำสั่งได้
+              </p>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800">ขั้นตอนที่ 4</span>
+              <div class="font-bold text-[#173b6b] text-xs">app.yaml Config</div>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                ระบุพาธของไฟล์โมเดลในไฟล์ app.yaml ด้วยไวยากรณ์ <code class="font-mono text-purple-900">variables: { ... }</code>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: LESSON 4 UNITS                                -->
+        <!-- ======================================================== -->
+        <section id="sec-content" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-8">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">3</span>
+            <h2 class="text-xl font-bold text-slate-900">เนื้อหาบทเรียน 4 ตอน (Course Content Units)</h2>
+          </div>
+
+          <!-- Unit 1 -->
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 1</span>
+              <h3 class="text-base font-bold text-slate-900">สถาปัตยกรรมโมเดล .eim และการประมวลผลบน Linux AArch64</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+              <p>
+                โมเดลปัญญาประดิษฐ์รูปแบบ <code class="font-mono text-blue-900 font-bold">.eim</code> ถูกออกแบบขึ้นเพื่อแก้ปัญหาคอขวดของการประมวลผลบนระบบสมองกลฝังตัว โดยผสานสถาปัตยกรรม <strong>EON Compiler</strong> ของ Edge Impulse ที่ทำการตัดทอนส่วนโค้ดที่ไม่จำเป็น (Dead-code elimination) และจัดเรียงหน่วยความจำแบบคงที่ (Static Memory Allocation) ทำให้เกิดคุณประโยชน์สำคัญดังนี้:
+              </p>
+              <ul class="list-disc list-inside space-y-1 text-xs text-slate-600 pl-1">
+                <li><strong>ไม่ต้องติดตั้งไลบรารีขนาดใหญ่:</strong> ไม่จำเป็นต้องติดตั้ง TensorFlow, PyTorch หรือ OpenCV ขนาดใหญ่ลงในระบบปฏิบัติการของบอร์ด</li>
+                <li><strong>การใช้คำสั่งระดับสถาปัตยกรรม (NEON SIMD Vectorization):</strong> คอมไพเลอร์สร้างชุดคำสั่งพิเศษที่ดึงประสิทธิภาพของชุดประมวลผลเวกเตอร์ ARM NEON บนซีพียู Arm Cortex ได้โดยตรง</li>
+                <li><strong>การสื่อสารผ่านโหมดมาตรฐาน (Standard I/O IPC):</strong> โปรแกรมไบนารี .eim สามารถรับส่งข้อมูลภาพและผลลัพธ์ผ่านทาง Standard Input/Output หรือ Socket IPC ได้อย่างยืดหยุ่น</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Unit 2 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 2</span>
+              <h3 class="text-base font-bold text-slate-900">การคอมไพล์และดาวน์โหลดไฟล์ .eim จาก Edge Impulse Studio</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+              <p>
+                กระบวนการส่งออกโมเดลจากหน้าต่าง <strong>Deployment</strong> บน Edge Impulse Studio มีขั้นตอนการปฏิบัติดังนี้:
+              </p>
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <ol class="list-decimal list-inside space-y-1.5 text-xs text-slate-700">
+                  <li>เข้าสู่โปรเจกต์บน Edge Impulse Studio แล้วเลือกแถบเมนูด้านซ้าย <strong>Deployment</strong></li>
+                  <li>ในส่วนค้นหาเป้าหมายการติดตั้ง (Deploy your impulse) ให้ค้นหาคำว่า <code class="bg-slate-200 px-1 py-0.5 rounded font-mono text-blue-900 font-bold">Linux AArch64</code></li>
+                  <li>เลือกตัวเลือก <strong>Linux (ARMv8 / AArch64)</strong> ซึ่งตรงกับสถาปัตยกรรมหน่วยประมวลผลของบอร์ด Arduino UNO Q</li>
+                  <li>กดปุ่ม <strong>Build</strong> และรอให้ระบบคลาวด์คอมไพล์ไฟล์โปรแกรมไบนารีจนเสร็จสิ้น (ระบบจะทำการดาวน์โหลดไฟล์ไบนารีลงสู่เครื่องคอมพิวเตอร์โดยอัตโนมัติ)</li>
+                </ol>
+              </div>
+
+              <div class="callout-note p-3 rounded-lg text-xs space-y-1 text-blue-900">
+                <div class="font-bold flex items-center gap-1.5">
+                  <i class="fa-solid fa-circle-info text-blue-600"></i> ข้อสังเกตในการตั้งชื่อไฟล์โมเดล
+                </div>
+                <p class="text-blue-800 leading-relaxed">
+                  ไฟล์ที่ดาวน์โหลดมาจากระบบคลาวด์จะมีชื่อยาวตามรหัสโปรเจกต์ เช่น <code class="font-mono text-blue-950">bearing-anomaly-linux-aarch64-v1.eim</code> เพื่อความสะดวกในการอ้างอิง ควรสลับชื่อไฟล์ให้กระชับและตรงตามบทบาท เช่น <code class="font-mono text-blue-950 font-bold">AnomalyDetection.eim</code> หรือ <code class="font-mono text-blue-950 font-bold">fomo_object_detection.eim</code>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 3 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 3</span>
+              <h3 class="text-base font-bold text-slate-900">การถ่ายโอนไฟล์สู่บอร์ดและการจัดการสิทธิ์คำสั่ง (chmod +x)</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+              <p>
+                ไดเรกทอรีมาตรฐานที่ระบบมอดูลซอฟต์แวร์ (Modular Bricks) บนบอร์ด Arduino UNO Q ใช้สำหรับค้นหาไฟล์แบบจำลองปัญญาประดิษฐ์ คือ:
+              </p>
+              <div class="p-3 bg-[#0b1526] text-yellow-300 font-mono text-xs rounded-xl border border-slate-700 overflow-x-auto break-all">
+                /home/arduino/.arduino-bricks/ei-models/
+              </div>
+
+              <p>
+                หลังจากถ่ายโอนไฟล์โมเดลผ่านคำสั่ง <code class="font-mono text-blue-800 font-bold">scp</code> หรือผ่านหน้าจอตัวจัดการไฟล์ของระบบแล้ว <strong>ระบบปฏิบัติการลินุกซ์จะยังไม่เปิดสิทธิ์การประมวลผลคำสั่ง (Execution Permission)</strong> ให้กับไฟล์ดังกล่าว หากพยายามรันระบบในทันทีจะพบข้อผิดพลาด <code class="text-red-600 font-bold font-mono">Permission denied</code>
+              </p>
+
+              <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+                <div class="font-bold text-xs text-amber-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-terminal text-amber-600"></i> คำสั่งการกำหนดสิทธิ์การประมวลผลบนเทอร์มินัลบอร์ด:
+                </div>
+                <div class="font-mono text-xs text-slate-900 bg-white p-2.5 rounded border border-amber-300 overflow-x-auto break-all">
+                  chmod +x /home/arduino/.arduino-bricks/ei-models/*.eim
+                </div>
+                <p class="text-[11px] text-amber-800 leading-relaxed">
+                  คำสั่ง <code class="font-bold">chmod +x</code> จะเพิ่มแฟล็กสิทธิ์ Execute ให้แก่ไฟล์ไบนารี ทำให้ระบบปฏิบัติการสามารถเปิดและประมวลผลคำสั่งได้อย่างราบรื่น
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 4 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 4</span>
+              <h3 class="text-base font-bold text-slate-900">การกำหนดค่าตัวแปรในไฟล์ app.yaml และการแก้ไขข้อผิดพลาดไวยากรณ์</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-4">
+              <p>
+                ไฟล์ <code class="font-mono text-blue-900 font-bold">app.yaml</code> ทำหน้าที่เป็นศูนย์กลางการจัดสรรตัวแปรสภาพแวดล้อม (Environment Variables Injection) ของแอปพลิเคชัน เพื่อส่งต่อพาธไฟล์โมเดลไปยังมอดูลประมวลผลต่างๆ ในระบบ โดยระบบ Arduino App Lab เวอร์ชันปัจจุบันกำหนดให้โครงสร้างตัวแปรต้องอยู่ในรูปแบบ <strong>พจนานุกรมวงเล็บปีกกา { ... }</strong>
+              </p>
+
+              <!-- App YAML Architecture Diagram -->
+              <div class="space-y-2">
+                <div class="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+                  <img src="images/chapters/ch06_app_yaml_configuration.jpg" alt="app.yaml Configuration Architecture" class="w-full object-cover">
+                </div>
+                <p class="text-[11px] text-slate-500 text-center italic">
+                  รูปที่ 6.2: การเปรียบเทียบไวยากรณ์ไฟล์ app.yaml ที่ถูกต้องตามมาตรฐาน Arduino App Lab และผังการส่งผ่านตัวแปรสู่ Modular Bricks
+                </p>
+              </div>
+
+              <!-- Comparison Table -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2 min-w-0 overflow-hidden">
+                  <div class="font-bold text-xs text-emerald-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i> ไวยากรณ์ที่ถูกต้อง (Valid Syntax)
+                  </div>
+                  <pre class="font-mono text-[11px] bg-white p-2.5 rounded border border-emerald-300 text-slate-800 overflow-x-auto leading-relaxed">variables: {
+  EI_V_ANOMALY_DETECTION_MODEL: 
+    "/home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim",
+  EI_OBJ_DETECTION_MODEL: 
+    "/home/arduino/.arduino-bricks/ei-models/fomo_object_detection.eim"
+}</pre>
+                  <p class="text-[11px] text-emerald-800 leading-relaxed">
+                    ใช้วงเล็บปีกกาครอบ มีเครื่องหมายจุลภาคคั่นระหว่างคู่คีย์และค่า สามารถถูกแปลง (Parse) เข้าสู่ระบบ App Lab ได้อย่างแม่นยำ
+                  </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-red-50 border border-red-200 space-y-2 min-w-0 overflow-hidden">
+                  <div class="font-bold text-xs text-red-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-xmark text-red-600"></i> ข้อผิดพลาดที่พบบ่อย (Common Pitfalls)
+                  </div>
+                  <pre class="font-mono text-[11px] bg-white p-2.5 rounded border border-red-300 text-slate-800 overflow-x-auto leading-relaxed">variables:
+  - EI_V_ANOMALY_DETECTION_MODEL: "..."
+  - EI_OBJ_DETECTION_MODEL: "..."
+# หรือเขียน dictionary ซ้อนโดยไม่มีปีกกา</pre>
+                  <p class="text-[11px] text-red-800 leading-relaxed">
+                    การใส่เครื่องหมายขีด (-) จะทำให้กลายเป็น Array ซึ่งระบบจะไม่สามารถจับคู่ชื่อตัวแปรได้ ส่งผลให้โปรแกรมมองไม่เห็นโมเดล
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: CODE EXAMPLES & REPAIR SCRIPT                 -->
+        <!-- ======================================================== -->
+        <section id="sec-code" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">4</span>
+            <h2 class="text-xl font-bold text-slate-900">ตัวอย่างโค้ดและยูทิลิตีตรวจสอบระบบ (Code Implementation & Validation)</h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            ไฟล์โค้ดสำหรับบทเรียนนี้ได้รับการจัดเก็บไว้ในโฟลเดอร์ <code class="bg-slate-100 text-blue-800 px-1.5 py-0.5 rounded font-mono font-bold">code_examples/chapter06</code> ประกอบด้วยไฟล์คอนฟิกูเรชัน <code class="font-mono text-slate-800 font-bold">app.yaml</code> และสคริปต์ตรวจแก้ไวยากรณ์ <code class="font-mono text-slate-800 font-bold">fix_app_yaml.py</code>
+          </p>
+
+          <!-- File 1: app.yaml -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-solid fa-file-code text-amber-500"></i> ไฟล์คอนฟิกูเรชันระบบ: app.yaml
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">code_examples/chapter06/app.yaml</span>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <span class="text-[11px] text-slate-400">YAML Deployment Config</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-emerald-400">name: EdgeAI Deployment Template
+description: "เทมเพลตการกำหนดค่าตัวแปรสภาพแวดล้อมสำหรับแบบจำลอง Edge Impulse บนบอร์ด Arduino UNO Q"
+ports: []
+variables: {
+  EI_V_ANOMALY_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim",
+  EI_OBJ_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/fomo_object_detection.eim",
+  EI_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/image_classification.eim",
+  EI_KEYWORD_SPOTTING_MODEL: "/home/arduino/.arduino-bricks/ei-models/KWS_model.eim",
+  EI_AUDIO_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AC_model.eim"
+}
+bricks: []</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- File 2: fix_app_yaml.py -->
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-brands fa-python text-blue-500"></i> สคริปต์ตรวจแก้ไวยากรณ์: fix_app_yaml.py
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">code_examples/chapter06/fix_app_yaml.py</span>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <span class="text-[11px] text-slate-400">Python 3 Maintenance Utility</span>
+              </div>
+              <div class="terminal-body max-h-[380px]">
+<pre class="text-blue-300">def analyze_app_yaml_syntax(file_path: str) -> dict:
+    """ตรวจสอบความถูกต้องของโครงสร้างไวยากรณ์ไฟล์ app.yaml"""
+    if not os.path.exists(file_path):
+        return {"valid": False, "reason": f"ไม่พบไฟล์คอนฟิกูเรชัน: {file_path}", "variables": {}}
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # ตรวจสอบรูปแบบ variables: { ... }
+    brace_pattern = re.compile(r'variables:\s*\{([^}]*)\}', re.DOTALL)
+    match = brace_pattern.search(content)
+
+    if not match:
+        reason = "โครงสร้าง variables ไม่ได้ใช้วงเล็บปีกกา { ... } ตามมาตรฐาน Arduino App Lab"
+        return {"valid": False, "reason": reason, "variables": {}}
+
+    # สกัดค่าตัวแปรภายในวงเล็บปีกกา
+    raw_vars = match.group(1).strip()
+    extracted_vars = {}
+    for line in raw_vars.split("\n"):
+        line = line.strip().rstrip(",")
+        if ":" in line:
+            k, v = line.split(":", 1)
+            extracted_vars[k.strip()] = v.strip().strip('"').strip("'")
+
+    return {
+        "valid": True,
+        "reason": "โครงสร้างไวยากรณ์ถูกต้องสมบูรณ์ตามมาตรฐาน Arduino App Lab",
+        "variables": extracted_vars
+    }</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Execution Result Terminal -->
+          <div class="space-y-2 pt-2">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-terminal text-emerald-600"></i> ผลการรันตรวจสอบความถูกต้องบนคอนโซล:
+            </span>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-[11px] text-slate-400">Terminal Output (Validation Report)</span>
+              </div>
+              <div class="terminal-body font-mono text-[11px]">
+<pre class="text-slate-300">$ python code_examples/chapter06/fix_app_yaml.py
+===========================================================================
+ บทเรียนที่ 6: ยูทิลิตีตรวจสอบและกำหนดค่าไฟล์ app.yaml บน Arduino UNO Q
+===========================================================================
+[*] ตำแหน่งไฟล์เป้าหมาย: code_examples/chapter06/app.yaml
+[*] ผลการวิเคราะห์ไวยากรณ์: <span class="text-emerald-400 font-bold">ถูกต้องสมบูรณ์ (PASS)</span>
+    └─ รายละเอียด: โครงสร้างไวยากรณ์ถูกต้องสมบูรณ์ตามมาตรฐาน Arduino App Lab
+
+[*] สรุปตัวแปรโมเดลปัญญาประดิษฐ์ในระบบ (Configured Model Paths):
+  ├─ EI_V_ANOMALY_DETECTION_MODEL   -> /home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim
+  ├─ EI_OBJ_DETECTION_MODEL         -> /home/arduino/.arduino-bricks/ei-models/fomo_object_detection.eim
+  ├─ EI_CLASSIFICATION_MODEL        -> /home/arduino/.arduino-bricks/ei-models/image_classification.eim
+  ├─ EI_KEYWORD_SPOTTING_MODEL      -> /home/arduino/.arduino-bricks/ei-models/KWS_model.eim
+  ├─ EI_AUDIO_CLASSIFICATION_MODEL  -> /home/arduino/.arduino-bricks/ei-models/AC_model.eim
+
+[*] การตรวจสอบไฟล์โมเดลไบนารี: /home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim
+    └─ [สถานะ] ไวยากรณ์ของไฟล์ app.yaml ถูกต้อง พร้อมใช้งานร่วมกับ Modular Brick</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: PRACTICAL TASKS CHECKLIST (5 TASKS)           -->
+        <!-- ======================================================== -->
+        <section id="sec-checklist" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">5</span>
+            <h2 class="text-xl font-bold text-slate-900">ใบงานและภารกิจปฏิบัติการประจำบทเรียน (Practical Tasks)</h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            ให้นักเรียนปฏิบัติตามภารกิจทั้ง 5 ขั้นตอน โดยคลิกทำเครื่องหมายลงในช่องสี่เหลี่ยมเมื่อปฏิบัติภารกิจเสร็จสมบูรณ์ ระบบจะคำนวณและบันทึกความก้าวหน้าลงในหน่วยความจำของอุปกรณ์โดยอัตโนมัติ
+          </p>
+
+          <div class="space-y-3 pt-2">
+            <!-- Task 1 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 1: คอมไพล์โมเดลไบนารี Linux AArch64 บน Edge Impulse Studio</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  เข้าสู่หน้า Deployment ของโปรเจกต์ Visual Anomaly Detection เลือกเป้าหมายการติดตั้งเป็น "Linux (ARMv8 / AArch64)" และกดปุ่ม Build เพื่อคอมไพล์เป็นไฟล์โมเดล .eim บนระบบคลาวด์
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 2 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 2: เปลี่ยนชื่อไฟล์และตรวจสอบความสมบูรณ์ของไบนารี</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  ดาวน์โหลดไฟล์ผลลัพธ์มายังเครื่อง และเปลี่ยนชื่อเป็น <code class="font-mono text-blue-700 font-bold">AnomalyDetection.eim</code> เพื่อความกระชับและพร้อมนำไปอ้างอิงในระบบคอนฟิกูเรชัน
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 3 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 3: ถ่ายโอนไฟล์โมเดลเข้าสู่ไดเรกทอรีมาตรฐานบนบอร์ด Arduino UNO Q</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  สร้างไดเรกทอรี <code class="font-mono text-slate-800">/home/arduino/.arduino-bricks/ei-models/</code> และคัดลอกไฟล์โมเดลเข้าไปยังตำแหน่งดังกล่าวผ่าน SSH/SCP หรือเครื่องมือของระบบ
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 4 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 4: กำหนดสิทธิ์การประมวลผลคำสั่งด้วยคำสั่ง chmod +x</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  เปิดเทอร์มินัลของบอร์ด ป้อนคำสั่ง <code class="font-mono text-blue-700 font-bold">chmod +x /home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim</code> เพื่อปลดล็อกสิทธิ์การประมวลผลคำสั่ง
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 5 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 5: ตรวจสอบและแก้ไขโครงสร้างไวยากรณ์ app.yaml ด้วยสคริปต์</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  รันคำสั่ง <code class="font-mono text-blue-700 font-bold">python code_examples/chapter06/fix_app_yaml.py</code> ตรวจสอบให้แน่ใจว่าได้ผลลัพธ์การประเมินเป็น PASS และตัวแปรพาธโมเดลชี้ไปยังไฟล์ได้อย่างถูกต้อง
+                </span>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 6: REVIEW QUESTIONS (3 QUESTIONS)                -->
+        <!-- ======================================================== -->
+        <section id="sec-questions" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">6</span>
+            <h2 class="text-xl font-bold text-slate-900">คำถามประเมินความเข้าใจและคิดวิเคราะห์ (Review Questions)</h2>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                1. เหตุใดการนำแบบจำลองปัญญาประดิษฐ์ไปประมวลผลในรูปแบบไฟล์ไบนารีคอมไพล์สำเร็จ (.eim) จึงมีความเร็วและมีระยะเวลาหน่วงในการประมวลผล (Latency) ต่ำกว่าการรันผ่านตัวแปลคำสั่งภาษาไพทอน (Python Interpreter)?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เนื่องจากไฟล์ <strong>.eim</strong> คือไฟล์ไบนารีภาษา C++ ระดับระบบที่ผ่านการคอมไพล์ตรงสู่ชุดคำสั่งภาษาเครื่องของซีพียู ARMv8 โดยตรง (Native Machine Code) พร้อมทั้งใช้ประโยชน์จากชุดคำสั่งเวกเตอร์ ARM NEON SIMD ในการคำนวณเมทริกซ์อย่างเต็มขีดความสามารถ แตกต่างจากการรันผ่าน Python Interpreter ที่ต้องมีกระบวนการแปลความหมายทีละบรรทัด (Interpretation Overhead) และมีตัวจัดการหน่วยความจำ (Garbage Collection) ที่ทำให้เกิดความล่าช้า ไฟล์ .eim จึงทำงานได้รวดเร็วกว่า 4-10 เท่า และประหยัดหน่วยความจำแรมอย่างยิ่ง
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                2. หากผู้พัฒนาถ่ายโอนไฟล์โมเดล .eim ไปไว้ในไดเรกทอรี /home/arduino/.arduino-bricks/ei-models/ เรียบร้อยแล้ว แต่เมื่อสั่งรันระบบกลับพบข้อผิดพลาด "Permission denied" เกิดจากสาเหตุใด และมีคำสั่งแก้ไขอย่างไร?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> สาเหตุเกิดจากการที่ระบบปฏิบัติการลินุกซ์กำหนดให้ไฟล์ที่เพิ่งดาวน์โหลดหรือถ่ายโอนเข้ามามีเพียงสิทธิ์ในการอ่านและเขียน (Read/Write) แต่ยังไม่มีสิทธิ์ในการประมวลผลคำสั่ง (Execution Permission: แฟล็ก +x) ทำให้เคอร์เนลของระบบไม่อนุญาตให้เปิดรันไฟล์ดังกล่าว วิธีแก้ไขคือการป้อนคำสั่ง <strong><code>chmod +x /home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim</code></strong> เพื่อเปิดสิทธิ์ Executable (-rwxr-xr-x) ให้แก่ไฟล์
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                3. ในไฟล์คอนฟิกูเรชัน app.yaml ของระบบ Arduino App Lab เหตุใดตัวแปรสภาพแวดล้อมจึงต้องกำหนดในรูปแบบพจนานุกรมวงเล็บปีกกา variables: { ... } และหากเขียนเป็น Array (ใช้เครื่องหมายขีด -) จะส่งผลเสียอย่างไร?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ระบบ Arduino App Lab ถูกออกแบบให้ตัวแปลไฟล์คอนฟิกูเรชันอ่านค่าแบบ Key-Value Dictionary เพื่อจับคู่ชื่อตัวแปร เช่น <code>EI_V_ANOMALY_DETECTION_MODEL</code> เข้าสู่ระบบสภาพแวดล้อมโดยตรง การใช้วงเล็บปีกกา <code>variables: { KEY: "VALUE" }</code> เป็นข้อกำหนดไวยากรณ์มาตรฐานของระบบ หากเขียนเป็น Array (เครื่องหมายขีด -) ระบบตัวแปลภาษาจะมองข้อมูลเป็นรายการลำดับ (List) แทนที่จะเป็นคู่คีย์-ค่า ทำให้ระบบซอฟต์แวร์ไม่สามารถค้นหาพาธของแบบจำลองปัญญาประดิษฐ์ได้ และโปรแกรมจะล้มเหลวขณะเริ่มต้นทำงาน
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 6 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=6#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 7: การประมวลผลโมเดลตรวจจับความผิดปกติจากภาพ และการบันทึกข้อมูลลง Database-SQL Brick</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">เชื่อมโยงผลการวินิจฉัยของโมเดล VAD เข้ากับระบบฐานข้อมูล SQL บนบอร์ดเพื่อบันทึกประวัติการผลิต</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter05.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 5</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter07.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>เข้าสู่บทเรียนที่ 7</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

@@ -213,6 +213,26 @@ async function fetchAllData() {
     state.students = resStudents.data || [];
     state.submissions = resSubmissions.data || [];
 
+    // Fallback โหลดข้อมูล Static สำหรับ GitHub Pages / Static Hosting
+    if (!state.lessons || state.lessons.length === 0) {
+      try {
+        const seedRes = await fetch('data/seed.json');
+        if (seedRes.ok) {
+          const seed = await seedRes.json();
+          state.lessons = seed.lessons || [];
+          if (!state.quizzes.length) state.quizzes = seed.quizzes || [];
+          if (!state.practicalExams.length) state.practicalExams = seed.practical_exams || [];
+          if (!state.worksheets.length) state.worksheets = seed.worksheets || [];
+          if (!state.materials.length) state.materials = seed.materials || [];
+          if (!state.students.length) state.students = seed.students || [];
+          if (!state.scores.length) state.scores = seed.scores || [];
+          console.log('[GitHub Pages Mode] โหลด seed.json สำเร็จ');
+        }
+      } catch (e) {
+        console.warn('[Static Fallback Notice]:', e.message);
+      }
+    }
+
     // หากมีนักเรียนล็อกอินอยู่ ให้ซิงค์ชื่อและห้องล่าสุดจากฐานข้อมูลทันที (แก้ปัญหาชื่อเก่าค้างใน localStorage)
     if (state.currentUser && state.currentUser.student_id) {
       const fresh = state.students.find(s => s.student_id === state.currentUser.student_id);
@@ -224,8 +244,20 @@ async function fetchAllData() {
       }
     }
   } catch (err) {
-    console.error('Error fetching data:', err);
-    showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลจากเซิร์ฟเวอร์', 'error');
+    console.warn('Backend API offline, continuing in static mode:', err.message);
+    try {
+      const seedRes = await fetch('data/seed.json');
+      if (seedRes.ok) {
+        const seed = await seedRes.json();
+        state.lessons = seed.lessons || [];
+        state.quizzes = seed.quizzes || [];
+        state.practicalExams = seed.practical_exams || [];
+        state.worksheets = seed.worksheets || [];
+        state.materials = seed.materials || [];
+        state.students = seed.students || [];
+        state.scores = seed.scores || [];
+      }
+    } catch (e) {}
   }
 }
 

@@ -1,0 +1,13 @@
+# Arduino App Lab Configuration
+# Chapter 2: Modular Brick Architecture & Hardware I/O Control
+# สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick) และการควบคุมฮาร์ดแวร์พื้นฐาน
+
+name: hardware-brick-runner
+version: 1.0.0
+description: ตัวอย่างการสร้างและลงทะเบียนโมดูลาร์ Brick ควบคุม LED Matrix และสวิตช์ปุ่มกดบน Arduino UNO Q
+
+variables: {
+  MATRIX_BRIGHTNESS: "80",
+  DEFAULT_STATE: "READY",
+  DEBOUNCE_DELAY_MS: "250"
+}

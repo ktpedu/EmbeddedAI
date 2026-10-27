@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 5: การฝึกสอนโมเดลตรวจจับความผิดปกติจากภาพ (Visual Anomaly Detection) | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+    <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=1yEMEJnsrUY" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 5</span>
+          <span class="font-semibold text-white truncate">การฝึกสอนโมเดลตรวจจับความผิดปกติจากภาพ (Visual Anomaly Detection)</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. CHAPTER HERO BANNER                                         -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#1e4b8a] text-white py-10 px-4 sm:px-6 lg:px-8 border-b-4 border-[#fff200] relative overflow-hidden">
+    <div class="absolute -right-16 -top-16 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-yellow-300 mb-3">
+        <a href="index.html" class="hover:underline flex items-center gap-1"><i class="fa-solid fa-house text-[10px]"></i> หน้าหลัก</a>
+        <span>/</span>
+        <a href="index.html#section-curriculum" class="hover:underline">หลักสูตร 12 บทเรียน</a>
+        <span>/</span>
+        <span class="text-white font-medium">บทที่ 5: การฝึกสอนโมเดลตรวจจับความผิดปกติจากภาพ</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-2 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-ep text-xs font-bold uppercase tracking-wider">
+            <i class="fa-solid fa-microscope text-[#fff200]"></i> หมวดคอมพิวเตอร์วิทัศน์และการตรวจจับความผิดปกติ (Computer Vision & Anomaly Detection)
+          </div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
+            บทที่ 5: การฝึกสอนโมเดลตรวจจับความผิดปกติจากภาพ <br class="hidden sm:inline">
+            <span class="text-[#fff200] text-xl sm:text-2xl font-bold">(Visual Anomaly Detection Model Training)</span>
+          </h1>
+          <p class="text-sm sm:text-base text-slate-200 leading-relaxed pt-1">
+            เรียนรู้สถาปัตยกรรมโครงข่ายประสาทเทียมแบบกลุ่มเดียว (One-Class Learning / FOMO-AD) การสกัดเวกเตอร์คุณลักษณะเด่นของชิ้นงานปกติ การคำนวณระยะห่างทางสถิติ และการวิเคราะห์ค่าคะแนนความผิดปกติ (Anomaly Score) เพื่อกำหนดเกณฑ์การคัดแยกชิ้นส่วนชำรุดในระบบควบคุมคุณภาพเชิงอุตสาหกรรม
+          </p>
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-3">
+          <a href="#sec-objectives" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=1yEMEJnsrUY" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: Visual Anomaly Detection FOMO-AD)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+        </div>
+
+        <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">3 คาบ (150 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">แพลตฟอร์มหลัก:</span>
+              <span class="font-bold text-white">Edge Impulse Studio</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">อัลกอริทึม:</span>
+              <span class="font-bold text-white">FOMO-AD (One-Class)</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter05/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter05 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. CONTENT WRAPPER & SIDEBAR LAYOUT                            -->
+  <!-- ============================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- STICKY TABLE OF CONTENTS (LEFT SIDEBAR) -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-24 space-y-6">
+        <div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#173b6b] mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-yellow-500"></i> สารบัญเนื้อหาบทที่ 5
+            </h3>
+            <nav class="space-y-1 text-xs">
+              <a href="#sec-objectives" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition"> 1. สาระสำคัญและผลการเรียนรู้</a>
+              <a href="#sec-architecture" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">2. สถาปัตยกรรม One-Class Learning</a>
+              <a href="#sec-content" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">3. เนื้อหาบทเรียน 4 ตอน</a>
+              <a href="#sec-code" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">4. โค้ดตัวอย่าง vad_test.py</a>
+              <a href="#sec-checklist" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">5. ภารกิจปฏิบัติการ 5 ขั้นตอน</a>
+              <a href="#sec-questions" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">6. คำถามประเมินความเข้าใจ</a>
+            </nav>
+          </div>
+
+          <!-- Practical Download Card -->
+          <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] text-white rounded-2xl p-4 shadow-sm border-t-2 border-[#fff200] text-xs space-y-2">
+            <div class="font-bold flex items-center gap-1.5 text-yellow-300">
+              <i class="fa-solid fa-code"></i> สคริปต์ประจำบทเรียน
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              ทดสอบการคำนวณค่าความผิดปกติและแสดงผล ASCII Heatmap ผ่านสคริปต์ภาษาไพทอน
+            </p>
+            <div class="font-mono text-[10px] bg-black/40 p-2 rounded border border-white/10 text-yellow-200">
+              python code_examples/chapter05/vad_test.py
+            </div>
+          </div>
+        </div>
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>กล้อง USB UVC Webcam พร้อมขาตั้งสำหรับจับภาพชิ้นงานในสายการผลิตจำลอง</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>ชิ้นงานตัวอย่างสำหรับฝึกสอน (ชิ้นงานปกติ 100+ ตัวอย่าง) และชิ้นงานทดสอบความผิดปกติ</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>สายเชื่อมต่อ USB Type-C และโปรแกรม Arduino App Lab</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=5#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 5
+          </a>
+          <a href="index.html?chapter=5#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 5
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- MAIN CONTENT ARTICLE (3 COLS) -->
+      <article class="lg:col-span-9 space-y-8">
+        
+        <!-- ======================================================== -->
+        <!-- SECTION 1: OBJECTIVES (K-P1-P2-A)                        -->
+        <!-- ======================================================== -->
+        <section id="sec-objectives" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              การตรวจสอบคุณภาพชิ้นงานในสายการผลิตอุตสาหกรรมมักประสบปัญหาการขาดแคลนข้อมูลชิ้นงานที่ชำรุดเสียหาย สถาปัตยกรรม <strong>Visual Anomaly Detection (FOMO-AD)</strong> บนแพลตฟอร์ม Edge Impulse แก้ปัญหานี้ด้วยหลักการ <strong>การเรียนรู้แบบกลุ่มเดียว (One-Class Learning)</strong> โดยใช้เฉพาะภาพถ่ายชิ้นงานปกติที่สมบูรณ์ในการฝึกสอน เพื่อสร้างแบบจำลองสกัดคุณลักษณะเด่น (Feature Extractor) ด้วย MobileNetV2 และประเมินความผิดปกติของชิ้นงานใหม่ผ่านการคำนวณระยะห่างทางสถิติออกมาเป็น <strong>คะแนนความผิดปกติ (Anomaly Score)</strong> ช่วยให้ระบบสามารถตรวจจับรอยตำหนิที่ไม่เคยพบเห็นมาก่อนได้อย่างแม่นยำและรวดเร็วบนอุปกรณ์ปลายทาง
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายความแตกต่างระหว่างการจำแนกภาพแบบหลายกลุ่ม (Classification) กับการเรียนรู้แบบกลุ่มเดียว (One-Class Learning), โครงสร้างโมเดล FOMO-AD และหลักการคำนวณระยะห่างเวกเตอร์เพื่อหาคะแนนความผิดปกติ (Anomaly Score) ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการออกแบบชุดข้อมูล (Dataset Strategy)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถจัดเตรียมชุดข้อมูลภาพชิ้นงานแบบไม่สมมาตร (Asymmetric Dataset), วิเคราะห์การกระจายตัวของข้อมูลใน 3D Feature Explorer และกำหนดค่าขีดเริ่มเปลี่ยน (Threshold) เพื่อแยกแยะชิ้นงานปกติและชิ้นงานชำรุดได้อย่างแม่นยำ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการฝึกสอนและประเมินผล (Model Training & Evaluation)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถออกแบบ Impulse, กำหนดค่าบล็อก Image Processing และบล็อกการเรียนรู้ Visual Anomaly Detection บน Edge Impulse Studio ตลอดจนฝึกสอนและประเมินประสิทธิภาพโมเดลได้อย่างสมบูรณ์
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความตระหนักในมาตรฐานความปลอดภัยขั้นวิกฤตของระบบอุตสาหกรรม มีความละเอียดรอบคอบในการควบคุมสภาวะแสงเพื่อป้องกันอคติของข้อมูล (Data Bias) และมีวินัยในการบันทึกผลการทดสอบทางวิศวกรรม
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: ARCHITECTURE & FUNDAMENTALS                   -->
+        <!-- ======================================================== -->
+        <section id="sec-architecture" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">2</span>
+            <h2 class="text-xl font-bold text-slate-900">สถาปัตยกรรม One-Class Learning และการตรวจจับความผิดปกติทางภาพ</h2>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              ในกระบวนการผลิตเชิงอุตสาหกรรมจริง ชิ้นงานที่ผลิตออกมาส่วนใหญ่กว่า <strong>99%</strong> คือชิ้นงานที่มีความสมบูรณ์และได้มาตรฐาน ส่วนชิ้นงานที่ชำรุดเสียหายมักเกิดขึ้นได้ยากและมีรูปแบบของรอยตำหนิที่หลากหลายอย่างไม่สิ้นสุด เช่น รอยขีดข่วน รอยตามด คราบน้ำมัน รอยแตกร้าว หรือชิ้นส่วนบิดงอ การใช้แบบจำลองโครงข่ายประสาทเทียมแบบจำแนกประเภท (Classification) ทั่วไปที่ต้องป้อนข้อมูลของดีและของเสียจำนวนเท่าๆ กัน จึงเป็นไปได้ยากอย่างยิ่งในทางปฏิบัติ
+            </p>
+            <p>
+              เทคโนโลยี <strong>Visual Anomaly Detection (FOMO-AD)</strong> บนแพลตฟอร์ม Edge Impulse แก้ปัญหานี้ด้วยสถาปัตยกรรม <strong>การเรียนรู้แบบกลุ่มเดียว (One-Class Learning)</strong> โดยใช้ภาพถ่ายของชิ้นงานปกติที่สมบูรณ์เท่านั้นในการฝึกสอนเพื่อเรียนรู้ลักษณะทางสถิติและสร้าง "ขอบเขตความปกติ (Normal Cluster Boundary)" เมื่อมีชิ้นงานใดที่มีลักษณะเบี่ยงเบนออกนอกกลุ่ม ระบบจะคำนวณระยะห่างออกมาเป็น <strong>คะแนนความผิดปกติ (Anomaly Score)</strong> ทันที
+            </p>
+          </div>
+
+          <!-- Infographic Architecture Diagram -->
+          <div class="space-y-2">
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+              <img src="images/chapters/ch05_visual_anomaly_architecture.jpg" alt="Visual Anomaly Detection Architecture" class="w-full object-cover">
+            </div>
+            <p class="text-[11px] text-slate-500 text-center italic">
+              รูปที่ 5.1: แผนภาพแสดงสถาปัตยกรรมการเรียนรู้แบบกลุ่มเดียว (One-Class Learning Phase) และการประเมินผลขณะปฏิบัติงานจริง (Inference Phase)
+            </p>
+          </div>
+
+          <!-- Architecture Breakdown Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="font-bold text-[#173b6b] text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-cube text-blue-600"></i> ขั้นที่ 1: การสกัดคุณลักษณะ
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                ภาพชิ้นงานปกติถูกส่งผ่านโครงข่ายสกัดคุณลักษณะ (Feature Extractor) เช่น <strong>MobileNetV2</strong> ที่ตัดชั้นจำแนกประเภทส่วนท้ายออก เพื่อแปลงภาพความละเอียดสูงให้กลายเป็นเวกเตอร์ตัวเลขในปริภูมิต่ำ (Feature Embeddings)
+              </p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="font-bold text-[#173b6b] text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-pie text-emerald-600"></i> ขั้นที่ 2: การสร้างกลุ่มทางสถิติ
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                อัลกอริทึมจัดกลุ่มข้อมูล เช่น <strong>Gaussian Mixture Model (GMM)</strong> หรือ <strong>K-Means Clustering</strong> จะจำลองการกระจายตัวของเวกเตอร์ภาพปกติ เพื่อกำหนดขอบเขตความน่าจะเป็นทางสถิติ (Learned Normal Boundary)
+              </p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="font-bold text-[#173b6b] text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-gauge-high text-amber-600"></i> ขั้นที่ 3: การประเมินผลจริง
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                เมื่อนำภาพชิ้นงานทดสอบเข้ามา ระบบจะคำนวณระยะห่างของเวกเตอร์เทียบกับกลุ่มปกติ หากมีรอยตำหนิ จุดดังกล่าวจะมีระยะห่างสูงผิดปกติ ส่งผลให้ค่า <strong>Anomaly Score</strong> พุ่งสูงเกินเกณฑ์ขีดเริ่มเปลี่ยน (Threshold)
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: LESSON 4 UNITS                                -->
+        <!-- ======================================================== -->
+        <section id="sec-content" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-8">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">3</span>
+            <h2 class="text-xl font-bold text-slate-900">เนื้อหาบทเรียน 4 ตอน (Course Content Units)</h2>
+          </div>
+
+          <!-- Unit 1 -->
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 1</span>
+              <h3 class="text-base font-bold text-slate-900">หลักการ One-Class Learning และโมเดล FOMO-AD</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+              <p>
+                ในงานวิจัยด้านวิทัศน์เครื่องจักร (Machine Vision) การตรวจจับความผิดปกติจัดอยู่ในกลุ่มปัญหาการเรียนรู้แบบไม่มีผู้กำกับอย่างสมบูรณ์ (Unsupervised) หรือกึ่งมีผู้กำกับ (Semi-supervised) แต่ในทางวิศวกรรมระบบสมองกลฝังตัว Edge Impulse ได้พัฒนาโมเดล <strong>FOMO-AD (Faster Objects, More Objects - Anomaly Detection)</strong> ซึ่งมีคุณสมบัติเด่นดังนี้:
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                  <div class="font-bold text-xs text-[#173b6b] mb-1">
+                    <i class="fa-solid fa-microchip mr-1 text-blue-600"></i> ประสิทธิภาพบนอุปกรณ์ทรัพยากรจำกัด
+                  </div>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    ใช้หน่วยความจำแรม (RAM) น้อยกว่า 500 KB และประมวลผลบนหน่วยประมวลผลสัญญาณดิจิทัลหรือซีพียู Arm Cortex ได้อย่างรวดเร็ว โดยไม่จำเป็นต้องพึ่งพาชิป GPU ราคาแพง
+                  </p>
+                </div>
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                  <div class="font-bold text-xs text-[#173b6b] mb-1">
+                    <i class="fa-solid fa-bullseye mr-1 text-emerald-600"></i> ระบุตำแหน่งรอยตำหนิได้ (Spatial Localization)
+                  </div>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    แตกต่างจากโมเดล Autoencoder ทั่วไปที่ให้คะแนนทั้งภาพเพียงค่าเดียว FOMO-AD แบ่งภาพเป็นกริดย่อย (Grid Patches) ทำให้สามารถบอกพิกัดจุดที่เกิดรอยขีดข่วนหรือความชำรุดได้อย่างชัดเจน
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 2 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 2</span>
+              <h3 class="text-base font-bold text-slate-900">การออกแบบบล็อก Impulse และการสกัดคุณลักษณะเด่น</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+              <p>
+                การตั้งค่าโครงสร้างระบบประมวลผลบนเมนู <strong>Impulse Design</strong> ประกอบด้วย 3 องค์ประกอบหลักที่ต้องเชื่อมต่อกันอย่างเป็นระบบ:
+              </p>
+              <ol class="list-decimal list-inside space-y-1.5 text-xs text-slate-700 pl-1">
+                <li><strong>Time series data / Image input:</strong> กำหนดขนาดภาพมาตรฐาน เช่น <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-blue-800">96x96</code> หรือ <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-blue-800">160x160</code> พิกเซล และเลือกรูปแบบสีเป็น <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-blue-800">RGB</code> หรือ <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-blue-800">Grayscale</code> ตามลักษณะงาน</li>
+                <li><strong>Processing block (Image):</strong> ขั้นตอนการปรับขนาดภาพ (Resize), การเกลี่ยข้อมูล (Normalization) และการจัดรูปแบบเทนเซอร์ให้อยู่ในช่วงตัวเลข <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-blue-800">[0.0, 1.0]</code> หรือ <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-blue-800">[-1.0, 1.0]</code></li>
+                <li><strong>Learning block (Visual Anomaly Detection):</strong> เลือกใช้อัลกอริทึม FOMO-AD หรือ GMM เพื่อสร้างแบบจำลองการกระจายตัวของชิ้นงานปกติ</li>
+              </ol>
+
+              <div class="callout-note p-3 rounded-lg text-xs space-y-1 text-blue-900 mt-2">
+                <div class="font-bold flex items-center gap-1.5">
+                  <i class="fa-solid fa-circle-exclamation text-blue-600"></i> ข้อพิจารณาสำคัญทางวิศวกรรม
+                </div>
+                <p class="text-blue-800 leading-relaxed">
+                  ในชุดฝึกสอน (Training Set) <strong>ต้องมีเฉพาะภาพชิ้นงานปกติ (Normal) เท่านั้น</strong> ห้ามนำภาพชิ้นงานที่มีตำหนิเข้ามาปะปนในขั้นตอนนี้เด็ดขาด เพราะจะทำให้แบบจำลองจดจำว่ารอยตำหนินั้นคือลักษณะที่ยอมรับได้ ส่งผลให้ความแม่นยำของระบบลดลงทันที
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 3 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 3</span>
+              <h3 class="text-base font-bold text-slate-900">การประเมินผลผ่าน 3D Feature Explorer และการปรับจูนการฝึกสอน</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-4">
+              <p>
+                หลังจากกดปุ่ม <strong>Start training</strong> บน Edge Impulse Studio ระบบจะแสดงหน้าจอสรุปผลลัพธ์การฝึกสอน พร้อมด้วยเครื่องมือสร้างมโนทัศน์ข้อมูลเชิงพื้นที่ <strong>3D Feature Explorer</strong> ซึ่งใช้เทคนิคการลดมิติข้อมูล (Dimensionality Reduction) เช่น UMAP หรือ t-SNE ในการฉายภาพเวกเตอร์คุณลักษณะออกมาเป็นพิกัด 3 มิติ
+              </p>
+
+              <!-- Studio Screenshot Image -->
+              <div class="space-y-2">
+                <div class="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+                  <img src="images/chapters/ch05_anomaly_detection_studio.jpg" alt="Edge Impulse Studio Visual Anomaly Interface" class="w-full object-cover">
+                </div>
+                <p class="text-[11px] text-slate-500 text-center italic">
+                  รูปที่ 5.2: หน้าต่าง Visual Anomaly Detection (FOMO-AD) บน Edge Impulse Studio แสดง 3D Feature Explorer และดัชนีชี้วัดประสิทธิภาพ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="font-bold text-xs text-[#173b6b]">การอ่านค่าและวิเคราะห์ผลลัพธ์ใน 3D Feature Explorer:</div>
+                <ul class="text-xs text-slate-600 space-y-1.5 list-disc list-inside leading-relaxed">
+                  <li><strong>กลุ่มจุดสีเขียว (Green Clusters):</strong> แสดงภาพชิ้นงานปกติที่ใช้ในการฝึกสอน หากข้อมูลมีคุณภาพ จุดสีเขียวควรเกาะกลุ่มกันอย่างหนาแน่นและมีรูปทรงกลมกลืน</li>
+                  <li><strong>จุดสีส้มและสีแดง (Orange & Red Dots):</strong> แสดงภาพชิ้นงานที่มีความน่าสงสัยหรือชำรุดเสียหาย ซึ่งควรอยู่ห่างจากกลุ่มจุดสีเขียวอย่างมีนัยสำคัญ</li>
+                  <li><strong>จุดที่กระจัดกระจายหลุดกลุ่ม (Outliers):</strong> หากพบจุดภาพปกติหลุดออกไปอยู่โดดเดี่ยว แสดงว่าภาพนั้นอาจมีสภาวะแสงไม่คงที่ มีเงาทึบ หรือมุมกล้องผิดเพี้ยนไปจากมาตรฐาน</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 4 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 4</span>
+              <h3 class="text-base font-bold text-slate-900">การคำนวณคะแนนความผิดปกติ (Mean/Max Score) และการกำหนดค่าขีดเริ่มเปลี่ยน</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+              <p>
+                เมื่อแบบจำลองประมวลผลภาพถ่าย ระบบจะให้ค่าคะแนนความผิดปกติออกมาเป็น 2 มิติหลัก ซึ่งผู้พัฒนาต้องเลือกใช้ให้ตรงกับลักษณะงาน:
+              </p>
+              
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                  <thead class="bg-[#173b6b] text-white uppercase text-[11px]">
+                    <tr>
+                      <th class="py-2.5 px-3">ดัชนีคะแนน (Metric)</th>
+                      <th class="py-2.5 px-3">ความหมายและการคำนวณ</th>
+                      <th class="py-2.5 px-3">กรณีการใช้งานที่เหมาะสม</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200">
+                    <tr class="bg-white hover:bg-slate-50">
+                      <td class="py-2.5 px-3 font-bold font-mono text-blue-900">Anomaly Mean Score</td>
+                      <td class="py-2.5 px-3">ค่าเฉลี่ยของคะแนนความผิดปกติจากทุกกริดย่อยทั่วทั้งภาพ</td>
+                      <td class="py-2.5 px-3">ความผิดปกติที่ครอบคลุมพื้นที่กว้าง เช่น สภาพพื้นผิวเปลี่ยนสี, ชิ้นงานผิดรุ่น, การเปรอะเปื้อนคราบน้ำมันทั้งชิ้น</td>
+                    </tr>
+                    <tr class="bg-slate-50/50 hover:bg-slate-50">
+                      <td class="py-2.5 px-3 font-bold font-mono text-emerald-900">Anomaly Max Score</td>
+                      <td class="py-2.5 px-3">ค่าคะแนนความผิดปกติที่สูงสุดของกริดย่อยใดกริดย่อยหนึ่ง</td>
+                      <td class="py-2.5 px-3">รอยตำหนิขนาดเล็กเฉพาะจุด เช่น รอยขีดข่วนบางๆ, รอยแตกมุมขอบ, เม็ดตามดบนลูกปืน (แม้ค่าเฉลี่ยทั้งภาพจะยังต่ำ)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="callout-tip p-3 rounded-lg text-xs space-y-1 text-emerald-900">
+                <div class="font-bold flex items-center gap-1.5">
+                  <i class="fa-solid fa-sliders text-emerald-600"></i> แนวทางการปรับตั้งค่าขีดเริ่มเปลี่ยน (Anomaly Threshold Optimization)
+                </div>
+                <p class="text-emerald-800 leading-relaxed">
+                  หากตั้งค่า Threshold ต่ำเกินไป (เช่น 8.0) จะทำให้ระบบไวต่อแสงเงา ส่งผลให้ชิ้นงานปกติถูกตีเป็นของเสียบ่อยครั้ง (High False Positives) แต่หากตั้งค่าสูงเกินไป (เช่น 45.0) จะทำให้ชิ้นงานที่มีรอยขีดข่วนขนาดเล็กหลุดรอดไปได้ (High False Negatives) ในทางวิศวกรรมจึงควรทดสอบกับชิ้นงานทดสอบ (Test Dataset) อย่างน้อย 50 ชิ้น เพื่อหาจุดตัดที่สร้างความสมดุลสูงสุด
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: CODE EXAMPLES & VAD TEST                      -->
+        <!-- ======================================================== -->
+        <section id="sec-code" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">4</span>
+            <h2 class="text-xl font-bold text-slate-900">ตัวอย่างโค้ดและการทดสอบระบบ (Code Implementation & Testing)</h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            ไฟล์โค้ดสำหรับบทเรียนนี้ได้รับการจัดเก็บไว้ในโฟลเดอร์ <code class="bg-slate-100 text-blue-800 px-1.5 py-0.5 rounded font-mono font-bold">code_examples/chapter05</code> ประกอบด้วยไฟล์คอนฟิกูเรชัน <code class="font-mono text-slate-800 font-bold">app.yaml</code> และสคริปต์ประเมินผลคะแนนความผิดปกติ <code class="font-mono text-slate-800 font-bold">vad_test.py</code>
+          </p>
+
+          <!-- File 1: app.yaml -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-solid fa-gear text-amber-500"></i> ไฟล์คอนฟิกูเรชันระบบ: app.yaml
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">code_examples/chapter05/app.yaml</span>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <span class="text-[11px] text-slate-400">YAML Configuration</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-emerald-400">version: "1.0"
+module_name: "visual_anomaly_detection_test"
+description: "การทดสอบและประเมินค่าคะแนนความผิดปกติของภาพ (Visual Anomaly Score Evaluation)"
+
+model:
+  name: "fomo_ad_bearing_model"
+  format: "eim"
+  input_width: 96
+  input_height: 96
+  color_depth: "RGB"
+  feature_extractor: "MobileNetV2"
+  alpha: 0.35
+
+anomaly_detection:
+  anomaly_threshold: 20.0        <span class="text-slate-500"># เกณฑ์ขีดเริ่มเปลี่ยนในการตัดสินใจ (Anomaly Threshold)</span>
+  critical_threshold: 40.0       <span class="text-slate-500"># เกณฑ์ขีดเริ่มเปลี่ยนขั้นวิกฤต (Critical Defect)</span>
+  evaluation_metric: "max"       <span class="text-slate-500"># ใช้ค่าสูงสุดรายพิกัดกริดเพื่อดักจับรอยตำหนิขนาดเล็ก</span>
+
+camera:
+  device_id: 0
+  capture_width: 640
+  capture_height: 480
+  fps: 30</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- File 2: vad_test.py -->
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-brands fa-python text-blue-500"></i> สคริปต์ทดสอบการประเมินคะแนน: vad_test.py
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">code_examples/chapter05/vad_test.py</span>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <span class="text-[11px] text-slate-400">Python 3 Script</span>
+              </div>
+              <div class="terminal-body max-h-[380px]">
+<pre class="text-blue-300">class VisualAnomalyEvaluator:
+    """คลาสสำหรับประเมินและตัดสินผลการตรวจจับความผิดปกติจากภาพ"""
+
+    def __init__(self, threshold: float = 20.0, critical_threshold: float = 40.0, grid_size: int = 12):
+        self.threshold = threshold
+        self.critical_threshold = critical_threshold
+        self.grid_size = grid_size  # ขนาดกริดคุณลักษณะ 12x12 ช่องย่อย
+
+    def evaluate_sample(self, sample_name: str, grid_scores: list) -> dict:
+        flat_scores = [score for row in grid_scores for score in row]
+        mean_score = sum(flat_scores) / len(flat_scores)
+        max_score = max(flat_scores)
+        
+        # ตัดสินผลตามเกณฑ์ขีดเริ่มเปลี่ยน (Thresholding Logic)
+        if max_score > self.critical_threshold:
+            verdict = "REJECT_CRITICAL"
+            status_desc = "ไม่ผ่านเกณฑ์ขั้นวิกฤต (พบการชำรุดรุนแรง/แตกหัก)"
+            action_desc = "สั่งการก้านปัดคัดแยกชิ้นงาน และส่งสัญญาณแจ้งเตือนผู้ควบคุมเครื่องจักร"
+        elif max_score > self.threshold:
+            verdict = "REJECT_DEFECT"
+            status_desc = "ไม่ผ่านเกณฑ์ (ตรวจพบรอยตำหนิ/รอยขีดข่วนผิดปกติ)"
+            action_desc = "สั่งการก้านปัดคัดแยกชิ้นงานออกสู่ช่องกักกันเพื่อตรวจสอบซ้ำ"
+        elif max_score > (self.threshold * 0.6):
+            verdict = "PASS_WARNING"
+            status_desc = "ผ่านเกณฑ์แบบเฝ้าระวัง (มีความผันแปรของแสงหรือพื้นผิวเล็กน้อย)"
+            action_desc = "ส่งต่อชิ้นงานเข้าสู่กระบวนการถัดไป พร้อมบันทึกภาพลงฐานข้อมูลเพื่อวิเคราะห์แนวโน้ม"
+        else:
+            verdict = "PASS_NORMAL"
+            status_desc = "ผ่านเกณฑ์มาตรฐานสมบูรณ์ (ชิ้นงานปกติ)"
+            action_desc = "ส่งต่อชิ้นงานเข้าสู่กระบวนการบรรจุภัณฑ์ถัดไป"
+
+        return {
+            "sample_name": sample_name,
+            "mean_score": round(mean_score, 2),
+            "max_score": round(max_score, 2),
+            "verdict": verdict,
+            "status_description": status_desc,
+            "recommended_action": action_desc
+        }</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Execution Result Terminal -->
+          <div class="space-y-2 pt-2">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-terminal text-emerald-600"></i> ผลลัพธ์การรันคำสั่งทดสอบจริงบนคอนโซล:
+            </span>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-[11px] text-slate-400">Terminal Output (ASCII Grid Map & Anomaly Evaluation)</span>
+              </div>
+              <div class="terminal-body font-mono text-[11px]">
+<pre class="text-slate-300">$ python code_examples/chapter05/vad_test.py
+===========================================================================
+ บทเรียนที่ 5: โครงการตรวจจับความผิดปกติจากภาพบนระบบสมองกลฝังตัว (FOMO-AD)
+ รายงานผลการประเมินคะแนนความผิดปกติ (Visual Anomaly Assessment)
+===========================================================================
+
+[การประเมิน] BEARING_SAMPLE_001 (ลูกปืนปกติสมบูรณ์)
+  ├─ คะแนนเฉลี่ย (Mean Score):     2.38
+  ├─ คะแนนสูงสุด (Max Score):      3.95
+  ├─ พิกัดกริดที่ตรวจพบ (Row, Col):  (11, 0)
+  ├─ ผลการวินิจฉัย (Verdict):       ผ่านเกณฑ์มาตรฐานสมบูรณ์ (ชิ้นงานปกติ)
+  └─ คำสั่งปฏิบัติการทางกายภาพ:     ส่งต่อชิ้นงานเข้าสู่กระบวนการบรรจุภัณฑ์ถัดไป
+
+[การประเมิน] BEARING_SAMPLE_003 (ลูกปืนมีรอยตามด/รอยขีดข่วน)
+  ├─ คะแนนเฉลี่ย (Mean Score):     2.37
+  ├─ คะแนนสูงสุด (Max Score):      23.50
+  ├─ พิกัดกริดที่ตรวจพบ (Row, Col):  (4, 5)
+  ├─ ผลการวินิจฉัย (Verdict):       ไม่ผ่านเกณฑ์ (ตรวจพบรอยตำหนิ/รอยขีดข่วนผิดปกติ)
+  └─ คำสั่งปฏิบัติการทางกายภาพ:     สั่งการก้านปัดคัดแยกชิ้นงานออกสู่ช่องกักกันเพื่อตรวจสอบซ้ำ
+
+--- แผนภาพความผิดปกติ (Feature Grid Heatmap): BEARING_SAMPLE_003 ---
+    00 01 02 03 04 05 06 07 08 09 10 11
+04 [                <span class="text-red-400 font-bold">## ##</span>                ]
+
+[เสร็จสิ้น] ระบบประเมินค่าคะแนนความผิดปกติพร้อมนำไปเชื่อมโยงร่วมกับ Modular Brick</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: PRACTICAL TASKS CHECKLIST (5 TASKS)           -->
+        <!-- ======================================================== -->
+        <section id="sec-checklist" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">5</span>
+            <h2 class="text-xl font-bold text-slate-900">ใบงานและภารกิจปฏิบัติการประจำบทเรียน (Practical Tasks)</h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            ให้นักเรียนปฏิบัติตามภารกิจทั้ง 5 ขั้นตอน โดยคลิกทำเครื่องหมายลงในช่องสี่เหลี่ยมเมื่อปฏิบัติภารกิจเสร็จสมบูรณ์ ระบบจะคำนวณและบันทึกความก้าวหน้าลงในหน่วยความจำของอุปกรณ์โดยอัตโนมัติ
+          </p>
+
+          <div class="space-y-3 pt-2">
+            <!-- Task 1 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 1: ตรวจสอบและคัดกรองชุดข้อมูลภาพปกติ (Normal Data Auditing)</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  ตรวจสอบภาพชิ้นส่วนลูกปืนหรือแผงวงจรในเมนู Data Acquisition บน Edge Impulse Studio เพื่อให้มั่นใจว่าในโฟลเดอร์ Training มีเฉพาะภาพปกติที่ไม่มีรอยตำหนิอย่างน้อย 100 ภาพ และมีสภาวะแสงที่สม่ำเสมอ
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 2 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 2: สร้างและกำหนดค่าบล็อกประมวลผล Impulse Design</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  เข้าสู่เมนู Impulse Design กำหนดขนาดภาพความละเอียด 96x96 พิกเซล เพิ่มบล็อก Image (RGB) และเลือกบล็อกการเรียนรู้ Visual Anomaly Detection (FOMO-AD) พร้อมกด Save Impulse
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 3 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 3: ฝึกสอนโมเดลและตรวจสอบ 3D Feature Explorer</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  กดปุ่ม Start training และรอจนกระบวนการเสร็จสิ้น จากนั้นเปิดดู 3D Feature Explorer ตรวจสอบว่ากลุ่มข้อมูลปกติ (จุดสีเขียว) เกาะกลุ่มกันอย่างเหนียวแน่น และไม่มีจุดแปลกแยกกระเด็นออกนอกกลุ่มอย่างผิดปกติ
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 4 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 4: ทดสอบโมเดลด้วยชิ้นงานชำรุดและกำหนดค่า Anomaly Threshold</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  นำภาพที่มีรอยขีดข่วนและรอยแตกเข้าสู่ชุดทดสอบ (Model Testing) สังเกตค่า Anomaly Max Score และปรับเลื่อนสเกล Threshold เพื่อให้ได้ค่าที่สามารถแยกชิ้นงานปกติและชิ้นงานชำรุดได้อย่างชัดเจน
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 5 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 5: ปฏิบัติการทดสอบสคริปต์ประเมินผล vad_test.py</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  เปิด Terminal รันคำสั่ง <code class="font-mono text-blue-700 font-bold">python code_examples/chapter05/vad_test.py</code> สังเกตการรายงานค่าคะแนนทางสถิติและแผนภาพความร้อน ASCII Heatmap ที่จำลองพิกัดตำแหน่งรอยตำหนิ
+                </span>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 6: REVIEW QUESTIONS (3 QUESTIONS)                -->
+        <!-- ======================================================== -->
+        <section id="sec-questions" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">6</span>
+            <h2 class="text-xl font-bold text-slate-900">คำถามประเมินความเข้าใจและคิดวิเคราะห์ (Review Questions)</h2>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                1. เหตุใดในระบบควบคุมคุณภาพการผลิตเชิงอุตสาหกรรม (QC Inspection) จึงนิยมเลือกใช้เทคนิค One-Class Anomaly Detection มากกว่าการสร้างโมเดลจำแนกประเภทภาพทั่วไป (Standard 2-Class Classification: Normal vs Defect)?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เนื่องจากในสายการผลิตจริง ชิ้นงานที่ชำรุดเสียหายเกิดขึ้นได้ยากมาก (Data Imbalance สูง) และรูปแบบของความเสียหายมีความหลากหลายไม่สิ้นสุด (เช่น รอยแตกแนวเฉียง รอยคราบสารเคมี ชิ้นส่วนโก่งงอ) ซึ่งเป็นไปไม่ได้ที่จะเก็บตัวอย่างของเสียให้ครอบคลุมทุกรูปแบบ การใช้ <strong>One-Class Anomaly Detection</strong> จึงฝึกสอนเฉพาะชิ้นงานปกติที่สมบูรณ์เท่านั้น เมื่อมีชิ้นงานใดผิดเพี้ยนไปจากมาตรฐานเดิม ไม่ว่าจะเป็นรอยตำหนิรูปแบบใด ระบบก็จะสามารถตรวจจับและส่งสัญญาณแจ้งเตือนได้ทันทีโดยไม่ต้องเคยเห็นของเสียรูปแบบนั้นมาก่อน
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                2. ค่าคะแนน Anomaly Mean Score และ Anomaly Max Score มีหลักการคิดคำนวณที่แตกต่างกันอย่างไร และหากเป็นงานตรวจหารอยขีดข่วนขนาดเล็กบนลูกปืน ควรตัดสินใจด้วยค่าใดเป็นหลัก?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> <strong>Anomaly Mean Score</strong> คือค่าเฉลี่ยของคะแนนความผิดปกติของทุกกริดย่อยทั่วทั้งภาพ ส่วน <strong>Anomaly Max Score</strong> คือค่าคะแนนความผิดปกติที่สูงที่สุดในกริดย่อยใดกริดย่อยหนึ่งของภาพนั้น สำหรับกรณี <strong>รอยขีดข่วนขนาดเล็กบนลูกปืน</strong> จะต้องเลือกใช้ <strong>Anomaly Max Score</strong> เป็นเกณฑ์ตัดสินหลัก เพราะรอยขีดข่วนกินพื้นที่เพียง 1-2 กริดเท่านั้น หากใช้ค่า Mean Score ค่าความผิดปกติจะถูกเฉลี่ยเจือจางไปกับพื้นที่ปกติส่วนใหญ่ของภาพ ทำให้ตรวจไม่พบความผิดปกติ (False Negative)
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                3. หากนำโมเดลไปติดตั้งใช้งานจริงบนสายพานลำเลียง แล้วพบปัญหาว่าชิ้นงานปกติถูกก้านปัดคัดแยกออกบ่อยครั้งผิดปกติ (อัตรา False Positive สูง) ผู้พัฒนาควรตรวจสอบและปรับปรุงระบบที่จุดใดบ้างตามลำดับ?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> ควรดำเนินการตรวจสอบตามลำดับดังนี้:
+                  <br>1. <strong>ตรวจสอบสภาวะแสงและสิ่งแวดล้อมทางกายภาพ:</strong> ตรวจสอบว่ามีแสงสะท้อน แสงธรรมชาติจากภายนอกโรงงาน หรือการสั่นสะเทือนของกล้องที่เปลี่ยนไปจากตอนเก็บข้อมูลชุดฝึกสอนหรือไม่
+                  <br>2. <strong>ตรวจสอบการปรับค่าขีดเริ่มเปลี่ยน (Anomaly Threshold):</strong> ตรวจดูว่าเกณฑ์ Threshold ตั้งไว้ต่ำเกินไปหรือไม่ หากต่ำเกินไปให้เพิ่มค่าขีดเริ่มเปลี่ยนขึ้นทีละระดับ
+                  <br>3. <strong>เพิ่มความหลากหลายของชิ้นงานปกติในชุดฝึกสอน:</strong> เก็บรวบรวมภาพชิ้นงานปกติในสภาวะมุมมองและรอบการทำงานที่หลากหลายยิ่งขึ้น แล้วทำการฝึกสอนโมเดลใหม่เพื่อให้ขอบเขตกลุ่มปกติ (Normal Cluster Boundary) ครอบคลุมสภาวะการผลิตจริงได้สมบูรณ์
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 5 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=5#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 6: การนำโมเดล .eim ไปใช้งานและการกำหนดค่าไฟล์ app.yaml บนบอร์ดพัฒนา Arduino UNO Q</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">การคอมไพล์โมเดลไบนารี AArch64 การถ่ายโอนไฟล์ การกำหนดสิทธิ์ chmod +x และการตั้งค่า app.yaml</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter04.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 4</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter06.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>เข้าสู่บทเรียนที่ 6</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 2: สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick) และการควบคุมฮาร์ดแวร์พื้นฐาน | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* Custom Styling for Dedicated Lesson Page */
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    /* Smooth Callout Styles */
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+  <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://youtube.com/playlist?list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 2</span>
+          <span class="font-semibold text-white truncate">สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick) และการควบคุมฮาร์ดแวร์พื้นฐาน</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. CHAPTER HERO BANNER                                         -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#0d2342] text-white py-10 sm:py-14 border-b-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-slate-300 mb-4 font-medium">
+        <a href="index.html" class="hover:text-yellow-300 transition">หน้าหลัก</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-white/40"></i>
+        <a href="index.html#section-lessons" class="hover:text-yellow-300 transition">บทเรียนออนไลน์</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-white/40"></i>
+        <span class="text-[#fff200] font-bold">บทที่ 2</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-4 max-w-3xl">
+        <div class="inline-flex items-center gap-2 bg-[#fff200] text-[#173b6b] text-xs font-black px-3.5 py-1 rounded-full shadow">
+          <i class="fa-solid fa-cubes"></i> Software Architecture & I/O Module • สถาปัตยกรรมซอฟต์แวร์และการควบคุมอินพุต/เอาต์พุต
+        </div>
+        <h1 class="text-xl sm:text-3xl lg:text-4xl font-black font-heading leading-snug sm:leading-normal tracking-tight text-white">
+          สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick) <br class="hidden sm:inline">
+          <span class="text-[#fff200]">และการควบคุมฮาร์ดแวร์พื้นฐาน</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-3xl">
+          เอกสารประกอบการจัดการเรียนรู้และแนวปฏิบัติการเชิงลึก มุ่งเน้นการศึกษาโครงสร้างสถาปัตยกรรมซอฟต์แวร์แบบมอดูลาร์บน <strong>Arduino App Lab</strong> ในรูปแบบ <strong>"Brick"</strong> การทำงานของวงจรประมวลผลหลัก <code>App.run()</code> การเขียนชุดคำสั่งภาษาไพทอนเพื่อควบคุมอุปกรณ์อินพุตและเอาต์พุตพื้นฐาน ได้แก่ แผงไฟแสดงผล <strong>LED Matrix</strong> และสวิตช์ปุ่มกด (User Button) บนบอร์ดพัฒนา <strong>Arduino UNO Q</strong> ตลอดจนกลไกการสื่อสารแลกเปลี่ยนข้อมูลระหว่างหน่วยไมโครโปรเซสเซอร์ (Qualcomm QRB2210 MPU) และหน่วยไมโครคอนโทรลเลอร์ (ARM Cortex-M4 MCU) ผ่านระบบบัส IPC เพื่อเตรียมความพร้อมสู่การเชื่อมต่อโมเดลปัญญาประดิษฐ์ในระดับวิศวกรรม
+        </p>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-2">
+          <a href="#section-ep1" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=g4sF5nnsSeY" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: Arduino App Lab & Modular Brick)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+      </div>
+
+        <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">3 คาบ (150 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">สถาปัตยกรรมเป้าหมาย:</span>
+              <span class="font-bold text-white">Arduino UNO Q (IPC Bus)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">อุปกรณ์ควบคุม:</span>
+              <span class="font-bold text-white">LED Matrix & User Button</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter02/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter02 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. MAIN LAYOUT: STICKY TOC SIDEBAR + ARTICLE CONTENT          -->
+  <!-- ============================================================== -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- ========================================================== -->
+      <!-- A. STICKY TABLE OF CONTENTS SIDEBAR (3 COLS)               -->
+      <!-- ========================================================== -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-24 space-y-6">
+        
+        <!-- Table of Contents Navigation -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex items-center gap-2 font-bold text-[#173b6b] text-sm border-b border-slate-100 pb-3 mb-3">
+            <i class="fa-solid fa-list-check text-yellow-500"></i>
+            <span>สารบัญเนื้อหาบทที่ 2</span>
+          </div>
+          <nav class="space-y-1 text-xs">
+            <a href="#section-outcomes" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              1. สาระสำคัญและผลการเรียนรู้
+            </a>
+            <a href="#section-ep1" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              2. สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick)
+            </a>
+            <a href="#section-ep2" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              3. การควบคุมอุปกรณ์ฮาร์ดแวร์พื้นฐานและการแสดงผล
+            </a>
+            <a href="#section-ep3" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              4. กลไกการสื่อสารระหว่างโปรเซสเซอร์ (IPC) และการดีบัก
+            </a>
+            <a href="#section-ep4" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              5. การบูรณาการโครงสร้าง Brick สู่การรองรับระบบ AI
+            </a>
+            <a href="#section-checklist" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              6. การประเมินสมรรถนะการปฏิบัติการ (Performance Checklist)
+            </a>
+            <a href="#section-quiz" class="toc-link block px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-[#173b6b] transition">
+              7. คำถามทบทวนองค์ความรู้ท้ายบทเรียน
+            </a>
+          </nav>
+        </div>
+
+        <!-- Hardware Checklist Card -->
+        <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] rounded-2xl shadow-md p-5 text-white text-xs space-y-3 border-2 border-yellow-400/40">
+          <div class="flex items-center gap-2 text-yellow-300 font-bold text-xs uppercase tracking-wider">
+            <i class="fa-solid fa-box-open"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ (Laboratory Equipment)
+          </div>
+          <ul class="space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>บอร์ดพัฒนา <strong>Arduino UNO Q</strong> (Qualcomm Dragonwing QRB2210 + ARM Cortex-M4)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>สายเชื่อมต่อ <strong>USB Type-C</strong> (Data Cable รองรับกระแสไฟฟ้า 3A)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>แผงไฟแสดงผล <strong>LED Matrix</strong> และสวิตช์ปุ่มกด <strong>User Button</strong> ในตัวบอร์ด</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>เครื่องคอมพิวเตอร์พร้อมโปรแกรม <strong>Arduino App Lab</strong> และสภาพแวดล้อม <strong>Python 3.10+</strong></span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-[#fff200] mt-0.5"></i>
+              <span>ไฟล์โค้ดตัวอย่าง <strong><code>brick_runner.py</code></strong> และไฟล์การกำหนดค่า <strong><code>app.yaml</code></strong></span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=2#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 2
+          </a>
+          <a href="index.html?chapter=2#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 2
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- ========================================================== -->
+      <!-- B. MAIN ARTICLE CONTENT (9 COLS)                           -->
+      <!-- ========================================================== -->
+      <article class="lg:col-span-9 space-y-10">
+
+        <!-- ======================================================== -->
+        <!-- SECTION 1: สาระสำคัญและผลการเรียนรู้                     -->
+        <!-- ======================================================== -->
+        <section id="section-outcomes" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              การพัฒนาซอฟต์แวร์บนระบบสมองกลฝังตัวระดับสูงจำเป็นต้องมีสถาปัตยกรรมที่ยืดหยุ่น รองรับการทำงานแบบขนาน และนำกลับมาใช้ใหม่ได้ (Reusability) แพลตฟอร์ม <strong>Arduino App Lab</strong> ได้ออกแบบสถาปัตยกรรมซอฟต์แวร์แบบมอดูลที่เรียกว่า <strong>"Modular Brick"</strong> โดยห่อหุ้มฟังก์ชันการทำงานเป็นบล็อกอิสระ (Encapsulated Software Component) ผ่านการเขียนโปรแกรมเชิงวัตถุด้วยภาษาไพทอน ควบคุมผ่านวงจรประมวลผลหลัก <code>App.run()</code> และสื่อสารกับไมโครคอนโทรลเลอร์เพื่อควบคุมอุปกรณ์ฮาร์ดแวร์ เช่น แผงไฟแสดงผล LED Matrix และสวิตช์ปุ่มกด ผ่านระบบบัสสื่อสารระหว่างโปรเซสเซอร์ (Inter-Processor Communication: IPC) ซึ่งเป็นโครงสร้างพื้นฐานสำคัญในการผสานโมเดลปัญญาประดิษฐ์เข้ากับระบบควบคุมอัตโนมัติในโลกจริง
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายโครงสร้างและกลไกการทำงานของสถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick), ฟังก์ชันวงรอบการประมวลผล <code>App.run()</code> และหลักการสื่อสารระหว่างโปรเซสเซอร์ MPU และ MCU ได้อย่างถูกต้องตามหลักวิศวกรรม
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการควบคุมฮาร์ดแวร์ (Hardware Control)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถเขียนชุดคำสั่งภาษาไพทอนเพื่อควบคุมการแสดงผลบนแผงไฟ LED Matrix (ทั้งข้อความ ไอคอนกราฟิก และแอนิเมชัน) พร้อมทั้งรับและประมวลผลสัญญาณจากสวิตช์ปุ่มกด (User Button) ได้อย่างสมบูรณ์
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการออกแบบสถาปัตยกรรมซอฟต์แวร์ (Software Engineering)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถพัฒนาคลาส Brick แบบกำหนดเอง (Custom Brick) โดยประยุกต์ใช้วงจรชีวิต (Lifecycle Methods), การจัดการระบบบันทึกข้อความ (Console Logging) และการดักจับข้อผิดพลาด (Exception Handling) ได้อย่างมีประสิทธิภาพ
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความตระหนักในคุณค่าของการออกแบบโค้ดแบบแยกส่วน (Modular Design) มีวินัยในการปฏิบัติตามมาตรฐานการเขียนโปรแกรม และมีความละเอียดรอบคอบในการป้องกันข้อผิดพลาดที่อาจส่งผลกระทบต่ออุปกรณ์ฮาร์ดแวร์
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Ep.05)         -->
+        <!-- ======================================================== -->
+        <section id="section-ep1" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-cubes mr-1 text-yellow-400"></i> ตอนที่ 1: สถาปัตยกรรมซอฟต์แวร์แบบมอดูล
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick Architecture)
+            </h2>
+          </div>
+
+          <!-- คำอธิบายความหมายและแนวคิด Brick -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              ในระบบสมองกลฝังตัวแบบดั้งเดิม การเขียนโปรแกรมมักใช้ภาษา C/C++ ภายใต้รูปแบบเชิงกระบวนการ (Procedural Paradigm) ที่มีเพียงฟังก์ชัน <code>setup()</code> สำหรับกำหนดค่าเริ่มต้น และฟังก์ชัน <code>loop()</code> สำหรับทำงานวนซ้ำอย่างไม่รู้จบ แม้รูปแบบดังกล่าวจะเรียบง่ายสำหรับโปรเจกต์ขนาดเล็ก แต่เมื่อระบบต้องรองรับ <strong>การประมวลผลปัญญาประดิษฐ์ (AI Inference)</strong> ควบคู่กับ <strong>การอ่านค่าเซนเซอร์ความเร็วสูง</strong> และ <strong>การบันทึกฐานข้อมูล</strong> รูปแบบลูปเดี่ยวจะเกิดปัญหาคอขวด (Blocking I/O) ทำให้ระบบตอบสนองช้าและปรับปรุงขยายระบบได้ยาก
+            </p>
+            <p>
+              <strong>Arduino App Lab</strong> จึงได้นำเสนอแนวคิด <strong>"Modular Brick"</strong> ซึ่งเป็นการออกแบบเชิงมอดูลาร์ (Modular Design) โดยแบ่งการทำงานของโปรแกรมออกเป็นบล็อกย่อยที่มีหน้าที่เฉพาะเจาะจง (Single Responsibility Principle) เช่น <em>กล้อง Brick</em>, <em>โมเดล AI Brick</em>, <em>ฐานข้อมูล Brick</em> และ <em>อุปกรณ์ขับเคลื่อน Brick</em> โดยแต่ละ Brick จะถูกจัดการและประสานงานผ่านโมดูลศูนย์กลาง <code>App</code>
+            </p>
+          </div>
+
+          <!-- รูปภาพสถาปัตยกรรม Brick -->
+          <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+            <img src="images/chapters/ch02_modular_brick_architecture.jpg" alt="แผนภาพสถาปัตยกรรม Modular Brick บนบอร์ดพัฒนา Arduino UNO Q" class="w-full h-auto object-cover max-h-[460px]">
+            <div class="bg-slate-900 text-slate-300 text-xs px-4 py-2.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-diagram-project mr-2 text-yellow-400"></i><strong>ภาพที่ 2.1:</strong> แผนภาพแสดงสถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick Software Architecture) บนระบบปฏิบัติการลีนุกซ์และการเชื่อมต่อกับฮาร์ดแวร์ MCU ผ่านบัส IPC</span>
+              <span class="text-yellow-400 font-medium text-[11px]">Software Architecture</span>
+            </div>
+          </div>
+
+          <!-- ตารางเปรียบเทียบ Procedural vs Modular Brick -->
+          <div class="space-y-2">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">ตารางเปรียบเทียบเชิงวิศวกรรม: สถาปัตยกรรมเดิม vs สถาปัตยกรรมมอดูลาร์ Brick</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse border border-slate-200 rounded-xl overflow-hidden">
+                <thead class="bg-[#173b6b] text-white">
+                  <tr>
+                    <th class="p-3 border border-slate-300">เกณฑ์การพิจารณา</th>
+                    <th class="p-3 border border-slate-300">สถาปัตยกรรมเดิม (Procedural Loop)</th>
+                    <th class="p-3 border border-slate-300">สถาปัตยกรรมมอดูลาร์ (Modular Brick)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  <tr>
+                    <td class="p-3 font-bold border border-slate-200 text-slate-900">รูปแบบการเขียนโปรแกรม</td>
+                    <td class="p-3 border border-slate-200">ลำดับขั้นตอนเชิงเส้น (Linear Procedural)</td>
+                    <td class="p-3 border border-slate-200 text-emerald-700 font-semibold">เชิงวัตถุและขับเคลื่อนด้วยเหตุการณ์ (OOP & Event-Driven)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold border border-slate-200 text-slate-900">การจัดการงานมัลติทาสกิ้ง</td>
+                    <td class="p-3 border border-slate-200">เขียนโค้ดจับเวลาด้วย <code>millis()</code> หรือใช้ RTOS ซับซ้อน</td>
+                    <td class="p-3 border border-slate-200 text-emerald-700 font-semibold">ระบบบริหารคิวงานอัตโนมัติผ่านวงจรประมวลผล <code>App.run()</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold border border-slate-200 text-slate-900">การนำกลับมาใช้ใหม่ (Reusability)</td>
+                    <td class="p-3 border border-slate-200">ต่ำ (โค้ดผูกติดกันเป็นไฟล์เดี่ยว มักต้องคัดลอกและแก้ไขใหม่)</td>
+                    <td class="p-3 border border-slate-200 text-emerald-700 font-semibold">สูงมาก (สามารถนำ Brick ไปต่อในโปรเจกต์อื่นได้ทันที)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold border border-slate-200 text-slate-900">การเชื่อมต่อกับระบบ AI</td>
+                    <td class="p-3 border border-slate-200">ทำได้ยากและใช้ทรัพยากรชิปขนาดเล็กจนหน่วยความจำไม่เพียงพอ</td>
+                    <td class="p-3 border border-slate-200 text-emerald-700 font-semibold">เชื่อมต่อไฟล์โมเดล <code>.eim</code> และฐานข้อมูล SQL ได้อย่างเป็นระบบ</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- วงจรชีวิตของ Brick (Lifecycle) -->
+          <div class="space-y-3 pt-2">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-arrows-spin text-blue-600"></i> วงจรชีวิตและฟังก์ชันสำคัญของมอดูล Brick (Brick Lifecycle Methods)
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b]">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-xs">1</span>
+                  <span><code>__init__(self)</code></span>
+                </div>
+                <p class="text-slate-600">กำหนดค่าตัวแปรเริ่มต้น ผูกขาพิน และจัดเตรียมพารามิเตอร์การทำงานของมอดูล</p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b]">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-xs">2</span>
+                  <span><code>on_start(self)</code></span>
+                </div>
+                <p class="text-slate-600">ทำงานเพียงครั้งเดียวเมื่อระบบสั่งเริ่มต้นแอปพลิเคชัน เช่น การเปิดพอร์ตหรือแสดงไอคอนต้อนรับ</p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b]">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-xs">3</span>
+                  <span><code>update(self)</code></span>
+                </div>
+                <p class="text-slate-600">ฟังก์ชันวนลูปหลัก ถูกเรียกตามรอบเวลาเพื่อตรวจสอบสถานะเซนเซอร์ คำนวณ และสั่งการเอาต์พุต</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: การควบคุมอุปกรณ์ฮาร์ดแวร์พื้นฐาน (Ep.09–10)       -->
+        <!-- ======================================================== -->
+        <section id="section-ep2" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-microchip mr-1 text-yellow-400"></i> ตอนที่ 2: การควบคุมอุปกรณ์อินพุตและเอาต์พุต
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การควบคุมอุปกรณ์ฮาร์ดแวร์พื้นฐานและการแสดงผล (Hardware Control & I/O)
+            </h2>
+          </div>
+
+          <!-- เนื้อหาการควบคุมฮาร์ดแวร์ -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              บอร์ดพัฒนา <strong>Arduino UNO Q</strong> ได้รวมอุปกรณ์อินพุตและเอาต์พุตที่พร้อมใช้งานบนบอร์ดโดยไม่ต้องต่อวงจรภายนอกเพิ่มเติม ได้แก่:
+            </p>
+            <ul class="list-disc list-inside space-y-1.5 pl-2 text-slate-600">
+              <li><strong>แผงไฟแสดงผล LED Matrix:</strong> หลอดไฟ LED ความสว่างสูงจัดวางเป็นเมทริกซ์ ใช้สำหรับแสดงไอคอนสถานะ (Status Icon), ตัวเลขนับถอยหลัง, ค่าเปอร์เซ็นต์ความมั่นใจของ AI หรือข้อความแจ้งเตือนสถานการณ์ฉุกเฉิน</li>
+              <li><strong>สวิตช์ปุ่มกดอเนกประสงค์ (User Push Button):</strong> ปุ่มกดอินพุตต่อร่วมกับวงจรต้านทานพูลอัปภายใน (Internal Pull-Up Resistor) เหมาะสำหรับใช้สั่งเปลี่ยนโหมดการทำงานของโมเดล AI หรือการสั่งบันทึกข้อมูลภาพ</li>
+            </ul>
+          </div>
+
+          <!-- ภาพถ่ายอุปกรณ์จริง -->
+          <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+            <img src="images/chapters/ch02_led_matrix_control.jpg" alt="การปฏิบัติการควบคุม LED Matrix และสวิตช์ปุ่มกดบนบอร์ด Arduino UNO Q" class="w-full h-auto object-cover max-h-[460px]">
+            <div class="bg-slate-900 text-slate-300 text-xs px-4 py-2.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-camera mr-2 text-yellow-400"></i><strong>ภาพที่ 2.2:</strong> การปฏิบัติการควบคุมแผงไฟ LED Matrix แสดงไอคอนสถานะ AI พร้อมการรับสัญญาณจากสวิตช์ปุ่มกดบนบอร์ดพัฒนา Arduino UNO Q</span>
+              <span class="text-yellow-400 font-medium text-[11px]">Hardware Laboratory</span>
+            </div>
+          </div>
+
+          <!-- ชุดคำสั่งตัวอย่าง brick_runner.py -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-code text-blue-600"></i> ชุดคำสั่งภาษาไพทอนตัวอย่าง: <code>brick_runner.py</code>
+              </h4>
+              <span class="text-xs font-mono text-[#173b6b] bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-semibold">Python 3.10+</span>
+            </div>
+
+            <!-- Terminal Code Window -->
+            <div class="terminal-window shadow-lg">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <div class="w-3 h-3 rounded-full bg-red-500 inline-block"></div>
+                  <div class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></div>
+                  <div class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></div>
+                  <span class="text-xs text-slate-300 font-mono ml-2 font-bold">brick_runner.py</span>
+                </div>
+                <span class="text-[11px] text-yellow-300 font-mono">Arduino App Lab • Modular Brick</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-slate-200 font-mono text-xs leading-relaxed">
+<span class="text-slate-500">#!/usr/bin/env python3</span>
+<span class="text-slate-500"># -*- coding: utf-8 -*-</span>
+<span class="text-slate-400">"""
+หลักสูตร: ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded Artificial Intelligence)
+บทที่ 2: สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick) และการควบคุมฮาร์ดแวร์พื้นฐาน
+ไฟล์: brick_runner.py
+"""</span>
+
+<span class="text-purple-400">import</span> time
+<span class="text-purple-400">import</span> sys
+<span class="text-purple-400">import</span> logging
+
+<span class="text-slate-500"># นำเข้าโมดูลฮาร์ดแวร์และโครงสร้างแอปพลิเคชันจากไลบรารีทางการของ Arduino App Lab</span>
+<span class="text-purple-400">try</span>:
+    <span class="text-purple-400">from</span> arduino.app_utils <span class="text-purple-400">import</span> App
+    <span class="text-purple-400">from</span> arduino.peripherals <span class="text-purple-400">import</span> Matrix, Pin
+    IS_HARDWARE_AVAILABLE = <span class="text-emerald-400">True</span>
+<span class="text-purple-400">except</span> ImportError:
+    IS_HARDWARE_AVAILABLE = <span class="text-yellow-400">False</span>
+    logging.warning(<span class="text-yellow-300">"ไม่พบไลบรารีฮาร์ดแวร์ กำลังทำงานในโหมดจำลอง (Simulator Mode)"</span>)
+
+<span class="text-blue-400">class</span> <span class="text-yellow-300 font-bold">HardwareControlBrick</span>:
+    <span class="text-slate-400">"""
+    มอดูลซอฟต์แวร์สำหรับควบคุมการแสดงผลบนแผงไฟ LED Matrix
+    และจัดการเหตุการณ์การกดสวิตช์ปุ่มกด (Active-Low)
+    """</span>
+    <span class="text-blue-400">def</span> <span class="text-yellow-300">__init__</span>(self):
+        self.state_index = <span class="text-emerald-400">0</span>
+        self.icons = [<span class="text-green-300">"READY"</span>, <span class="text-green-300">"AI_ACTIVE"</span>, <span class="text-green-300">"WARNING"</span>]
+        
+        <span class="text-purple-400">if</span> IS_HARDWARE_AVAILABLE:
+            self.matrix = Matrix()
+            <span class="text-slate-500"># กำหนดพินปุ่มกดเป็น Input พร้อมเปิดตัวต้านทาน Pull-up ภายใน</span>
+            self.button = Pin(<span class="text-green-300">"USER_BTN"</span>, Pin.IN_PULLUP)
+        <span class="text-purple-400">else</span>:
+            self.matrix = <span class="text-emerald-400">None</span>
+            self.button = <span class="text-emerald-400">None</span>
+        
+        print(<span class="text-green-300">"[INFO] มอดูล HardwareControlBrick เริ่มต้นการทำงานสำเร็จ"</span>)
+
+    <span class="text-blue-400">def</span> <span class="text-yellow-300">on_start</span>(self):
+        <span class="text-slate-400">"""สั่งทำงานเมื่อเริ่มต้นโปรแกรม"""</span>
+        print(<span class="text-green-300">"[INFO] กำลังเตรียมความพร้อมอุปกรณ์แสดงผล..."</span>)
+        <span class="text-purple-400">if</span> self.matrix:
+            self.matrix.show_icon(<span class="text-green-300">"CHECK"</span>)  <span class="text-slate-500"># แสดงสัญลักษณ์เครื่องหมายถูก</span>
+            time.sleep(<span class="text-emerald-400">1.0</span>)
+            self.matrix.clear()
+        print(<span class="text-green-300">"[INFO] บอร์ดพร้อมตรวจรับเหตุการณ์และรันโมเดล"</span>)
+
+    <span class="text-blue-400">def</span> <span class="text-yellow-300">update</span>(self):
+        <span class="text-slate-400">"""วนลูปตรวจสอบสัญญาณปุ่มกดและอัปเดตการแสดงผล"""</span>
+        <span class="text-purple-400">if</span> self.button <span class="text-purple-400">and</span> <span class="text-purple-400">not</span> self.button.read():  <span class="text-slate-500"># Active-Low: 0 คือกด</span>
+            self.state_index = (self.state_index + <span class="text-emerald-400">1</span>) % len(self.icons)
+            current_mode = self.icons[self.state_index]
+            print(<span class="text-green-300">f"[EVENT] ผู้ใช้กดปุ่ม: สลับสู่โหมดการทำงาน -> {current_mode}"</span>)
+            
+            <span class="text-purple-400">if</span> self.matrix:
+                self.matrix.show_icon(current_mode)
+            
+            <span class="text-slate-500"># ป้องกันปัญหาการกระดอนของหน้าสัมผัสสวิตช์ (Software Debouncing)</span>
+            time.sleep(<span class="text-emerald-400">0.25</span>)
+
+    <span class="text-blue-400">def</span> <span class="text-yellow-300">on_stop</span>(self):
+        <span class="text-slate-400">"""คืนค่าและปิดการทำงานอย่างปลอดภัยเมื่อปิดโปรแกรม"""</span>
+        <span class="text-purple-400">if</span> self.matrix:
+            self.matrix.clear()
+        print(<span class="text-green-300">"[INFO] ปิดการทำงานของฮาร์ดแวร์อย่างปลอดภัย"</span>)
+
+<span class="text-purple-400">if</span> __name__ == <span class="text-green-300">"__main__"</span>:
+    <span class="text-slate-500"># สร้างอินสแตนซ์ศูนย์กลางของแอปพลิเคชัน</span>
+    app = App()
+    
+    <span class="text-slate-500"># ลงทะเบียนมอดูลฮาร์ดแวร์เข้าสู่ระบบ</span>
+    hw_brick = HardwareControlBrick()
+    app.register_brick(hw_brick)
+    
+    <span class="text-slate-500"># เริ่มต้นวงรอบการประมวลผลหลัก (Main Application Loop)</span>
+    print(<span class="text-green-300">"[SYSTEM] เริ่มต้นการรันระบบ Modular Brick Runner..."</span>)
+    app.run()
+</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- ข้อควรระวังเรื่อง Switch Bouncing -->
+          <div class="callout-tip p-4 rounded-xl text-xs sm:text-sm text-emerald-900 space-y-1">
+            <div class="font-bold flex items-center gap-2">
+              <i class="fa-solid fa-lightbulb text-emerald-600"></i> หลักการทางวิศวกรรม: การแก้ปัญหาสัญญาณกระดอนของสวิตช์ (Switch Debouncing)
+            </div>
+            <p>
+              สวิตช์ปุ่มกดเชิงกลเมื่อถูกกด แผ่นโลหะตัวนำภายในจะเกิดการสั่นสะเทือนทางกลศาสตร์ชั่วคราว ทำให้เกิดสัญญาณแรงดันไฟฟ้ากระดอนสลับระหว่าง High และ Low หลายครั้งภายในเวลาไม่กี่มิลลิวินาที ส่งผลให้ไมโครโปรเซสเซอร์เข้าใจผิดว่ามีการกดปุ่มหลายครั้ง ในโค้ดตัวอย่างจึงแก้ปัญหาด้วยเทคนิค <strong>Software Debouncing</strong> โดยการหน่วงเวลา <code>time.sleep(0.25)</code> เพื่อรอให้สัญญาณนิ่งสนิทก่อนรับคำสั่งครั้งถัดไป
+            </p>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: กลไกการสื่อสารระหว่างโปรเซสเซอร์ (Ep.06–08)       -->
+        <!-- ======================================================== -->
+        <section id="section-ep3" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-network-wired mr-1 text-yellow-400"></i> ตอนที่ 3: ระบบการสื่อสารและการบันทึกข้อมูล
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              กลไกการสื่อสารระหว่างโปรเซสเซอร์ (IPC) และการดีบักระบบ (IPC & Logging)
+            </h2>
+          </div>
+
+          <!-- กลไก IPC -->
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              เนื่องจากบอร์ดพัฒนา <strong>Arduino UNO Q</strong> มีหน่วยประมวลผลสองระบบแยกจากกันอย่างชัดเจน ได้แก่ <strong>MPU (Qualcomm QRB2210)</strong> และ <strong>MCU (ARM Cortex-M4)</strong> คำถามสำคัญคือ: <em>"โค้ดภาษาไพทอนที่รันบนลีนุกซ์สั่งเปิดหลอดไฟ LED หรืออ่านค่าพินบน MCU ได้อย่างไร?"</em>
+            </p>
+            <p>
+              คำตอบคือการทำงานผ่าน <strong>กลไกการสื่อสารระหว่างโปรเซสเซอร์ (Inter-Processor Communication: IPC)</strong> ภายใต้โพรโทคอล <strong>RPMsg (Remote Processor Messaging)</strong> ซึ่งทำงานผ่านหน่วยความจำที่ใช้งานร่วมกัน (Shared Memory Bus):
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div class="p-4 rounded-xl bg-slate-900 text-white space-y-2">
+                <div class="text-yellow-300 font-bold text-xs uppercase flex items-center gap-2">
+                  <i class="fa-solid fa-code"></i> ฝั่ง MPU (Linux Python Runtime)
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  เมื่อไพทอนเรียกใช้ <code>matrix.show_icon("CHECK")</code> ไลบรารีจะจัดเตรียมโครงสร้างคำสั่งเป็นแพ็กเก็ตข้อมูลไบนารี (Serial Payload) แล้วส่งผ่านไดรเวอร์ RPMsg ไปยังหน่วยความจำบัฟเฟอร์ความเร็วสูง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#173b6b] text-white space-y-2">
+                <div class="text-yellow-300 font-bold text-xs uppercase flex items-center gap-2">
+                  <i class="fa-solid fa-microchip"></i> ฝั่ง MCU (Cortex-M4 Firmware)
+                </div>
+                <p class="text-xs text-slate-200 leading-relaxed">
+                  เฟิร์มแวร์ระบบเวลาจริง (FreeRTOS) บน Cortex-M4 จะตรวจจับสัญญาณขัดจังหวะ (Hardware Interrupt) ถอดรหัสคำสั่ง และส่งกระแสไฟฟ้าไปยังชิปไดรเวอร์เพื่อจุดหลอดไฟ LED Matrix ทันทีภายในเวลาต่ำกว่า 1 ไมโครวินาที
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ระบบ Logging 4 ระดับ -->
+          <div class="space-y-3 pt-2">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-terminal text-blue-600"></i> มาตรฐานระดับการบันทึกข้อความเพื่อการดีบักระบบ (Logging Levels)
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              
+              <div class="p-3 rounded-xl bg-blue-50 border border-blue-200 space-y-1">
+                <span class="font-bold text-blue-700"><i class="fa-solid fa-bug mr-1"></i>DEBUG</span>
+                <p class="text-slate-600 text-[11px]">ใช้สำหรับบันทึกข้อมูลเชิงลึก เช่น ค่าดิบของเซนเซอร์ เพื่อการวิเคราะห์หาสาเหตุของปัญหา</p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
+                <span class="font-bold text-emerald-700"><i class="fa-solid fa-circle-info mr-1"></i>INFO</span>
+                <p class="text-slate-600 text-[11px]">ใช้แสดงสถานะการทำงานปกติ เช่น เริ่มต้นระบบสำเร็จ หรือโหมดที่กำลังทำงานอยู่</p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+                <span class="font-bold text-amber-700"><i class="fa-solid fa-triangle-exclamation mr-1"></i>WARNING</span>
+                <p class="text-slate-600 text-[11px]">แจ้งเตือนเหตุการณ์ผิดปกติที่ไม่ทำให้โปรแกรมหยุด เช่น สัญญาณเครือข่ายอ่อน หรือค่าตัวแปรใกล้ล้น</p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-red-50 border border-red-200 space-y-1">
+                <span class="font-bold text-red-700"><i class="fa-solid fa-circle-xmark mr-1"></i>ERROR</span>
+                <p class="text-slate-600 text-[11px]">ข้อผิดพลาดร้ายแรงที่ทำให้ระบบส่วนใดส่วนหนึ่งหยุดทำงาน เช่น ขาดการเชื่อมต่อกับอุปกรณ์ฮาร์ดแวร์</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: การบูรณาการโครงสร้างสู่ AI                    -->
+        <!-- ======================================================== -->
+        <section id="section-ep4" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="badge-ep text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
+              <i class="fa-solid fa-brain mr-1 text-yellow-400"></i> ตอนที่ 4: การเตรียมความพร้อมสู่ระบบ Edge AI
+            </span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-2">
+              การบูรณาการโครงสร้าง Brick สู่การรองรับโมเดล AI และฐานข้อมูล
+            </h2>
+          </div>
+
+          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+            <p>
+              เมื่อเข้าใจสถาปัตยกรรมของ <strong>Modular Brick</strong> และการควบคุมอุปกรณ์ฮาร์ดแวร์แล้ว ในบทเรียนถัดไป ระบบจะนำบล็อกซอฟต์แวร์เหล่านี้มาประกอบเข้าด้วยกันเป็น <strong>ขั้นตอนการประมวลผลข้อมูล (Data Pipeline)</strong> สำหรับงานปัญญาประดิษฐ์เชิงวิศวกรรม:
+            </p>
+
+            <!-- Flowchart Pipeline Block -->
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-2.5 text-center text-xs pt-2">
+              
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-black mx-auto flex items-center justify-center text-xs">1</div>
+                <div class="font-bold text-slate-900">Input Brick</div>
+                <div class="text-[11px] text-slate-500">รับภาพจากกล้อง UVC หรือเสียงจากไมโครโฟน</div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-800 font-black mx-auto flex items-center justify-center text-xs">2</div>
+                <div class="font-bold text-slate-900">AI Inference</div>
+                <div class="text-[11px] text-slate-500">ประมวลผลโมเดล <code>.eim</code> (VAD / FOMO / KWS)</div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-black mx-auto flex items-center justify-center text-xs">3</div>
+                <div class="font-bold text-slate-900">Logic Brick</div>
+                <div class="text-[11px] text-slate-500">เปรียบเทียบค่าคะแนนกับเกณฑ์ Threshold</div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-black mx-auto flex items-center justify-center text-xs">4</div>
+                <div class="font-bold text-slate-900">Database Brick</div>
+                <div class="text-[11px] text-slate-500">บันทึกประวัติการตรวจจับลงใน SQLite (บทที่ 3)</div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-[#173b6b] text-white space-y-1 shadow-md">
+                <div class="w-8 h-8 rounded-full bg-[#fff200] text-[#173b6b] font-black mx-auto flex items-center justify-center text-xs">5</div>
+                <div class="font-bold text-yellow-300">Actuator Brick</div>
+                <div class="text-[11px] text-slate-200">แสดงผล LED Matrix หรือสั่งงานมอเตอร์คัดแยก</div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 6: การประเมินสมรรถนะการปฏิบัติการ                -->
+        <!-- ======================================================== -->
+        <section id="section-checklist" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 6</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              การประเมินสมรรถนะการปฏิบัติการ (Performance Assessment Checklist)
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">รายการเกณฑ์การตรวจสอบสมรรถนะที่ผู้เรียนต้องผ่านการประเมินผลในบทเรียนที่ 2</p>
+          </div>
+
+          <div class="space-y-3">
+            
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 1: การสร้างโครงสร้างคลาส Custom Brick และลงทะเบียนเข้าสู่ระบบ App.run()</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ออกแบบคลาสที่มีเมธอด <code>__init__</code>, <code>on_start</code>, และ <code>update</code> ตามแบบแผนเชิงวัตถุได้อย่างถูกต้อง</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 2: การเขียนคำสั่งควบคุมแผงไฟแสดงผล LED Matrix เพื่อแสดงไอคอนสถานะ</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ใช้ฟังก์ชัน <code>show_icon()</code> และ <code>clear()</code> เพื่อแสดงสัญลักษณ์บ่งชี้สถานะระบบได้อย่างสมบูรณ์</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 3: การประมวลผลสัญญาณปุ่มกด User Button พร้อมอัลกอริทึม Software Debouncing</span>
+                <p class="text-slate-500 mt-0.5 text-xs">กำหนดพินเป็น Input Pull-Up และเขียนโค้ดหน่วงเวลาเพื่อป้องกันสัญญาณกระดอนได้อย่างถูกต้อง</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 4: การจัดระบบ Logging และดักจับความผิดพลาดของระบบผ่านคำสั่ง Try-Except</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ใช้โมดูล <code>logging</code> หรือคำสั่งดักจับข้อผิดพลาดเพื่อรองรับโหมดทดสอบจำลอง (Simulator) เมื่อไม่มีฮาร์ดแวร์จริง</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-yellow-50/50 transition">
+              <input type="checkbox" class="mt-1 w-4 h-4 text-[#173b6b] rounded focus:ring-yellow-400">
+              <div class="text-xs sm:text-sm">
+                <span class="font-bold text-slate-900">ภารกิจที่ 5: การประเมินผลสัมฤทธิ์ทางการเรียนท้ายบทเรียนที่ 2 ผ่านเกณฑ์ร้อยละ 70</span>
+                <p class="text-slate-500 mt-0.5 text-xs">ทำแบบทดสอบวัดผลสัมฤทธิ์ทางการเรียนประจำบทที่ 2 ในศูนย์ทดสอบออนไลน์ของระบบครบถ้วนและผ่านเกณฑ์ที่กำหนด</p>
+              </div>
+            </label>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 7: คำถามทบทวนองค์ความรู้ท้ายบทเรียน              -->
+        <!-- ======================================================== -->
+        <section id="section-quiz" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 7</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              คำถามทบทวนองค์ความรู้ท้ายบทเรียน (Academic Review Questions)
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">แบบฝึกหัดสำหรับประเมินตนเองและทบทวนเนื้อหาสำคัญเพื่อเตรียมความพร้อมสู่การปฏิบัติการขั้นสูง</p>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>1. เหตุใดสถาปัตยกรรมแบบมอดูล (Modular Brick) จึงเหมาะสมสำหรับการพัฒนาระบบ Edge AI มากกว่าการเขียนโค้ดแบบลูปเดียว (<code>void loop()</code>) ใน Arduino แบบดั้งเดิม?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เนื่องจากงานด้าน Edge AI มีความซับซ้อนสูง ประกอบด้วยหลายขั้นตอนที่ต้องทำงานประสานกัน เช่น การจับภาพจากกล้อง, การคำนวณโครงข่ายประสาทเทียม (AI Inference), การบันทึกข้อมูลประวัติลงฐานข้อมูล SQL และการควบคุมเอาต์พุต หากเขียนแบบลูปเดียว การที่ฟังก์ชันใดฟังก์ชันหนึ่งทำงานช้าจะทำให้ทั้งระบบเกิดการหน่วงและหยุดชะงัก (Blocking) ในขณะที่สถาปัตยกรรมแบบมอดูลาร์ Brick ได้แยกฟังก์ชันออกเป็นมอดูลอิสระ มีวงจรชีวิตและการจัดการคิวงานผ่าน <code>App.run()</code> ทำให้โค้ดมีความยืดหยุ่น ปรับปรุงแก้ไขง่าย และนำกลับมาใช้ใหม่ (Reusable) ได้อย่างมีประสิทธิภาพ
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>2. ในสถาปัตยกรรมการประมวลผลร่วมของบอร์ด Arduino UNO Q กลไกการสื่อสารระหว่าง MPU (Qualcomm QRB2210) กับ MCU (Cortex-M4) มีความสำคัญอย่างไรในการควบคุมฮาร์ดแวร์แบบเรียลไทม์?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เนื่องจาก MPU ทำงานภายใต้ระบบปฏิบัติการ Linux ซึ่งเป็นระบบปฏิบัติการแบบแบ่งเวลา (Time-Sharing OS) ไม่ใช่ระบบเวลาจริง (Real-Time OS) จึงอาจมีความคลาดเคลื่อนของจังหวะเวลา (Jitter) หากสั่งการขาสัญญาณหรือไฟ LED Matrix โดยตรง แต่ด้วยกลไก <strong>IPC (RPMsg)</strong> MPU สามารถส่งคำสั่งระดับสูงไปยังไมโครคอนโทรลเลอร์ <strong>MCU (Cortex-M4)</strong> ซึ่งทำงานด้วยระบบเวลาจริง เพื่อให้ MCU เป็นผู้ควบคุมขาสัญญาณพินและหลอดไฟด้วยความแม่นยำระดับไมโครวินาที ทำให้การควบคุมอุปกรณ์ฮาร์ดแวร์มีความเสถียรและแม่นยำสูงสุด
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center justify-between">
+                <span>3. ปรากฏการณ์สัญญาณกระดอนของสวิตช์ปุ่มกด (Switch Bouncing) เกิดขึ้นจากสาเหตุใด และในซอฟต์แวร์ Brick มีแนวทางการแก้ไขปัญหานี้อย่างไร?</span>
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เกิดจากหน้าสัมผัสโลหะภายในสวิตช์เชิงกลเมื่อถูกกด จะเกิดการกระเด้งและสั่นสะเทือนชั่วครู่ก่อนจะสัมผัสกันสนิท ทำให้ระดับแรงดันไฟฟ้าสลับระหว่าง High และ Low ซ้ำ ๆ ในช่วง 5–20 มิลลิวินาที ส่งผลให้หน่วยประมวลผลตีความว่าถูกกดปุ่มซ้ำหลายครั้ง แนวทางการแก้ไขในซอฟต์แวร์ Brick สามารถทำได้โดยใช้วิธี <strong>Software Debouncing</strong> เช่น การใช้คำสั่งหน่วงเวลา (<code>time.sleep(0.25)</code>) หรือการตรวจเช็คเวลาผ่านฟังก์ชันนาฬิกา (Timer Threshold) เพื่อให้ระบบเพิกเฉยต่อสัญญาณรบกวนในช่วงเวลาสั้น ๆ หลังจากตรวจพบการกดครั้งแรก
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 2 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=2#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 3: การจัดการระบบฐานข้อมูลบนอุปกรณ์ด้วย Database-SQL Brick</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">ศึกษาการเชื่อมโยงระบบบันทึกประวัติการตรวจจับ AI และการสืบค้นข้อมูลย้อนหลัง</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter01.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 1</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter03.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>เข้าสู่บทเรียนที่ 3</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

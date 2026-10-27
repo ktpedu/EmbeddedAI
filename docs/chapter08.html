@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 8: การฝึกสอนโมเดลตรวจจับวัตถุด้วยสถาปัตยกรรม FOMO (Object Detection) | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+    <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=glQx9GTLEUI&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=30" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 8</span>
+          <span class="font-semibold text-white truncate">การฝึกสอนโมเดลตรวจจับวัตถุด้วยสถาปัตยกรรม FOMO (Object Detection)</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. CHAPTER HERO BANNER                                         -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#1e4b8a] text-white py-10 px-4 sm:px-6 lg:px-8 border-b-4 border-[#fff200] relative overflow-hidden">
+    <div class="absolute -right-16 -top-16 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-yellow-300 mb-3">
+        <a href="index.html" class="hover:underline flex items-center gap-1"><i class="fa-solid fa-house text-[10px]"></i> หน้าหลัก</a>
+        <span>/</span>
+        <a href="index.html#section-curriculum" class="hover:underline">หลักสูตร 12 บทเรียน</a>
+        <span>/</span>
+        <span class="text-white font-medium">บทที่ 8: การฝึกสอนโมเดลตรวจจับวัตถุด้วยสถาปัตยกรรม FOMO</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-2 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-ep text-xs font-bold uppercase tracking-wider">
+            <i class="fa-solid fa-crosshairs text-[#fff200]"></i> หมวดการตรวจจับวัตถุและการจำแนกตำแหน่งเชิงพื้นที่ (Object Detection & Spatial Localization)
+          </div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
+            บทที่ 8: การฝึกสอนโมเดลตรวจจับวัตถุด้วยสถาปัตยกรรม FOMO <br class="hidden sm:inline">
+            <span class="text-[#fff200] text-xl sm:text-2xl font-bold">(Training Ultra-Fast Object Detection Models using FOMO)</span>
+          </h1>
+          <p class="text-sm sm:text-base text-slate-200 leading-relaxed pt-1">
+            ศึกษาสถาปัตยกรรมโครงข่ายประสาทเทียม FOMO (Faster Objects, More Objects) ที่ออกแบบเฉพาะสำหรับตรวจจับวัตถุหลายชิ้นบนอุปกรณ์สมองกลฝังตัว การติดป้ายกำกับกรอบวัตถุ (Bounding Box Labeling) การฝึกสอนด้วย MobileNetV2 0.35 และการประเมินสมรรถนะด้วย Confusion Matrix, Precision, Recall และ F1-Score
+          </p>
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-3">
+          <a href="#sec-objectives" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=glQx9GTLEUI" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/13lyv179wa2fo0igkep1i977e13dv6kd" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: FOMO Object Detection Architecture)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+        </div>
+
+        <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">4 คาบ (200 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ทฤษฎี & ปฏิบัติ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">สถาปัตยกรรม AI:</span>
+              <span class="font-bold text-white">FOMO (Centroid Grid)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">โครงข่ายพื้นฐาน:</span>
+              <span class="font-bold text-white">MobileNetV2 0.35</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter08/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter08 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. CONTENT WRAPPER & SIDEBAR LAYOUT                            -->
+  <!-- ============================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- STICKY TABLE OF CONTENTS (LEFT SIDEBAR) -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-24 space-y-6">
+        <div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#173b6b] mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-yellow-500"></i> สารบัญเนื้อหาบทที่ 8
+            </h3>
+            <nav class="space-y-1 text-xs">
+              <a href="#sec-objectives" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition"> 1. สาระสำคัญและผลการเรียนรู้</a>
+              <a href="#sec-architecture" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">2. สถาปัตยกรรมโมเดล FOMO</a>
+              <a href="#sec-content" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">3. เนื้อหาบทเรียน 4 ตอน</a>
+              <a href="#sec-code" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">4. โค้ดตัวอย่าง fomo_eval.py</a>
+              <a href="#sec-checklist" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">5. ภารกิจปฏิบัติการ 5 ขั้นตอน</a>
+              <a href="#sec-questions" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">6. คำถามประเมินความเข้าใจ</a>
+            </nav>
+          </div>
+
+          <!-- Practical Download Card -->
+          <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] text-white rounded-2xl p-4 shadow-sm border-t-2 border-[#fff200] text-xs space-y-2">
+            <div class="font-bold flex items-center gap-1.5 text-yellow-300">
+              <i class="fa-solid fa-cube"></i> สคริปต์ประจำบทเรียน
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              ทดสอบการคำนวณจุดกึ่งกลาง Centroid และตัวชี้วัด Precision / Recall / F1-Score
+            </p>
+            <div class="font-mono text-[10px] bg-black/40 p-2 rounded border border-white/10 text-yellow-200 overflow-x-auto">
+              python code_examples/chapter08/fomo_eval.py
+            </div>
+          </div>
+        </div>
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>กล้อง USB UVC Webcam พร้อมฉากและแท่นวางวัตถุสำหรับกำหนด Bounding Box</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>วัตถุหรือชิ้นส่วนเป้าหมายสำหรับการตรวจจับตำแหน่งจุดกึ่งกลาง (Centroid)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>สายเชื่อมต่อ USB Type-C และบัญชี Edge Impulse Studio</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=8#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 8
+          </a>
+          <a href="index.html?chapter=8#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 8
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- MAIN CONTENT ARTICLE (3 COLS) -->
+      <article class="lg:col-span-9 space-y-8">
+        
+        <!-- ======================================================== -->
+        <!-- SECTION 1: OBJECTIVES (K-P1-P2-A)                        -->
+        <!-- ======================================================== -->
+        <section id="sec-objectives" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              การตรวจจับวัตถุบนอุปกรณ์สมองกลฝังตัวจำเป็นต้องอาศัยโครงข่ายประสาทเทียมที่มีความเร็วสูงและใช้ทรัพยากรคำนวณต่ำ สถาปัตยกรรม <strong>FOMO (Faster Objects, More Objects)</strong> ได้รับการออกแบบขึ้นมาเพื่อทดแทนโมเดลตรวจจับวัตถุแบบเดิม โดยเปลี่ยนจากการทำนายกรอบสี่เหลี่ยม (Bounding Box Regression) มาเป็นการพยากรณ์จุดศูนย์กลางของวัตถุผ่านตารางกริดย่อย (Centroid Grid Prediction) บนโครงข่าย MobileNetV2 ทำให้ประมวลผลได้เร็วกว่าโมเดลทั่วไปถึง 30 เท่า และใช้หน่วยความจำ RAM เพียงไม่กี่ร้อยกิโลไบต์ จึงเหมาะสมอย่างยิ่งสำหรับงานนับจำนวนและระบุตำแหน่งชิ้นงานบนระบบ Edge AI
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายหลักการทำงานของโมเดล FOMO ความแตกต่างระหว่างการพยากรณ์กรอบวัตถุกับการแบ่งเซลล์กริดพยากรณ์จุดศูนย์กลาง และตัวชี้วัดประสิทธิภาพ (Precision, Recall, F1-Score) ได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการจัดเตรียมและติดป้ายกำกับ (Data Acquisition & Labeling)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถจัดเตรียมชุดข้อมูลภาพวัตถุ กำหนดขอบเขตกรอบสี่เหลี่ยมในเมนู Labeling Queue และจัดสรรสัดส่วนชุดข้อมูลฝึกสอนต่อชุดข้อมูลทดสอบตามมาตรฐานสถิติได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการฝึกสอนและประเมินโมเดล (Training & Evaluation)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถออกแบบบล็อก Impulse, ปรับแต่งพารามิเตอร์การฝึกสอนโมเดล MobileNetV2 (0.35), วิเคราะห์ตาราง Confusion Matrix และส่งออกโมเดล .eim สำหรับนำไปใช้งานจริงได้อย่างสมบูรณ์
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความมุ่งมั่นและละเอียดรอบคอบในการติดป้ายกำกับข้อมูลวัตถุ ตระหนักถึงความสำคัญของความสมดุลระหว่างความเร็วและความแม่นยำในการตรวจจับ และมีทัศนคติที่ดีต่อการพัฒนานวัตกรรมปัญญาประดิษฐ์
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: ARCHITECTURE & FUNDAMENTALS                   -->
+        <!-- ======================================================== -->
+        <section id="sec-architecture" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">2</span>
+            <h2 class="text-xl font-bold text-slate-900">สถาปัตยกรรมโมเดล FOMO และการตรวจจับจุดศูนย์กลางวัตถุ</h2>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              โมเดลตรวจจับวัตถุแบบเดิม เช่น <strong>YOLO (You Only Look Once)</strong> หรือ <strong>SSD (Single Shot MultiBox Detector)</strong> มีโครงสร้างที่ซับซ้อนอย่างยิ่ง เนื่องจากต้องทำนายทั้งตำแหน่งพิกัด ขอบเขตความกว้างความสูง (Bounding Box Regression) และการคำนวณ Anchor Boxes หลายพันจุดพร้อมกัน ส่งผลให้ต้องการหน่วยความจำแรม (RAM) หลายสิบเมกะไบต์ และจำเป็นต้องใช้ชิปประมวลผลกราฟิก (GPU) ซึ่งไม่สามารถทำงานได้บนอุปกรณ์สมองกลฝังตัวขนาดเล็ก
+            </p>
+            <p>
+              สถาปัตยกรรม <strong>FOMO (Faster Objects, More Objects)</strong> ได้รับการคิดค้นขึ้นเพื่อแก้ปัญหาดังกล่าว โดยเปลี่ยนโจทย์การตรวจจับวัตถุให้กลายเป็นการ <strong>จำแนกประเภทจุดศูนย์กลางบนตารางกริด (Grid-based Centroid Classification)</strong> โมเดลจะแบ่งภาพออกเป็นเซลล์ย่อย (เช่น ตารางขนาด 12x12 สำหรับภาพ 96x96 พิกเซล) แล้วทำนายว่าใจกลางของแต่ละเซลล์เป็นพื้นหลัง (Background) หรือเป็นจุดกึ่งกลางของวัตถุประเภทใด ผลลัพธ์คือขนาดของโมเดลลดลงเหลือเพียง <strong>น้อยกว่า 300 KB</strong> และมีความเร็วในการประมวลผลสูงกว่าโมเดลแบบเดิมถึง <strong>30 เท่า</strong>
+            </p>
+          </div>
+
+          <!-- Infographic Architecture Diagram -->
+          <div class="space-y-2">
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+              <img src="images/chapters/ch08_fomo_architecture.jpg" alt="FOMO Object Detection Architecture" class="w-full object-cover">
+            </div>
+            <p class="text-[11px] text-slate-500 text-center italic">
+              รูปที่ 8.1: แผนภาพแสดงโครงสร้างสถาปัตยกรรม FOMO และการแปลงปัญหาการตรวจจับกรอบวัตถุสู่การจำแนกจุดศูนย์กลางบนกริดคุณลักษณะ
+            </p>
+          </div>
+
+          <!-- Architecture Comparison Table -->
+          <div class="overflow-x-auto pt-2">
+            <table class="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+              <thead class="bg-[#173b6b] text-white uppercase text-[11px]">
+                <tr>
+                  <th class="py-2.5 px-3">คุณลักษณะเปรียบเทียบ</th>
+                  <th class="py-2.5 px-3">สถาปัตยกรรมแบบเดิม (YOLOv5 / SSD)</th>
+                  <th class="py-2.5 px-3 bg-[#1e4b8a]">สถาปัตยกรรม FOMO (Edge Impulse)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr class="bg-white hover:bg-slate-50">
+                  <td class="py-2.5 px-3 font-bold text-slate-900">เป้าหมายผลลัพธ์ (Output)</td>
+                  <td class="py-2.5 px-3 text-slate-600">พิกัดกรอบล้อมรอบ [x, y, width, height]</td>
+                  <td class="py-2.5 px-3 font-bold text-blue-900">จุดศูนย์กลางของวัตถุ Centroid (cx, cy)</td>
+                </tr>
+                <tr class="bg-slate-50/50 hover:bg-slate-50">
+                  <td class="py-2.5 px-3 font-bold text-slate-900">การใช้หน่วยความจำแรม (RAM)</td>
+                  <td class="py-2.5 px-3 text-red-600 font-mono">10 MB - 60 MB+</td>
+                  <td class="py-2.5 px-3 text-emerald-600 font-bold font-mono">&lt; 300 KB (ลดลง 95%+)</td>
+                </tr>
+                <tr class="bg-white hover:bg-slate-50">
+                  <td class="py-2.5 px-3 font-bold text-slate-900">ความเร็วในการประมวลผล</td>
+                  <td class="py-2.5 px-3 text-slate-600">1 - 5 FPS (บน Arm Cortex)</td>
+                  <td class="py-2.5 px-3 font-bold text-emerald-600">30 - 60+ FPS (เวลาจริง)</td>
+                </tr>
+                <tr class="bg-slate-50/50 hover:bg-slate-50">
+                  <td class="py-2.5 px-3 font-bold text-slate-900">การตรวจนับวัตถุหลายชิ้น</td>
+                  <td class="py-2.5 px-3 text-slate-600">ต้องใช้ขั้นตอน Non-Maximum Suppression (NMS)</td>
+                  <td class="py-2.5 px-3 text-blue-900 font-bold">นับจำนวนได้ทันทีจากจุดยอดในกริด</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: LESSON 4 UNITS                                -->
+        <!-- ======================================================== -->
+        <section id="sec-content" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-8">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">3</span>
+            <h2 class="text-xl font-bold text-slate-900">เนื้อหาบทเรียน 4 ตอน (Course Content Units)</h2>
+          </div>
+
+          <!-- Unit 1 -->
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 1</span>
+              <h3 class="text-base font-bold text-slate-900">หลักการทำงานของโมเดล FOMO และการแบ่งเซลล์กริด</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+              <p>
+                ในการทำงานของ FOMO ภาพอินพุตจะถูกประมวลผลผ่านโครงข่ายประสาทเทียมแบบคอนโวลูชัน (Fully Convolutional Network: FCN) โดยไม่มีชั้น Fully Connected ที่ตอนท้าย ทำให้ภาพขนาด <code class="font-mono text-blue-800">96x96</code> พิกเซลถูกบีบอัดลงมาเป็นตารางขนาด <code class="font-mono text-blue-800">12x12</code> เซลล์ (Downsampling Factor = 8)
+              </p>
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="font-bold text-xs text-[#173b6b]">ข้อจำกัดและข้อควรระวังในการออกแบบ (Resolution Trade-off):</div>
+                <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside leading-relaxed">
+                  <li>เนื่องจากขนาดเซลล์ของกริดมีขนาด 8x8 พิกเซล หากมีวัตถุ 2 ชิ้นอยู่ใกล้กันมากจนจุดศูนย์กลางตกลงในเซลล์เดียวกัน โมเดลจะตรวจจับวัตถุดังกล่าวได้เพียงชิ้นเดียว</li>
+                  <li>หากต้องการตรวจจับวัตถุขนาดเล็กมากหรืออยู่ชิดกัน ให้เพิ่มความละเอียดภาพอินพุตเป็น <code class="font-mono text-slate-800">160x160</code> หรือ <code class="font-mono text-slate-800">320x320</code> พิกเซล เพื่อให้เซลล์กริดมีขนาดเล็กลง</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 2 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 2</span>
+              <h3 class="text-base font-bold text-slate-900">การจัดเตรียมชุดข้อมูลและการติดป้ายกำกับกรอบวัตถุ (Bounding Box Labeling)</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+              <p>
+                การติดป้ายกำกับข้อมูลภาพบน Edge Impulse Studio ในโหมด <strong>Bounding Boxes</strong> มีขั้นตอนการปฏิบัติดังนี้:
+              </p>
+              <ol class="list-decimal list-inside space-y-1.5 text-xs text-slate-700 pl-1">
+                <li>เปิดเมนู <strong>Data acquisition</strong> แล้วเลือกภาพที่ต้องการกำหนดป้ายกำกับ</li>
+                <li>ใช้เครื่องมือตีกรอบสี่เหลี่ยมล้อมรอบตัววัตถุแต่ละชิ้น เช่น ล้อมรอบชิ้นส่วนตลับลูกปืน (Bearing), น็อตตัวผู้ (Bolt), หรือน็อตตัวเมีย (Nut)</li>
+                <li>กำหนดชื่อคลาสกำกับกรอบให้ตรงตามประเภทชิ้นงาน</li>
+                <li>ระบบจะคำนวณจุดกึ่งกลางของกรอบสี่เหลี่ยมเพื่อใช้เป็นค่าอ้างอิงจริง (Ground Truth Centroid) สำหรับการฝึกสอนโดยอัตโนมัติ</li>
+              </ol>
+
+              <div class="callout-note p-3 rounded-lg text-xs space-y-1 text-blue-900">
+                <div class="font-bold flex items-center gap-1.5">
+                  <i class="fa-solid fa-tags text-blue-600"></i> คุณภาพของการตีกรอบ (Annotation Precision)
+                </div>
+                <p class="text-blue-800 leading-relaxed">
+                  การตีกรอบควรให้ขอบแนบชิดกับตัววัตถุอย่างพอดี ไม่ควรกว้างหรือแคบเกินไป เพราะจะทำให้จุดกึ่งกลาง (Centroid) คลาดเคลื่อน ส่งผลให้อัลกอริทึมสูญเสียความแม่นยำในการระบุพิกัดตำแหน่ง
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 3 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 3</span>
+              <h3 class="text-base font-bold text-slate-900">การตั้งค่า Impulse และการฝึกสอนโมเดล MobileNetV2 (0.35)</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-4">
+              <p>
+                ในเมนู <strong>Impulse Design</strong> ให้กำหนดบล็อก Image ปรับขนาดเป็น <code class="font-mono text-blue-900">96x96 RGB</code> และเพิ่มบล็อกการเรียนรู้ <strong>Object Detection (Images)</strong>
+              </p>
+
+              <!-- Studio Screenshot Image -->
+              <div class="space-y-2">
+                <div class="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+                  <img src="images/chapters/ch08_fomo_studio_training.jpg" alt="Edge Impulse Studio Object Detection Training" class="w-full object-cover">
+                </div>
+                <p class="text-[11px] text-slate-500 text-center italic">
+                  รูปที่ 8.2: หน้าต่างการฝึกสอน Object Detection บน Edge Impulse Studio แสดงพารามิเตอร์ของโมเดล FOMO และกราฟการเรียนรู้
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="font-bold text-xs text-[#173b6b]">พารามิเตอร์การฝึกสอนที่แนะนำสำหรับบอร์ด Arduino UNO Q:</div>
+                <ul class="text-xs text-slate-600 space-y-1.5 list-disc list-inside leading-relaxed">
+                  <li><strong>Neural Network Architecture:</strong> เลือก <strong>FOMO (Faster Objects, More Objects) MobileNetV2 0.35</strong></li>
+                  <li><strong>Number of epochs:</strong> กำหนดไว้ที่ 50 - 80 รอบการเรียนรู้</li>
+                  <li><strong>Learning rate:</strong> กำหนดค่ามาตรฐาน <code class="font-mono text-slate-800">0.001</code> (Adam Optimizer)</li>
+                  <li><strong>Data Augmentation:</strong> เปิดใช้งานการพลิกภาพ (Flip), การหมุน (Rotation &plusmn;15&deg;) เพื่อเพิ่มความทนทานต่อมุมมองของกล้อง</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 4 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 4</span>
+              <h3 class="text-base font-bold text-slate-900">การประเมินประสิทธิภาพด้วย Confusion Matrix, Precision, Recall และ F1-Score</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+              <p>
+                การประเมินความแม่นยำของโมเดลตรวจจับวัตถุใช้เกณฑ์การตัดสินจาก <strong>เมทริกซ์ความสับสน (Confusion Matrix)</strong> โดยคำนวณตัวชี้วัดสำคัญ 3 ประการ:
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="p-3 rounded-xl bg-blue-50 border border-blue-200 space-y-1">
+                  <div class="font-bold text-xs text-blue-900">1. Precision (ความเที่ยงตรง)</div>
+                  <div class="font-mono text-[11px] text-blue-800 bg-white p-1 rounded">TP / (TP + FP)</div>
+                  <p class="text-[11px] text-blue-700 leading-relaxed">
+                    สัดส่วนของชิ้นงานที่โมเดลทำนายว่าใช่ แล้วเป็นชิ้นงานนั้นจริง ยิ่งค่าสูงแสดงว่าการเตือนผิดพลาด (False Alarm) ต่ำ
+                  </p>
+                </div>
+
+                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
+                  <div class="font-bold text-xs text-emerald-900">2. Recall (ความครอบคลุม)</div>
+                  <div class="font-mono text-[11px] text-emerald-800 bg-white p-1 rounded">TP / (TP + FN)</div>
+                  <p class="text-[11px] text-emerald-700 leading-relaxed">
+                    สัดส่วนของชิ้นงานจริงทั้งหมดที่โมเดลสามารถค้นพบได้ ยิ่งค่าสูงแสดงว่าวัตถุไม่หลุดรอดสายตา (Missed Detection ต่ำ)
+                  </p>
+                </div>
+
+                <div class="p-3 rounded-xl bg-purple-50 border border-purple-200 space-y-1">
+                  <div class="font-bold text-xs text-purple-900">3. F1-Score (คะแนนสมดุล)</div>
+                  <div class="font-mono text-[11px] text-purple-800 bg-white p-1 rounded">2 * (P * R) / (P + R)</div>
+                  <p class="text-[11px] text-purple-700 leading-relaxed">
+                    ค่าเฉลี่ยฮาร์โมนิกที่ถ่วงน้ำหนักความสมดุลระหว่าง Precision และ Recall ใช้เป็นตัวแทนตัดสินคุณภาพโมเดลโดยรวม
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: CODE EXAMPLES & FOMO EVALUATION               -->
+        <!-- ======================================================== -->
+        <section id="sec-code" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">4</span>
+            <h2 class="text-xl font-bold text-slate-900">ตัวอย่างโค้ดและการทดสอบระบบ (Code Implementation & Testing)</h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            ไฟล์โค้ดสำหรับบทเรียนนี้ได้รับการจัดเก็บไว้ในโฟลเดอร์ <code class="bg-slate-100 text-blue-800 px-1.5 py-0.5 rounded font-mono font-bold">code_examples/chapter08</code> ประกอบด้วยไฟล์คอนฟิกูเรชัน <code class="font-mono text-slate-800 font-bold">app.yaml</code> และสคริปต์ประเมินผลการตรวจจับวัตถุ <code class="font-mono text-slate-800 font-bold">fomo_eval.py</code>
+          </p>
+
+          <!-- File 1: app.yaml -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-solid fa-file-code text-amber-500"></i> ไฟล์คอนฟิกูเรชันระบบ: app.yaml
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">code_examples/chapter08/app.yaml</span>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <span class="text-[11px] text-slate-400">YAML Deployment Config</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-emerald-400">name: FOMO Object Detection Evaluator
+description: "การตรวจจับวัตถุหลายชิ้นและนับจำนวนด้วยโมเดล FOMO บน Arduino UNO Q"
+ports: []
+variables: {
+  EI_OBJ_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/fomo_object_detection.eim",
+  CONFIDENCE_THRESHOLD: "0.60",
+  INPUT_WIDTH: "96",
+  INPUT_HEIGHT: "96",
+  TARGET_CLASSES: "bolt,nut,bearing",
+  MAX_DETECTIONS: "20"
+}
+bricks:
+  - id: "object_detection_brick"
+    type: "fomo_object_detection"
+    enabled: true</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- File 2: fomo_eval.py -->
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-brands fa-python text-blue-500"></i> สคริปต์ประเมินสมรรถนะ: fomo_eval.py
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">code_examples/chapter08/fomo_eval.py</span>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <span class="text-[11px] text-slate-400">Python 3 FOMO Centroid Evaluation</span>
+              </div>
+              <div class="terminal-body max-h-[380px]">
+<pre class="text-blue-300">class FOMOEvaluator:
+    """คลาสสำหรับประเมินผลการตรวจจับวัตถุตามสถาปัตยกรรม FOMO"""
+
+    def __init__(self, confidence_threshold: float = 0.60):
+        self.confidence_threshold = confidence_threshold
+        self.classes = ["bolt", "nut", "bearing"]
+
+    def evaluate_detections(self, detections: list) -> dict:
+        valid_items = []
+        counts = {cls: 0 for cls in self.classes}
+        grid_map = [["." for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
+        for item in detections:
+            score = item.get("score", 0.0)
+            if score >= self.confidence_threshold:
+                label = item.get("label", "unknown")
+                # คำนวณจุดศูนย์กลาง (Centroid)
+                cx = item["x"] + item["width"] / 2.0
+                cy = item["y"] + item["height"] / 2.0
+
+                gx = min(GRID_SIZE - 1, max(0, int(cx // CELL_PIXELS)))
+                gy = min(GRID_SIZE - 1, max(0, int(cy // CELL_PIXELS)))
+
+                symbol = label[0].upper() if label != "bearing" else "R"
+                grid_map[gy][gx] = symbol
+                counts[label] += 1
+
+                valid_items.append({
+                    "label": label,
+                    "centroid_pixel": (round(cx, 1), round(cy, 1)),
+                    "grid_coord": (gx, gy),
+                    "confidence": round(score, 3)
+                })
+
+        return {
+            "total_detected": len(valid_items),
+            "class_counts": counts,
+            "detected_objects": valid_items,
+            "grid_map": grid_map
+        }</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Execution Result Terminal -->
+          <div class="space-y-2 pt-2">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-terminal text-emerald-600"></i> ผลการรันประเมินสมรรถนะบนคอนโซล:
+            </span>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-[11px] text-slate-400">Terminal Output (Centroid Map & Metrics Table)</span>
+              </div>
+              <div class="terminal-body font-mono text-[11px]">
+<pre class="text-slate-300">$ python code_examples/chapter08/fomo_eval.py
+===========================================================================
+ บทเรียนที่ 8: การประเมินสมรรถนะโมเดลตรวจจับวัตถุ FOMO (Object Detection)
+ รายงานการระบุพิกัดจุดศูนย์กลางและจำแนกประเภทชิ้นส่วนอุตสาหกรรม
+===========================================================================
+[*] เกณฑ์ความเชื่อมั่นขั้นต่ำ (Confidence Threshold): 0.6
+[*] จำนวนวัตถุที่ผ่านเกณฑ์ทั้งหมด: 5 ชิ้น
+
+[*] สรุปจำนวนชิ้นงานจำแนกตามประเภท (Object Counts):
+  ├─ Bolt         : 2 ชิ้น
+  ├─ Nut          : 2 ชิ้น
+  ├─ Bearing      : 1 ชิ้น
+
+--- แผนภาพแสดงจุดศูนย์กลางของวัตถุบนกริด (Centroid Map 12x12) ---
+    00 01 02 03 04 05 06 07 08 09 10 11
+02 [ ·  ·  <span class="text-blue-400 font-bold">B</span>  ·  ·  ·  ·  ·  ·  ·  ·  · ]
+03 [ ·  ·  ·  ·  ·  ·  <span class="text-blue-400 font-bold">B</span>  ·  ·  ·  ·  · ]
+06 [ ·  ·  ·  ·  ·  ·  <span class="text-emerald-400 font-bold">R</span>  ·  ·  ·  ·  · ]
+07 [ ·  ·  ·  <span class="text-yellow-400 font-bold">N</span>  ·  ·  ·  ·  ·  ·  ·  · ]
+08 [ ·  ·  ·  ·  ·  ·  ·  ·  <span class="text-yellow-400 font-bold">N</span>  ·  ·  · ]
+
+===========================================================================
+ รายงานตัวชี้วัดประสิทธิภาพเชิงสถิติ (Model Evaluation Metrics)
+===========================================================================
+คลาสวัตถุ              | TP   | FP   | FN   | Precision  | Recall   | F1-Score
+---------------------------------------------------------------------------
+Bolt (น็อตตัวผู้)      | 45   | 3    | 2    | 0.9375     | 0.9574   | <span class="text-emerald-400 font-bold">0.9474</span>  
+Nut (น็อตตัวเมีย)      | 40   | 2    | 4    | 0.9524     | 0.9091   | <span class="text-emerald-400 font-bold">0.9302</span>  
+Bearing (ตลับลูกปืน)   | 50   | 1    | 1    | 0.9804     | 0.9804   | <span class="text-emerald-400 font-bold">0.9804</span>  
+---------------------------------------------------------------------------
+[สรุปผล] สถาปัตยกรรม FOMO ให้ค่า F1-Score สูงกว่า 94% บนขนาดโมเดลที่กะทัดรัดยิ่งยวด</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: PRACTICAL TASKS CHECKLIST (5 TASKS)           -->
+        <!-- ======================================================== -->
+        <section id="sec-checklist" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">5</span>
+            <h2 class="text-xl font-bold text-slate-900">ใบงานและภารกิจปฏิบัติการประจำบทเรียน (Practical Tasks)</h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            ให้นักเรียนปฏิบัติตามภารกิจทั้ง 5 ขั้นตอน โดยคลิกทำเครื่องหมายลงในช่องสี่เหลี่ยมเมื่อปฏิบัติภารกิจเสร็จสมบูรณ์ ระบบจะคำนวณและบันทึกความก้าวหน้าลงในหน่วยความจำของอุปกรณ์โดยอัตโนมัติ
+          </p>
+
+          <div class="space-y-3 pt-2">
+            <!-- Task 1 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 1: ติดป้ายกำกับวัตถุ Bounding Box บน Edge Impulse Studio</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  เข้าสู่เมนู Data acquisition ทำการตีกรอบสี่เหลี่ยมระบุตำแหน่งชิ้นงาน Bolt, Nut, และ Bearing อย่างน้อย 60 ภาพ พร้อมตรวจสอบความแนบชิดของกรอบ
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 2 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 2: ออกแบบและกำหนดค่าบล็อกประมวลผล Impulse Design</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  กำหนดขนาดภาพ 96x96 พิกเซล เพิ่มบล็อก Image (RGB) และเลือกบล็อกการเรียนรู้ Object Detection (Images) พร้อมเลือกอัลกอริทึม FOMO
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 3 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 3: ฝึกสอนโมเดล MobileNetV2 0.35 และประเมินผล</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  กดปุ่ม Start training และรอผลการประเมิน ตรวจสอบค่า F1-Score ใน Confusion Matrix ให้มีค่าไม่ต่ำกว่า 85%
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 4 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 4: ทดสอบโมเดลกับภาพทดสอบใหม่ใน Model Testing</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  เข้าสู่เมนู Model testing ทำการทดสอบภาพใหม่และสังเกตจุดกึ่งกลาง Centroid ของวัตถุที่ตรวจจับได้ พร้อมปรับระดับ Confidence Threshold
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 5 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 5: ปฏิบัติการทดสอบสคริปต์ประเมินสมรรถนะ fomo_eval.py</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  รันคำสั่ง <code class="font-mono text-blue-700 font-bold">python code_examples/chapter08/fomo_eval.py</code> สังเกตแผนภาพ Centroid Map และตารางวิเคราะห์ตัวชี้วัด Precision / Recall
+                </span>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 6: REVIEW QUESTIONS (3 QUESTIONS)                -->
+        <!-- ======================================================== -->
+        <section id="sec-questions" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">6</span>
+            <h2 class="text-xl font-bold text-slate-900">คำถามประเมินความเข้าใจและคิดวิเคราะห์ (Review Questions)</h2>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                1. สถาปัตยกรรม FOMO มีกลยุทธ์การลดความซับซ้อนของการคำนวณอย่างไรเมื่อเทียบกับโมเดลตรวจจับวัตถุแบบ YOLO หรือ SSD จึงทำให้สามารถประมวลผลบนบอร์ดสมองกลฝังตัวได้รวดเร็วกว่าถึง 30 เท่า?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> FOMO ตัดขั้นตอนที่ใช้การคำนวณหนักที่สุด 2 ส่วนออกไป คือ <strong>1. การคำนวณถดถอยขอบเขตของกรอบ (Bounding Box Regression)</strong> และ <strong>2. การประเมิน Anchor Boxes นับพันจุด</strong> แล้วเปลี่ยนปัญหาให้กลายเป็นการ <strong>จำแนกประเภทจุดศูนย์กลางของวัตถุบนตารางกริด (Grid Centroid Classification)</strong> เท่านั้น ทำให้ไม่ต้องประมวลผลอัลกอริทึม Non-Maximum Suppression (NMS) ที่ซับซ้อน จึงลดการใช้หน่วยความจำแรมเหลือไม่ถึง 300 KB และประมวลผลได้รวดเร็วยิ่งยวด
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                2. หากนำโมเดล FOMO ไปติดตั้งใช้งานจริง แล้วพบว่าเมื่อมีน็อต 2 ตัววางซ้อนชิดกัน โมเดลกลับรายงานว่าตรวจพบเพียง 1 ตัว ปัญหานี้เกิดจากข้อจำกัดทางสถาปัตยกรรมใด และมีแนวทางแก้ไขอย่างไร?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> เกิดจาก <strong>ข้อจำกัดความละเอียดของเซลล์กริด (Grid Resolution Limit)</strong> เนื่องจาก FOMO ทำการย่อขนาดภาพลง 8 เท่า (Downsampling Factor = 8) ทำให้เซลล์กริดมีขนาด 8x8 พิกเซล หากจุดกึ่งกลางของวัตถุทั้งสองชิ้นตกลงในเซลล์กริดเดียวกัน โมเดลจะสามารถส่งคืนผลลัพธ์ได้เพียงคลาสเดียว แนวทางแก้ไขคือ <strong>การเพิ่มความละเอียดของภาพอินพุต</strong> เช่น จาก 96x96 เป็น 160x160 หรือ 320x320 พิกเซล เพื่อเพิ่มจำนวนเซลล์กริดให้หนาแน่นขึ้น ทำให้เซลล์ย่อยมีขนาดเล็กลงและแยกวัตถุที่อยู่ชิดกันได้
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                3. ในการประเมินโมเดล ค่า Precision และ Recall สื่อถึงความสามารถด้านใด และหากงานระบบตรวจสอบคุณภาพต้องการป้องกันไม่ให้มีชิ้นงานหลุดรอดการนับจำนวน ควรปรับเกณฑ์ค่าใดเป็นหลัก?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> <strong>Precision</strong> สื่อถึงความแม่นยำในการทำนาย (ทำนายว่าใช่ แล้วเป็นชิ้นงานนั้นจริงกี่เปอร์เซ็นต์ เพื่อป้องกันการทายมั่ว) ส่วน <strong>Recall</strong> สื่อถึงความครอบคลุม (ชิ้นงานจริงทั้งหมด สามารถตรวจพบได้กี่เปอร์เซ็นต์ เพื่อป้องกันการตกหล่น) สำหรับงานตรวจนับจำนวนชิ้นงานที่ไม่ต้องการให้มีชิ้นงานใดหลุดรอด จะต้องเน้นให้ค่า <strong>Recall สูงที่สุด</strong> โดยสามารถปรับ <strong>ลดเกณฑ์ความเชื่อมั่น (Confidence Threshold)</strong> ลง เช่น จาก 0.70 เป็น 0.50 เพื่อให้โมเดลเปิดรับการตรวจจับวัตถุได้ไวขึ้น
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 8 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=8#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 9: การนำโมเดล FOMO ไปใช้งานและการควบคุมอุปกรณ์ขับเคลื่อน (Actuator)</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">เชื่อมต่อโมเดลตรวจจับวัตถุเข้าสู่สายการผลิตจริง ควบคุมแขนกลก้านปัดและบันทึกประวัติการคัดแยก</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter07.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 7</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter09.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>บทที่ 9</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

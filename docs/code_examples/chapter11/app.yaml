@@ -1,0 +1,21 @@
+# ==============================================================================
+# โครงสร้างคอนฟิกูเรชันแอปพลิเคชัน Arduino App Lab
+# รายวิชา: การพัฒนาปัญญาประดิษฐ์บนอุปกรณ์ขอบ (Edge AI Development)
+# บทที่ 11: การรู้จำคำสั่งเสียงภาษาไทยผ่านไมโครโฟน (Thai Keyword Spotting)
+# ==============================================================================
+name: "Thai Voice Command App"
+description: "ระบบรู้จำคำสั่งเสียงภาษาไทยผ่านไมโครโฟนและควบคุมอุปกรณ์ฮาร์ดแวร์เอาต์พุต"
+ports: []
+
+variables:
+  EI_KEYWORD_SPOTTING_MODEL: "/home/arduino/.arduino-bricks/ei-models/thai_kws.eim"
+  CONFIDENCE_THRESHOLD: "0.85"
+  DEBOUNCE_SEC: "2.0"
+
+bricks:
+  - arduino:keyword_spotting: {}
+  - arduino:relay_control:
+      variables:
+        LAMP_RELAY_PIN: "7"
+        LED_RED_PIN: "8"
+        LED_GREEN_PIN: "9"
