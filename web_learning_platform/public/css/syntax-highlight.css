@@ -1,0 +1,117 @@
+/**
+ * Code Syntax Highlighting & Terminal Beautifier Styles
+ * One Dark / GitHub Dark Theme for Python, Bash & YAML
+ */
+
+pre[class*="language-"],
+code[class*="language-"],
+.terminal-window pre,
+pre.terminal-body {
+  font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, Monaco, 'Courier New', Courier, monospace !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.45 !important;
+  direction: ltr;
+  text-align: left;
+  white-space: pre !important;
+  word-spacing: normal;
+  word-break: normal;
+  tab-size: 4;
+  hyphens: none;
+  background: #1e222b !important;
+  color: #abb2bf !important;
+  border-radius: 0.75rem;
+}
+
+/* Div container terminal body (e.g. Chapter 01 Linux shell simulator) */
+div.terminal-body {
+  font-family: 'JetBrains Mono', Consolas, monospace !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+  background: #0b1526 !important;
+  color: #e2e8f0 !important;
+  border-radius: 0 0 0.75rem 0.75rem !important;
+}
+
+div.terminal-body pre {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  line-height: 1.45 !important;
+  white-space: pre-wrap !important;
+}
+
+/* Syntax Highlighting Colors */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #5c6370;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #abb2bf;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #d19a66;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #98c379;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #56b6c2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #c678dd;
+  font-weight: 600;
+}
+
+.token.function,
+.token.class-name {
+  color: #61afef;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #e06c75;
+}
+
+/* Scrollbar for Code Blocks */
+pre::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+pre::-webkit-scrollbar-track {
+  background: #15181e;
+  border-radius: 4px;
+}
+pre::-webkit-scrollbar-thumb {
+  background: #3e4451;
+  border-radius: 4px;
+}
+pre::-webkit-scrollbar-thumb:hover {
+  background: #525a6b;
+}

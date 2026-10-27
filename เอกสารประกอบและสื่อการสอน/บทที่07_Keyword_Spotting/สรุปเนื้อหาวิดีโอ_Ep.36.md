@@ -1,0 +1,14 @@
+# สื่อวิดีโอการสอน: Arduino UNO Q (Ep.36) การเทรนโมเดล AI ให้ใช้กับงาน Keyword Spotting (Brick)
+
+- **รหัสตอน:** Ep.36
+- **ลิงก์รับชมผ่าน YouTube:** [Arduino UNO Q (Ep.36) การเทรนโมเดล AI ให้ใช้กับงาน Keyword Spotting (Brick)](https://www.youtube.com/watch?v=Lt5RQeWXZBA&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=35)
+- **วิทยากร:** นายธนา อุดมศรีไพบูลย์
+- **แพลตฟอร์มและบอร์ดที่ใช้:** Arduino UNO Q (Qualcomm Dragonwing QRB2210 / Linux AArch64) & Edge Impulse Studio
+
+## สาระสำคัญประจำคลิปวิดีโอ
+การประมวลผลสัญญาณเสียงดิจิทัล, การแปลงสเปกโตรแกรม MFCC (Audio MFCC Block), สัญญาณเสียงความถี่สุ่ม 16 kHz, ค่าความผิดพลาด FAR และ FRR, และการเขียนโค้ดตรวจสอบคลาสโมเดลด้วย KeywordSpotting.get_model_info()
+
+## รายการเอกสารและสื่อที่แนบในโฟลเดอร์นี้
+- `KWS_Slide.pdf`
+- `ชุดข้อมูลเสียง_EdgeImpulseDataset`
+- `วิดีโอสอน_Ep.36.url`

@@ -1,0 +1,17 @@
+# ==============================================================================
+# โครงการสื่อการเรียนรู้ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI Learning Platform)
+# ไฟล์คอนฟิกูเรชัน: app.yaml
+# บทเรียนที่ 6: การนำโมเดล .eim ไปใช้งานและการกำหนดค่าไฟล์ app.yaml บนบอร์ดพัฒนา Arduino UNO Q
+# ==============================================================================
+
+name: EdgeAI Deployment Template
+description: "เทมเพลตการกำหนดค่าตัวแปรสภาพแวดล้อมสำหรับแบบจำลอง Edge Impulse บนบอร์ด Arduino UNO Q"
+ports: []
+variables: {
+  EI_V_ANOMALY_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim",
+  EI_OBJ_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/fomo_object_detection.eim",
+  EI_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/image_classification.eim",
+  EI_KEYWORD_SPOTTING_MODEL: "/home/arduino/.arduino-bricks/ei-models/KWS_model.eim",
+  EI_AUDIO_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AC_model.eim"
+}
+bricks: []

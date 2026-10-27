@@ -1,0 +1,8 @@
+name: Microphone Audio Classification App
+description: "แอปพลิเคชันเฝ้าระวังเสียงเหตุการณ์ผ่านไมโครโฟนด้วย Audio Classification Brick บนบอร์ด Arduino UNO Q"
+ports: []
+variables: {
+  EI_AUDIO_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/mic_ac.eim"
+}
+bricks:
+- arduino:audio_classification: {}

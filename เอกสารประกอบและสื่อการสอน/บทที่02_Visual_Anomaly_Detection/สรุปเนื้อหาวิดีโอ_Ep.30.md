@@ -1,0 +1,15 @@
+# สื่อวิดีโอการสอน: Arduino UNO Q (Ep.30) การเทรนโมเดล AI ให้ใช้กับงาน Visual Anomaly Detection (Brick)
+
+- **รหัสตอน:** Ep.30
+- **ลิงก์รับชมผ่าน YouTube:** [Arduino UNO Q (Ep.30) การเทรนโมเดล AI ให้ใช้กับงาน Visual Anomaly Detection (Brick)](https://www.youtube.com/watch?v=1yEMEJnsrUY)
+- **วิทยากร:** นายธนา อุดมศรีไพบูลย์
+- **แพลตฟอร์มและบอร์ดที่ใช้:** Arduino UNO Q (Qualcomm Dragonwing QRB2210 / Linux AArch64) & Edge Impulse Studio
+
+## สาระสำคัญประจำคลิปวิดีโอ
+หลักการ One-Class Classification สำหรับงาน Visual Anomaly Detection, การใช้เฉพาะภาพชิ้นงานปกติ (Normal) ในชุดฝึกสอน, สถาปัตยกรรม FOMO-AD, การแปลผลค่า Anomaly Score (0-5 ปกติ, 6-15 เงา/รบกวน, >20 ชำรุด, >40 ชำรุดรุนแรง)
+
+## รายการเอกสารและสื่อที่แนบในโฟลเดอร์นี้
+- `EIM.pdf`
+- `ชุดข้อมูลภาพ_PicsTest`
+- `วิดีโอสอน_Ep.30.url`
+- `วิดีโอสอน_Ep30.url`

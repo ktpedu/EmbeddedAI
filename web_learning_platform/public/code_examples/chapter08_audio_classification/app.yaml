@@ -1,0 +1,8 @@
+name: Audio Event Classification App
+description: "แอปพลิเคชันจำแนกเสียงเหตุการณ์ด้วยโมดูล Audio Classification บนบอร์ด Arduino UNO Q"
+ports: []
+variables: {
+  EI_AUDIO_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AC_model.eim"
+}
+bricks:
+- arduino:audio_classification: {}

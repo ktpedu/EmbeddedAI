@@ -1,0 +1,16 @@
+วิชา EdgeAI
+(EdgeAI ด้วย Edge Impulse) 
+
+//** บทที่ 1 เริ่มต้นใช้งาน Edge Impulse เพื่อเทรนโมเดล AI //** https://www.youtube.com/watch?v=-X8y_aeMAFY&t=52s
+					//** บทที่ 2 การเทรนโมเดล AI ให้ใช้กับงาน Visual Anomaly Detection (Brick) //** https://www.youtube.com/watch?v=1yEMEJnsrUY								                //** บทที่ 3 การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick)  //**  https://www.youtube.com/watch?v=glQx9GTLEUI&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=30
+					//** บทที่ 4  การเทรนโมเดล AI ให้ใช้กับงาน Image Classification (Brick) //** https://www.youtube.com/watch?v=3EmkC1QBZK0&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=32
+					//** บทที่ 5 กระบวนการ Deploy ไฟล์โมเดล (.eim) สู่บอร์ด Arduino UNO Q //** https://www.youtube.com/watch?v=3mAwLsQjv6U&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=31        //*** https://www.youtube.com/watch?v=0g2F-s-7O2U&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=34
+	
+					//** บทที่ 6  รู้จักกับ “Visual Anomaly Detection Brick” บน Arduino App Lab //** https://www.youtube.com/watch?v=5Xiz_W53yU0&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=33
+					//**บทที่ 7  การเทรนโมเดล AI ให้ใช้กับงาน Keyword Spotting (Brick) //** https://www.youtube.com/watch?v=Lt5RQeWXZBA&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=35
+
+					//** บทที่ 8 การเทรนโมเดล AI ให้ใช้กับงาน Audio Classification (Brick) //** https://www.youtube.com/watch?v=9R-vpS6F4jA&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=38
+					//** บทที่ 9 การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick) ผ่านกล้องเว็ปแคม //** https://www.youtube.com/watch?v=6DlVYQzgrEw&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=41
+					//** บทที่ 10 การเทรนโมเดล AI ให้ใช้กับงาน Image Classification (Brick) ผ่านกล้องเว็ปแคม //** https://www.youtube.com/watch?v=bLw9BH5RrFo&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=42
+					//** บทที่ 11 การเทรนโมเดล AI ให้ใช้กับงาน Keyword Spotting (Brick) ผ่านไมโครโฟน (คำสั่งไทย) //** https://www.youtube.com/watch?v=CRpBHlDRh60&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=43
+					//** บทที่ 12 การเทรนโมเดล AI ให้ใช้กับงาน Audio Classification (Brick) ผ่านไมโครโฟน //** https://www.youtube.com/watch?v=OSzculUyvaY&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=44

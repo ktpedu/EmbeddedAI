@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ใบงานปฏิบัติการที่ 9: การนำโมเดล FOMO ไปใช้งานและการควบคุมอุปกรณ์ขับเคลื่อน (Actuator) | KT-Edu Edge AI</title>
+  <!-- Google Fonts: Sarabun & Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --depa-blue: #173b6b;
+      --depa-gold: #f59e0b;
+      --depa-light: #f8fafc;
+      --depa-dark: #0f172a;
+      --border-color: #cbd5e1;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1e293b;
+      background-color: #f1f5f9;
+      padding: 20px 0;
+    }
+    
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Prompt', sans-serif;
+      font-weight: 700;
+      color: var(--depa-blue);
+    }
+    
+    /* Toolbar on Screen */
+    .screen-toolbar {
+      max-width: 210mm;
+      margin: 0 auto 16px auto;
+      background: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Prompt', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: var(--depa-blue);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #0f284a;
+    }
+    
+    .btn-success {
+      background: #059669;
+      color: #ffffff;
+    }
+    .btn-success:hover {
+      background: #047857;
+    }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #94a3b8;
+      color: #475569;
+    }
+    .btn-outline:hover {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+    
+    /* A4 Page Container */
+    .page-container {
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20mm 18mm;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-radius: 4px;
+    }
+    
+    /* Academic Header */
+    .academic-header {
+      border-bottom: 2px solid var(--depa-blue);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header-text {
+      text-align: center;
+      flex-grow: 1;
+    }
+    
+    .course-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--depa-blue);
+      letter-spacing: -0.2px;
+    }
+    
+    .sub-course-title {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    
+    .worksheet-title-banner {
+      background: #f8fafc;
+      border-left: 4px solid var(--depa-blue);
+      border-right: 1px solid var(--border-color);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    
+    .badge-unit {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+    
+    .ws-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--depa-blue);
+      margin-bottom: 2px;
+    }
+    
+    .ws-eng-name {
+      font-size: 12px;
+      color: #64748b;
+      font-style: italic;
+    }
+    
+    .ws-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: #475569;
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 6px;
+    }
+    
+    /* Student Fill-in Info Box */
+    .student-info-box {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      background: #ffffff;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 10px;
+      font-size: 12px;
+    }
+    
+    .field-label {
+      font-weight: 600;
+      color: #334155;
+    }
+    
+    .field-line {
+      border-bottom: 1px dotted #94a3b8;
+      display: inline-block;
+      min-width: 60px;
+    }
+    
+    /* Section Styles */
+    .section-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--depa-blue);
+      margin-bottom: 6px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 4px;
+    }
+    
+    .bullet-list {
+      margin-left: 20px;
+      margin-bottom: 10px;
+      font-size: 12.5px;
+    }
+    
+    .bullet-list li {
+      margin-bottom: 4px;
+    }
+    
+    .procedure-step {
+      margin-bottom: 8px;
+      font-size: 12.5px;
+    }
+    
+    .step-num {
+      font-weight: 700;
+      color: var(--depa-blue);
+    }
+    
+    /* Tables */
+    .lab-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px 0;
+      font-size: 12px;
+    }
+    
+    .lab-table th {
+      background: #f1f5f9;
+      color: var(--depa-blue);
+      font-family: 'Prompt', sans-serif;
+      font-weight: 700;
+      border: 1px solid var(--border-color);
+      padding: 6px 8px;
+      text-align: center;
+    }
+    
+    .lab-table td {
+      border: 1px solid var(--border-color);
+      padding: 6px 8px;
+    }
+    
+    .lab-table td:nth-child(1) {
+      font-weight: 500;
+    }
+    
+    .lab-table .code-font {
+      font-family: monospace;
+      font-size: 11px;
+      color: #0369a1;
+    }
+    
+    /* Post lab questions */
+    .question-block {
+      margin-bottom: 12px;
+      font-size: 12.5px;
+    }
+    
+    .question-text {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+    
+    .answer-lines {
+      height: 38px;
+      border-bottom: 1px dotted #cbd5e1;
+      margin-top: 4px;
+    }
+    
+    /* Sign & Score Evaluation Box */
+    .evaluation-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+      page-break-inside: avoid;
+    }
+    
+    .rubric-box {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11.5px;
+      background: #fafafa;
+    }
+    
+    .signature-box {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11.5px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .score-badge {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--depa-blue);
+      border: 2px solid var(--depa-blue);
+      border-radius: 8px;
+      padding: 4px 10px;
+      display: inline-block;
+      margin: 4px 0;
+    }
+    
+    /* PRINT STYLES */
+    @media print {
+      body {
+        background-color: #ffffff;
+        padding: 0;
+      }
+      .screen-toolbar {
+        display: none !important;
+      }
+      .page-container {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+        min-height: auto;
+      }
+      @page {
+        size: A4;
+        margin: 15mm 15mm 15mm 15mm;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Toolbar -->
+  <div class="screen-toolbar">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-weight: 700; color: #173b6b; font-family: 'Prompt', sans-serif;">
+        <i class="fa-solid fa-file-lines text-blue-600"></i> ใบงานปฏิบัติการที่ 9
+      </span>
+      <span style="font-size: 12px; color: #64748b;">(สอดคล้องกับ Chapter 09)</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button onclick="window.print()" class="btn btn-primary" title="สั่งพิมพ์เป็นเอกสารกระดาษ หรือบันทึกเป็น PDF">
+        <i class="fa-solid fa-print"></i> พิมพ์ / บันทึก PDF
+      </button>
+      <a href="/worksheets/Lab_Worksheet_09.pdf" download="Lab_Worksheet_09.pdf" class="btn btn-success" title="ดาวน์โหลดไฟล์ PDF โดยตรง">
+        <i class="fa-solid fa-download"></i> ดาวน์โหลด PDF
+      </a>
+      <a href="/chapter09.html" class="btn btn-outline" title="เปิดอ่านเนื้อหาคู่มือบทเรียน">
+        <i class="fa-solid fa-book-open"></i> กลับสู่บทเรียน
+      </a>
+    </div>
+  </div>
+
+  <!-- A4 Worksheet Document -->
+  <div class="page-container">
+    
+    <!-- Academic Header -->
+    <div class="academic-header">
+      <div class="header-text">
+        <div class="course-title">เอกสารใบงานปฏิบัติการ (LABORATORY WORKSHEET)</div>
+        <div class="sub-course-title">รายวิชาเพิ่มเติม: ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded Artificial Intelligence) | depa & KT-Edu Platform</div>
+      </div>
+    </div>
+
+    <!-- Title Banner -->
+    <div class="worksheet-title-banner">
+      <span class="badge-unit">หน่วยปฏิบัติการที่ 9</span>
+      <h1 class="ws-name">ใบงานปฏิบัติการที่ 9: การนำโมเดล FOMO ไปใช้งานและการควบคุมอุปกรณ์ขับเคลื่อน (Actuator)</h1>
+      <div class="ws-eng-name">Deploying FOMO Object Detection & Actuator Integration</div>
+      <div class="ws-meta">
+        <span><i class="fa-regular fa-clock"></i> ระยะเวลาปฏิบัติการ: <strong>60 นาที</strong></span>
+        <span><i class="fa-solid fa-code"></i> สคริปต์อ้างอิง: <strong><code>code_examples/chapter09/fomo_live.py</code></strong></span>
+        <span><i class="fa-solid fa-award"></i> คะแนนเต็ม: <strong>10 คะแนน</strong></span>
+      </div>
+    </div>
+
+    <!-- Student Information Fill-in -->
+    <div class="student-info-box">
+      <div><span class="field-label">ชื่อ-นามสกุล:</span> ............................................................................</div>
+      <div><span class="field-label">เลขที่:</span> ...............</div>
+      <div><span class="field-label">ชั้น:</span> ม. ...........................</div>
+      <div><span class="field-label">รหัสประจำตัว:</span> ....................................................</div>
+      <div><span class="field-label">กลุ่มที่:</span> ...............</div>
+      <div><span class="field-label">วันที่:</span> ......./......./...........</div>
+    </div>
+
+    <!-- Section 1: Objectives -->
+    <div class="section-title">
+      <i class="fa-solid fa-bullseye"></i> 1. สาระสำคัญและจุดประสงค์การเรียนรู้ (Objectives)
+    </div>
+    <ul class="bullet-list">
+      <li>สามารถรันโมเดล FOMO ตรวจจับวัตถุสดผ่านกล้องเว็บแคมบนบอร์ด Arduino UNO Q ได้</li>
+      <li>สามารถเปิดบริการสตรีมมิ่งภาพวิดีโอพร้อมแสดงกรอบและพิกัด Centroid ผ่านพอร์ต 7000 (MJPEG) ได้</li>
+      <li>สามารถนำพิกัดพิกัด (X, Y) ไปสั่งงานเซอร์โวมอเตอร์หรือรีเลย์เพื่อคัดแยกชิ้นงานได้ตามเป้าหมาย</li>
+    </ul>
+
+    <!-- Section 2: Equipment -->
+    <div class="section-title">
+      <i class="fa-solid fa-screwdriver-wrench"></i> 2. รายการอุปกรณ์และเครื่องมือซอฟต์แวร์ (Equipment & Tools)
+    </div>
+    <ul class="bullet-list">
+      <li>บอร์ด Arduino UNO Q พร้อมโมดูลกล้อง</li>
+      <li>เซอร์โวมอเตอร์ (Servo Motor) หรือโมดูลขับกลไกคัดแยก (Actuator Sorter)</li>
+      <li>โมเดล FOMO ที่คอมไพล์เป็น .eim</li>
+      <li>ไฟล์สคริปต์ fomo_live.py</li>
+    </ul>
+
+    <!-- Section 3: Procedures -->
+    <div class="section-title">
+      <i class="fa-solid fa-list-ol"></i> 3. ลำดับขั้นตอนการปฏิบัติการ (Laboratory Procedures)
+    </div>
+    
+    <div class="procedure-step">
+      <span class="step-num">1. การเปิดรันโมเดล FOMO และระบบสตรีมภาพพอร์ต 7000:</span> สั่งรัน python fomo_live.py เปิดเว็บบราวเซอร์ในคอมพิวเตอร์ไปยังที่อยู่ http://arduino-uno-q.local:7000 ตรวจสอบภาพสดจากสายพาน
+    </div>
+    
+    <div class="procedure-step">
+      <span class="step-num">2. การตรวจจับพิกัด Centroid ของวัตถุหลายชิ้น:</span> วางวัตถุ Bolt, Nut และ Bearing ลงบนหน้ากล้องพร้อมกัน สังเกตจุด Centroid (x, y) และป้ายกำกับคลาสที่ปรากฏบนภาพสตรีม
+    </div>
+    
+    <div class="procedure-step">
+      <span class="step-num">3. การสั่งงาน Servo Motor เพื่อคัดแยกชิ้นงานตามพิกัด:</span> ทดสอบการหมุนของแขนกลเซอร์โวมอเตอร์ตามเงื่อนไข เช่น หากวัตถุข้ามเส้นพิกัด X > 150 ให้สั่งปัดชิ้นงานลงกล่องเป้าหมาย
+    </div>
+    
+
+    <!-- Section 4: Data & Observation Table -->
+    <div class="section-title">
+      <i class="fa-solid fa-table"></i> 4. ตารางบันทึกผลการปฏิบัติการและการสังเกตการณ์ (Data & Results)
+    </div>
+    <table class="lab-table">
+      <thead>
+        <tr>
+          <th style="width: 28%; text-align: left;">วัตถุทดสอบ</th><th style="width: 25%;">พิกัดจุดกึ่งกลาง (X, Y)</th><th style="width: 23%;">Confidence Score</th><th style="width: 23%;">คำสั่งส่งไปยัง Actuator</th><th style="width: 23%;">ผลการคัดแยก</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>ชิ้นที่ 1: Bolt</td>
+          <td class="code-font"></td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;">หมุน Servo ไปที่ 45 องศา</td>
+        </tr>
+        
+        <tr>
+          <td>ชิ้นที่ 2: Nut</td>
+          <td class="code-font"></td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;">หมุน Servo ไปที่ 90 องศา</td>
+        </tr>
+        
+        <tr>
+          <td>ชิ้นที่ 3: Bearing</td>
+          <td class="code-font"></td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;">หมุน Servo ไปที่ 135 องศา</td>
+        </tr>
+        
+        <tr>
+          <td>การทดสอบวางวัตถุซ้อนกัน</td>
+          <td class="code-font"></td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;">ระบบสั่งการถูกต้อง</td>
+        </tr>
+        
+      </tbody>
+    </table>
+
+    <!-- Section 5: Analytical Questions -->
+    <div class="section-title">
+      <i class="fa-solid fa-circle-question"></i> 5. คำถามท้ายบทปฏิบัติการเพื่อการคิดวิเคราะห์ (Analytical Questions)
+    </div>
+    
+    <div class="question-block">
+      <div class="question-text">1. เพราะเหตุใดการตรวจจับวัตถุแบบ FOMO จึงให้ค่าผลลัพธ์เป็นพิกัดจุดกึ่งกลาง (Centroid) เหมาะสำหรับงานควบคุมแขนกลคัดแยกชิ้นงาน?</div>
+      <div class="answer-lines"></div>
+      <div class="answer-lines"></div>
+    </div>
+    
+    <div class="question-block">
+      <div class="question-text">2. อธิบายกระบวนการแปลงพิกัดพิกเซลของภาพ (Pixel Coordinates) ไปเป็นมุมการหมุนของเซอร์โวมอเตอร์ (Servo Angle)</div>
+      <div class="answer-lines"></div>
+      <div class="answer-lines"></div>
+    </div>
+    
+    <div class="question-block">
+      <div class="question-text">3. หากอัตราเฟรมต่อวินาที (FPS) ของโมเดลต่ำเกินไป จะส่งผลเสียต่อการคัดแยกชิ้นงานบนสายพานลำเลียงที่เคลื่อนที่เร็วอย่างไร?</div>
+      <div class="answer-lines"></div>
+      <div class="answer-lines"></div>
+    </div>
+    
+
+    <!-- Section 6 & 7: Rubrics and Signatures -->
+    <div class="evaluation-grid">
+      <div class="rubric-box">
+        <div style="font-weight: 700; color: var(--depa-blue); margin-bottom: 4px;">
+          <i class="fa-solid fa-list-check"></i> เกณฑ์การประเมินรูบริก (Rubrics 10 คะแนน):
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>• การรันโมเดล FOMO สดและเปิดสตรีมภาพพอร์ต 7000 สำเร็จ</span>
+          <span style="font-weight: 600; color: #173b6b;">4 คะแนน</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>• การเขียนโค้ดแปลงพิกัดและสั่งการอุปกรณ์กลไกขับเคลื่อน (Servo/Relay)</span>
+          <span style="font-weight: 600; color: #173b6b;">4 คะแนน</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>• การทดสอบคัดแยกชิ้นงานและการวิเคราะห์คำถามท้ายบทปฏิบัติการ</span>
+          <span style="font-weight: 600; color: #173b6b;">2 คะแนน</span>
+        </div>
+        
+      </div>
+
+      <div class="signature-box">
+        <div>
+          <div>คะแนนที่ได้</div>
+          <div class="score-badge">........ / 10</div>
+        </div>
+        <div style="margin-top: 6px;">
+          <div>ลงชื่อ .................................................... ผู้ประเมิน</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;">(....................................................) ครูผู้สอน</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

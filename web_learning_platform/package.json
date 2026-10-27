@@ -1,0 +1,24 @@
+{
+  "name": "edgeai-learning-platform",
+  "version": "1.0.0",
+  "description": "ระบบเว็บบทเรียนออนไลน์ รายวิชา ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "edge-ai",
+    "arduino-uno-q",
+    "edge-impulse",
+    "embedded-ai",
+    "lms"
+  ],
+  "author": "ผู้สอนกลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,8 @@
+name: Visual Anomaly Inspection App
+description: "แอปพลิเคชันตรวจสอบคุณภาพชิ้นงานด้วยโมดูล Visual Anomaly Detection บนบอร์ด Arduino UNO Q"
+ports: []
+variables: {
+  EI_V_ANOMALY_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AnonallyDetection.eim"
+}
+bricks:
+- arduino:visual_anomaly_detection: {}

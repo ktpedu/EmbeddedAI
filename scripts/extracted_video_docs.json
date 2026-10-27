@@ -1,0 +1,273 @@
+{
+  "ch01_ep01": {
+    "vid": "oVg57hOrU4s",
+    "title": "Arduino UNO Q (Ep.1) การติดตั้ง Arduino App Lab บนเครื่องคอมพิวเตอร์",
+    "box_links": [
+      "https://app.box.com/s/vvstsd7x58cf4eo",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/vvstsd7x58cf4eo...",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ]
+  },
+  "ch01_ep02": {
+    "vid": "IUrO0bfUvc0",
+    "title": "Arduino UNO Q (Ep.2) การติดตั้งระบบปฏิบัติการ Debian Linux ให้กับ Arduino UNO Q",
+    "box_links": [
+      "https://app.box.com/s/vvstsd7x58cf4eo",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/vvstsd7x58cf4eo...",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434อาการ"
+    ]
+  },
+  "ch01_ep03": {
+    "vid": "cRO5jjGtE_k",
+    "title": "Arduino UNO Q (Ep.3) การตั้งค่าเริ่มต้นให้กับบอร์ด Arduino UNO Q เพื่อใช้งาน Arduino App Lab",
+    "box_links": [
+      "https://app.box.com/s/vvstsd7x58cf4eo",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/vvstsd7x58cf4eo...",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ]
+  },
+  "ch01_ep04": {
+    "vid": "nO3FicIusQs",
+    "title": "Arduino UNO Q (Ep.4) เริ่มต้นใช้งาน Arduino App Lab เพื่อสร้าง App เพื่อใช้งานบอร์ด Arduino UNO Q",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch02_ep05": {
+    "vid": "g4sF5nnsSeY",
+    "title": "Arduino UNO Q (Ep. 5) การทำงานของ App.run()",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch02_ep06": {
+    "vid": "DVCrb6t5dls",
+    "title": "Arduino UNO Q (Ep.6) การโปรแกรมบอร์ดในโหมด Single-board Computer และ การเยี่ยมชมเดสก์ท็อป Linux",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch02_ep07": {
+    "vid": "zu6CBc-GZpM",
+    "title": "Arduino UNO Q (Ep.7) การโปรแกรมบอร์ดในโหมดเครือข่ายไร้สาย (Network Mode) และการสั่งงาน Command Line",
+    "box_links": [
+      "https://app.box.com/s/vvstsd7x58cf4eo",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/vvstsd7x58cf4eo...",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ]
+  },
+  "ch02_ep08": {
+    "vid": "pcw_iF02Ros",
+    "title": "Arduino UNO Q (Ep.8) เริ่มต้นสร้าง App เพื่อใช้งานแสดงข้อความบนคอนโซล",
+    "box_links": [
+      "https://app.box.com/s/vvstsd7x58cf4eo",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/vvstsd7x58cf4eo...",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ]
+  },
+  "ch02_ep09": {
+    "vid": "7JBtwM5m-YI",
+    "title": "Arduino UNO Q (Ep.9) สร้าง App เพื่อใช้ควบคุมบอร์ด LED บนบอร์ด Arduino UNO Q ตอนที่ 1",
+    "box_links": [
+      "https://app.box.com/s/vvstsd7x58cf4eo",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/vvstsd7x58cf4eo...",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ]
+  },
+  "ch02_ep10": {
+    "vid": "36Z_RYn6pQI",
+    "title": "Arduino UNO Q (Ep.10) สร้าง App เพื่อใช้ควบคุมบอร์ด LED บนบอร์ด Arduino UNO Q ตอนที่ 2",
+    "box_links": [
+      "https://app.box.com/s/vvstsd7x58cf4eo",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/vvstsd7x58cf4eo...",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434",
+      "https://app.box.com/s/vvstsd7x58cf4eoj9s03ftglpgd3d434คำสั่ง"
+    ]
+  },
+  "ch03_ep16": {
+    "vid": "N-tZirbAWCE",
+    "title": "Arduino UNO Q (Ep.16) รู้จักกับ &quot;Database-SQL Brick&quot; บน Arduino App Lab",
+    "box_links": [
+      "https://app.box.com/s/jk0x5i37qc670f0",
+      "https://app.box.com/s/jk0x5i37qc670f0kmwuisougd3kj8j4p"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/jk0x5i37qc670f0...",
+      "https://app.box.com/s/jk0x5i37qc670f0kmwuisougd3kj8j4p*****แก้ไขโค้ดจากคลิป",
+      "https://app.box.com/s/jk0x5i37qc670f0kmwuisougd3kj8j4p"
+    ]
+  },
+  "ch03_ep17": {
+    "vid": "MekwqhTuTzc",
+    "title": "Arduino UNO Q (Ep.17) รู้จักกับ &quot;Database-Time Series Brick&quot; บน Arduino App Lab",
+    "box_links": [
+      "https://app.box.com/s/jk0x5i37qc670f0",
+      "https://app.box.com/s/jk0x5i37qc670f0kmwuisougd3kj8j4p"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/jk0x5i37qc670f0...",
+      "https://app.box.com/s/jk0x5i37qc670f0kmwuisougd3kj8j4p"
+    ]
+  },
+  "ch04_ep29": {
+    "vid": "-X8y_aeMAFY",
+    "title": "Arduino UNO Q (Ep.29) เริ่มต้นใช้งาน Edge Impulse เพื่อเทรนโมเดล AI",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch05_ep30": {
+    "vid": "1yEMEJnsrUY",
+    "title": "Arduino UNO Q (Ep.30) การเทรนโมเดล AI ให้ใช้กับงาน Visual Anomaly Detection (Brick)",
+    "box_links": [
+      "https://app.box.com/s/3gl7jnelf5uj39c",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/3gl7jnelf5uj39c...",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu"
+    ]
+  },
+  "ch06_ep33": {
+    "vid": "3mAwLsQjv6U",
+    "title": "Arduino UNO Q (Ep.33) กระบวนการ Deploy ไฟล์โมเดล (.eim) สู่บอร์ด Arduino UNO Q",
+    "box_links": [
+      "https://app.box.com/s/3gl7jnelf5uj39c",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu1"
+    ],
+    "doc_urls": [
+      "https://docs.edgeimpulse.com/hardware/deployments/run-arduino-app-labเอกสารประกอบhttps://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu1.",
+      "https://app.box.com/s/3gl7jnelf5uj39c...",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu"
+    ]
+  },
+  "ch06_ep35": {
+    "vid": "0g2F-s-7O2U",
+    "title": "Arduino UNO Q (Ep.35) ถ่ายซ่อมคลิป Ep.33",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch07_ep34": {
+    "vid": "5Xiz_W53yU0",
+    "title": "Arduino UNO Q (Ep.34) รู้จักกับ “Visual Anomaly Detection  Brick” บน Arduino App Lab",
+    "box_links": [
+      "https://app.box.com/s/5fc91neqpantexq",
+      "https://app.box.com/s/5fc91neqpantexqez8yr9vjfv9fc5s6b"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/5fc91neqpantexqez8yr9vjfv9fc5s6bลำดับขั้นตอนบน",
+      "https://app.box.com/s/5fc91neqpantexq...",
+      "https://app.box.com/s/5fc91neqpantexqez8yr9vjfv9fc5s6b"
+    ]
+  },
+  "ch08_ep31": {
+    "vid": "glQx9GTLEUI",
+    "title": "Arduino UNO Q (Ep.31) การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick)",
+    "box_links": [
+      "https://app.box.com/s/3gl7jnelf5uj39c",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/3gl7jnelf5uj39c...",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0puลิงค์ยูทูปสำหรับการเทรนโมเดล",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu"
+    ]
+  },
+  "ch08_ep18": {
+    "vid": "mkmYqMgfaUw",
+    "title": "Arduino UNO Q (Ep.18) รู้จักกับ “Object Detection Brick” บน Arduino App Lab ตอนที่ 1/4",
+    "box_links": [
+      "https://app.box.com/s/13lyv179wa2fo0i",
+      "https://app.box.com/s/13lyv179wa2fo0igkep1i977e13dv6kd"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/13lyv179wa2fo0i...",
+      "https://app.box.com/s/13lyv179wa2fo0igkep1i977e13dv6kd"
+    ]
+  },
+  "ch09_ep42": {
+    "vid": "6DlVYQzgrEw",
+    "title": "Arduino UNO Q (Ep.42) การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick) ผ่านกล้องเว็ปแคม",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch010_ep32": {
+    "vid": "3EmkC1QBZK0",
+    "title": "Arduino UNO Q (Ep.32) การเทรนโมเดล AI ให้ใช้กับงาน Image Classification (Brick)",
+    "box_links": [
+      "https://app.box.com/s/3gl7jnelf5uj39cs",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu",
+      "https://app.box.com/s/3gl7jnelf5uj39c"
+    ],
+    "doc_urls": [
+      "https://youtu.be/bLw9BH5RrFoเอกสารประกอบhttps://app.box.com/s/3gl7jnelf5uj39cs...",
+      "https://app.box.com/s/3gl7jnelf5uj39c...",
+      "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu"
+    ]
+  },
+  "ch010_ep43": {
+    "vid": "bLw9BH5RrFo",
+    "title": "Arduino UNO Q (Ep.43) การเทรนโมเดล AI ให้ใช้กับงาน Image Classification (Brick) ผ่านกล้องเว็ปแคม",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch011_ep44": {
+    "vid": "CRpBHlDRh60",
+    "title": "Arduino UNO Q (Ep.44) การเทรนโมเดล AI ให้ใช้กับงาน Keyword Spotting (Brick) ผ่านไมโครโฟน (คำสั่งไทย)",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch011_ep36": {
+    "vid": "Lt5RQeWXZBA",
+    "title": "Arduino UNO Q (Ep.36) การเทรนโมเดล AI ให้ใช้กับงาน Keyword Spotting (Brick)",
+    "box_links": [
+      "https://app.box.com/s/hh6m3noroe5dz93",
+      "https://app.box.com/s/hh6",
+      "https://app.box.com/s/hh6m3noroe5dz932y7f6e0hklb6iuj21"
+    ],
+    "doc_urls": [
+      "https://youtu.be/CRpBHlDRh60เอกสารประกอบhttps://app.box.com/s/hh6...",
+      "https://app.box.com/s/hh6m3noroe5dz93...",
+      "https://app.box.com/s/hh6m3noroe5dz932y7f6e0hklb6iuj21"
+    ]
+  },
+  "ch012_ep45": {
+    "vid": "OSzculUyvaY",
+    "title": "Arduino UNO Q (Ep.45) การเทรนโมเดล AI ให้ใช้กับงาน Audio Classification (Brick) ผ่านไมโครโฟน",
+    "box_links": [],
+    "doc_urls": []
+  },
+  "ch012_ep39": {
+    "vid": "9R-vpS6F4jA",
+    "title": "Arduino UNO Q (Ep.39) การเทรนโมเดล AI ให้ใช้กับงาน Audio Classification (Brick)",
+    "box_links": [
+      "https://app.box.com/s/m1zd2ahqm8xb20o",
+      "https://app.box.com/s/m1zd2ahqm8x",
+      "https://app.box.com/s/m1zd2ahqm8xb20ozfig7h4gow6rhjmi1"
+    ],
+    "doc_urls": [
+      "https://app.box.com/s/m1zd2ahqm8xb20ozfig7h4gow6rhjmi1",
+      "https://youtu.be/OSzculUyvaYเอกสารประกอบhttps://app.box.com/s/m1zd2ahqm8x...",
+      "https://app.box.com/s/m1zd2ahqm8xb20o..."
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+name: Keyword Spotting App
+description: "แอปพลิเคชันรู้จำคำสั่งเสียงเฉพาะคำด้วย Keyword Spotting Brick บนบอร์ด Arduino UNO Q"
+ports: []
+variables: {
+  EI_KEYWORD_SPOTTING_MODEL: "/home/arduino/.arduino-bricks/ei-models/KWS_model.eim"
+}
+bricks:
+- arduino:keyword_spotting: {}

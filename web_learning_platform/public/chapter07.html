@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="th" class="font-style-noto scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บทที่ 7: การประมวลผลโมเดลตรวจจับความผิดปกติจากภาพ และการบันทึกข้อมูลลง Database-SQL Brick | ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</title>
+  
+  <!-- Early Font Init Script to Prevent FOUC -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('edgeai_font_style') || 'noto';
+      document.documentElement.className = 'font-style-' + saved + ' scroll-smooth';
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="images/logo/favicon.png">
+
+  <!-- Google Fonts: Noto Sans Thai, Prompt, Sarabun, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & Typography Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            heading: ['var(--font-family)', '"Noto Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling in depa & KT-Edu Brand Theme -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    .toc-link.active {
+      background-color: #173b6b;
+      color: #fff200;
+      font-weight: 700;
+      border-left: 4px solid #fff200;
+    }
+    .terminal-window {
+      background-color: #0b1526;
+      border-radius: 0.75rem;
+      border: 1px solid #1e3a5f;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      color: #e2e8f0;
+    }
+    .terminal-header {
+      background-color: #112240;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-between;
+      border-bottom: 1px solid #1e3a5f;
+    }
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .badge-ep {
+      background-color: #0d2342;
+      color: #fff200;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+    .callout-note {
+      border-left: 4px solid #3b82f6;
+      background-color: #eff6ff;
+    }
+    .callout-tip {
+      border-left: 4px solid #10b981;
+      background-color: #ecfdf5;
+    }
+    .callout-warning {
+      border-left: 4px solid #f59e0b;
+      background-color: #fffbeb;
+    }
+    .callout-danger {
+      border-left: 4px solid #ef4444;
+      background-color: #fef2f2;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased min-h-screen flex flex-col depa-brand-border">
+
+    <!-- ============================================================== -->
+  <!-- 1. TOP UTILITY BAR                                             -->
+  <!-- ============================================================== -->
+  <div class="bg-[#0d2342] text-slate-300 text-xs py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10 hidden md:block">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-yellow-300 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-[#fff200]"></i> KT-Edu Learning Module
+        </span>
+        <span class="text-white/30">|</span>
+        <span class="text-slate-300">คู่มือบทเรียนฉบับสมบูรณ์ รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Font resizer -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1">ขนาดอักษร:</span>
+          <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-[11px]">A-</button>
+          <button onclick="changeFontSize(0)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-xs font-bold text-yellow-300">A</button>
+          <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 rounded hover:bg-white/10 text-sm font-bold">A+</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <!-- Google Font Switcher -->
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 mr-1"><i class="fa-brands fa-google text-[#fff200] mr-1"></i>ฟอนต์:</span>
+          <button onclick="setFontStyle('noto')" id="fontBtn-noto" class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition" title="Google Noto Sans Thai">Google Noto</button>
+          <button onclick="setFontStyle('prompt')" id="fontBtn-prompt" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="Prompt">Prompt</button>
+          <button onclick="setFontStyle('sarabun')" id="fontBtn-sarabun" class="px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition" title="สารบรรณ">สารบรรณ</button>
+        </div>
+        <span class="text-white/20">|</span>
+        <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="text-slate-300 hover:text-yellow-300 flex items-center gap-1 font-semibold text-xs transition" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f text-[#1877f2]"></i> <span class="hidden sm:inline">เพจของฉัน</span></a>
+        <span class="text-white/20">|</span>
+        <a href="index.html" class="text-yellow-300 hover:text-white flex items-center gap-1 font-semibold text-xs">
+          <i class="fa-solid fa-house text-xs"></i> หน้าหลักแพลตฟอร์ม
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN HEADER (depa THEME)                                    -->
+  <!-- ============================================================== -->
+  <header class="bg-[#173b6b] text-white shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- KT-Edu Logo & Title -->
+        <a href="index.html" class="flex items-center space-x-3.5 hover:opacity-95 transition">
+          <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-full shadow-lg border-2 border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-base sm:text-lg leading-tight">
+              <span class="text-white font-heading font-extrabold tracking-tight">ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว</span>
+            </div>
+            <div class="text-xs text-yellow-200/90 font-mono tracking-wider flex items-center gap-1.5 mt-0.5">
+              <span>Embedded AI • Arduino UNO Q • Edge Impulse</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <a href="index.html#section-lessons" class="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-white/20 transition">
+            <i class="fa-solid fa-arrow-left"></i> กลับสารบัญบทเรียน
+          </a>
+          <a href="https://www.youtube.com/watch?v=5Xiz_W53yU0&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=33" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow flex items-center gap-2 transition">
+            <i class="fa-brands fa-youtube"></i> <span class="hidden md:inline">สื่อวีดิทัศน์ประกอบการจัดการเรียนรู้</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Chapter Progress Strip -->
+    <div class="bg-[#0d2342] border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2">
+      <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <span class="bg-[#fff200] text-[#173b6b] font-black px-2 py-0.5 rounded text-[11px]">บทเรียนที่ 7</span>
+          <span class="font-semibold text-white truncate">การประมวลผลโมเดลตรวจจับความผิดปกติจากภาพ และการบันทึกข้อมูลลง Database-SQL Brick</span>
+        </div>
+        <div class="flex items-center space-x-3 text-[11px] font-medium">
+          <span class="text-yellow-300"><i class="fa-regular fa-clock mr-1"></i>เวลาเรียน 3 คาบ (150 นาที)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 3. CHAPTER HERO BANNER                                         -->
+  <!-- ============================================================== -->
+  <section class="bg-gradient-to-r from-[#0d2342] via-[#173b6b] to-[#1e4b8a] text-white py-10 px-4 sm:px-6 lg:px-8 border-b-4 border-[#fff200] relative overflow-hidden">
+    <div class="absolute -right-16 -top-16 w-80 h-80 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center space-x-2 text-xs text-yellow-300 mb-3">
+        <a href="index.html" class="hover:underline flex items-center gap-1"><i class="fa-solid fa-house text-[10px]"></i> หน้าหลัก</a>
+        <span>/</span>
+        <a href="index.html#section-curriculum" class="hover:underline">หลักสูตร 12 บทเรียน</a>
+        <span>/</span>
+        <span class="text-white font-medium">บทที่ 7: การประมวลผลโมเดลตรวจจับความผิดปกติจากภาพ และการบันทึกข้อมูลลง Database-SQL Brick</span>
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-2 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-ep text-xs font-bold uppercase tracking-wider">
+            <i class="fa-solid fa-database text-[#fff200]"></i> หมวดการประมวลผลภาพสดและการจัดการฐานข้อมูล (Real-time Vision & Embedded SQL)
+          </div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
+            บทที่ 7: การประมวลผลโมเดลตรวจจับความผิดปกติจากภาพ <br class="hidden sm:inline">
+            <span class="text-[#fff200] text-xl sm:text-2xl font-bold">และการบันทึกข้อมูลลง Database-SQL Brick บนบอร์ด Arduino UNO Q</span>
+          </h1>
+          <p class="text-sm sm:text-base text-slate-200 leading-relaxed pt-1">
+            บูรณาการการรับสัญญาณภาพสดจากกล้องดิจิทัล UVC เข้ากับมอดูล Visual Anomaly Detection (FOMO-AD) Brick เพื่อวิเคราะห์ค่าคะแนนความผิดปกติ Anomaly Max Score แบบเวลาจริง พร้อมควบคุมอุปกรณ์แจ้งเตือนทางกายภาพ (LED Matrix & Relay) และบันทึกประวัติการตรวจสอบลงตารางฐานข้อมูล SQLite สำหรับจัดทำรายงานสถิติย้อนหลัง
+          </p>
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap gap-3 pt-3">
+          <a href="#sec-objectives" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg flex items-center gap-2">
+            <i class="fa-solid fa-book-open"></i> เริ่มต้นศึกษาเนื้อหา
+          </a>
+          <a href="https://www.youtube.com/watch?v=5Xiz_W53yU0" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="สื่อวีดิทัศน์ประจำบทเรียน">
+            <i class="fa-brands fa-youtube text-red-400 text-base"></i> สื่อวีดิทัศน์ประจำบทเรียน
+          </a>
+          <a href="https://app.box.com/s/5fc91neqpantexqez8yr9vjfv9fc5s6b" target="_blank" rel="noopener noreferrer" class="bg-blue-600/70 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition" title="เอกสารประกอบการบรรยาย (Box: VAD Brick & Database-SQL Logging)">
+            <i class="fa-solid fa-file-pdf"></i> เอกสารประกอบการบรรยาย (PDF)
+          </a>
+        </div>
+        </div>
+
+        <!-- Quick Lesson Meta Card -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/20 min-w-[280px] space-y-3 self-start lg:self-auto">
+          <div class="text-xs text-yellow-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> ข้อมูลจำเพาะประจำบทเรียน
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-slate-300 block text-[11px]">เวลาเรียน:</span>
+              <span class="font-bold text-white text-sm">4 คาบ (200 นาที)</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">รูปแบบการเรียน:</span>
+              <span class="font-bold text-yellow-300 text-sm">ปฏิบัติการบูรณาการ</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">อุปกรณ์หลัก:</span>
+              <span class="font-bold text-white">กล้อง UVC & Arduino UNO Q</span>
+            </div>
+            <div>
+              <span class="text-slate-300 block text-[11px]">ฐานข้อมูลบนบอร์ด:</span>
+              <span class="font-bold text-white">SQLite 3 (SQL Brick)</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-file-code mr-1"></i> โค้ดตัวอย่าง:</span>
+            <a href="/code_examples/chapter07/" target="_blank" class="font-mono text-yellow-300 font-bold hover:text-white underline decoration-yellow-400 flex items-center gap-1.5" title="คลิกเพื่อเปิดโฟลเดอร์ไฟล์โค้ดของบทเรียนนี้">code_examples/chapter07 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 4. CONTENT WRAPPER & SIDEBAR LAYOUT                            -->
+  <!-- ============================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- STICKY TABLE OF CONTENTS (LEFT SIDEBAR) -->
+      <aside class="lg:col-span-3 lg:sticky lg:top-24 space-y-6">
+        <div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#173b6b] mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-yellow-500"></i> สารบัญเนื้อหาบทที่ 7
+            </h3>
+            <nav class="space-y-1 text-xs">
+              <a href="#sec-objectives" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition"> 1. สาระสำคัญและผลการเรียนรู้</a>
+              <a href="#sec-architecture" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">2. สถาปัตยกรรมระบบบูรณาการ</a>
+              <a href="#sec-content" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">3. เนื้อหาบทเรียน 4 ตอน</a>
+              <a href="#sec-code" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">4. โค้ดตัวอย่าง test_vad_live.py</a>
+              <a href="#sec-checklist" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">5. ภารกิจปฏิบัติการ 5 ขั้นตอน</a>
+              <a href="#sec-questions" class="toc-link block px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">6. คำถามประเมินความเข้าใจ</a>
+            </nav>
+          </div>
+
+          <!-- Practical Download Card -->
+          <div class="bg-gradient-to-br from-[#173b6b] to-[#0d2342] text-white rounded-2xl p-4 shadow-sm border-t-2 border-[#fff200] text-xs space-y-2">
+            <div class="font-bold flex items-center gap-1.5 text-yellow-300">
+              <i class="fa-solid fa-microchip"></i> สคริปต์ประจำบทเรียน
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              ทดสอบประมวลผลภาพสดพร้อมระบบบันทึกประวัติเหตุการณ์ลง SQLite DB
+            </p>
+            <div class="font-mono text-[10px] bg-black/40 p-2 rounded border border-white/10 text-yellow-200 overflow-x-auto">
+              python code_examples/chapter07/test_vad_live.py
+            </div>
+          </div>
+        </div>
+              <!-- Card: Equipment & Target Board -->
+        <div class="bg-gradient-to-br from-[#0d2342] to-[#173b6b] rounded-2xl p-4 sm:p-5 text-white shadow-md border border-white/10 space-y-3.5">
+          <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2">
+            <i class="fa-solid fa-microchip"></i> รายการครุภัณฑ์และอุปกรณ์ปฏิบัติการ
+          </div>
+          <ul class="text-xs space-y-2 text-slate-200">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>บอร์ดพัฒนา Arduino UNO Q (ชิปหน่วยประมวลผล Qualcomm Dragonwing QRB2210)</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>กล้อง USB UVC Webcam สำหรับการตรวจจับภาพชิ้นงานแบบเรียลไทม์</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>โมเดล VAD .eim และมอดูล Database-SQL Brick สำหรับบันทึก Event Log</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-check text-yellow-400 mt-0.5 text-[11px]"></i>
+              <span>สายเชื่อมต่อ USB Type-C และโปรแกรม Arduino App Lab</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Chapter Navigation Button -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2">
+          <a href="index.html?chapter=7#section-quizzes" class="w-full btn-depa-yellow py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow">
+            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบวัดผลสัมฤทธิ์บทที่ 7
+          </a>
+          <a href="index.html?chapter=7#section-worksheets" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-flask text-red-500"></i> ใบงานปฏิบัติการที่ 7
+          </a>
+        </div>
+
+      </aside>
+
+      <!-- MAIN CONTENT ARTICLE (3 COLS) -->
+      <article class="lg:col-span-9 space-y-8">
+        
+        <!-- ======================================================== -->
+        <!-- SECTION 1: OBJECTIVES (K-P1-P2-A)                        -->
+        <!-- ======================================================== -->
+        <section id="sec-objectives" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs font-bold text-yellow-600 uppercase tracking-wider">SECTION 1</span>
+            <h2 class="text-2xl font-black text-[#173b6b] font-heading mt-1">
+              สาระสำคัญและผลการเรียนรู้ประจำบท
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">กรอบมาตรฐานการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน และสมรรถนะสำคัญของผู้เรียน</p>
+          </div>
+
+          <!-- สาระสำคัญ -->
+          <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+            <div class="font-bold text-[#173b6b] flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> สาระสำคัญ (Core Concept)
+            </div>
+            <p>
+              การประยุกต์ใช้งานโมเดลตรวจจับความผิดปกติทางภาพในการผลิตจริง จำเป็นต้องเชื่อมต่อการรับภาพแบบเวลาจริง (Real-time Vision) เข้ากับระบบควบคุมทางกายภาพและระบบบันทึกข้อมูลเชิงประวัติ โดยการเรียกใช้โมดูล <strong>Visual Anomaly Detection Brick</strong> บนโปรแกรม Arduino App Lab เพื่อประมวลผลคะแนน Anomaly Score จากภาพถ่ายหรือกล้องดิจิทัล UVC พร้อมสั่งการแจ้งเตือนผ่านหน้าจอ LED Matrix และควบคุมรีเลย์ (Relay) ในการคัดแยกชิ้นงานชำรุด ควบคู่กับการจัดเก็บประวัติการตรวจสอบลงตารางฐานข้อมูล <strong>SQLite</strong> ผ่าน <strong>Database-SQL Brick</strong> เพื่อใช้ในการวิเคราะห์สถิติสรุปผลย้อนหลัง
+            </p>
+          </div>
+
+          <!-- ผลการเรียนรู้ 4 ด้าน จัดตาม K-P-A -->
+          <div class="space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-red-500"></i> ผลการเรียนรู้ที่คาดหวังตามกรอบสมรรถนะ (Learning Outcomes)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">K</span>
+                  <span>ด้านความรู้และความเข้าใจ (Knowledge)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถอธิบายสถาปัตยกรรมการทำงานร่วมกันระหว่างโมดูล Visual Anomaly Detection Brick, อุปกรณ์แจ้งเตือนทางกายภาพ และระบบฐานข้อมูลเชิงสัมพันธ์ SQLite บนบอร์ดพัฒนาได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P1</span>
+                  <span>ด้านทักษะการประมวลผลภาพ (Image Pipeline Processing)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถเขียนชุดคำสั่งภาษาไพทอนเพื่อเรียกใช้คลาส VisualAnomalyDetection วนลูปอ่านภาพทดสอบจากโฟลเดอร์ และสกัดค่าคะแนนความผิดปกติ anomaly_max_score เพื่อเปรียบเทียบกับค่าขีดเริ่มเปลี่ยนได้อย่างถูกต้อง
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">P2</span>
+                  <span>ด้านทักษะการผสานฐานข้อมูลและระบบควบคุม (Database & Actuation)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนสามารถเขียนโปรแกรมบันทึกผลการคัดแยกชิ้นงานลงตารางฐานข้อมูล SQLite แบบอัตโนมัติ ควบคุมรีเลย์และแผงไฟแสดงผล พร้อมทั้งสืบค้นรายงานสถิติอัตราของเสียประจำวันได้อย่างสมบูรณ์
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div class="flex items-center gap-2 font-bold text-[#173b6b] text-xs">
+                  <span class="w-6 h-6 rounded-full bg-[#173b6b] text-white flex items-center justify-center text-[11px]">A</span>
+                  <span>ด้านคุณลักษณะและเจตคติ (Attitude & Values)</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ผู้เรียนมีความรอบคอบในการจัดการความถูกต้องของข้อมูล (Data Integrity) ตระหนักถึงเสถียรภาพของระบบอัตโนมัติในกระบวนการผลิต และมีความรับผิดชอบในการจัดทำรายงานเชิงวิศวกรรม
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: INTEGRATED ARCHITECTURE                       -->
+        <!-- ======================================================== -->
+        <section id="sec-architecture" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">2</span>
+            <h2 class="text-xl font-bold text-slate-900">สถาปัตยกรรมระบบตรวจสอบคุณภาพแบบเวลาจริง (Real-time Edge AI Architecture)</h2>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              ในระบบควบคุมคุณภาพการผลิตยุคอุตสาหกรรม 4.0 (Smart Factory) การประมวลผลปัญญาประดิษฐ์ไม่ได้จำกัดอยู่เพียงการแสดงผลคะแนนบนหน้าจอคอมพิวเตอร์ แต่ต้องทำงานแบบบูรณาการร่วมกับระบบกายภาพ (Cyber-Physical System) ได้อย่างครบวงจร โดยระบบประกอบด้วย 3 วงจรการทำงานหลักที่ประสานกันแบบคู่ขนาน:
+            </p>
+            <ol class="list-decimal list-inside space-y-1 text-xs text-slate-700 pl-1">
+              <li><strong>วงจรรับภาพและอนุมานผล (Inference Loop):</strong> กล้องอุตสาหกรรมส่งสัญญาณภาพสดผ่านพอร์ต USB สู่ Visual Anomaly Brick เพื่อประมวลผลผ่านโมเดล .eim ภายในระยะเวลาไม่เกิน 30-50 มิลลิวินาที</li>
+              <li><strong>วงจรควบคุมกายภาพ (Hardware Actuation Loop):</strong> เมื่อค่า Anomaly Max Score เกินเกณฑ์ที่กำหนด ระบบจะส่งสัญญาณไฟฟ้าขับรีเลย์ (Relay) สั่งการก้านปัดคัดแยกชิ้นงานชำรุดลงสู่ถังกักกัน พร้อมแสดงสัญลักษณ์เตือนบนหน้าจอแผงไฟ LED Matrix</li>
+              <li><strong>วงจรบันทึกข้อมูลและรายงานผล (Data Logging Loop):</strong> ข้อมูลผลการตรวจจับทุกชิ้นงานจะถูกส่งต่อไปยัง Database-SQL Brick เพื่อบันทึกลงฐานข้อมูล SQLite ประจำเครื่องอย่างถาวร ทำให้วิศวกรสามารถตรวจสอบย้อนกลับ (Traceability) ได้ทุกชิ้นงาน</li>
+            </ol>
+          </div>
+
+          <!-- Infographic Architecture Diagram -->
+          <div class="space-y-2">
+            <div class="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+              <img src="images/chapters/ch07_vad_live_system_architecture.jpg" alt="Real-time Edge AI Quality Inspection System Architecture" class="w-full object-cover">
+            </div>
+            <p class="text-[11px] text-slate-500 text-center italic">
+              รูปที่ 7.1: แผนภาพสถาปัตยกรรมการทำงานแบบบูรณาการ: กล้อง UVC, การประมวลผล VAD Brick บนบอร์ด, การขับเคลื่อน Actuator และการบันทึกลง Database-SQL Brick
+            </p>
+          </div>
+
+          <!-- Architecture Feature Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="font-bold text-[#173b6b] text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-video text-blue-600"></i> กล้องสด & การวิเคราะห์
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                กล้อง UVC ส่งสัญญาณภาพความละเอียด 640x480 พิกเซล ผ่านการย่อขนาดเป็น 96x96 พิกเซล และเข้าสู่โมเดล FOMO-AD คำนวณค่าความผิดปกติรายพิกัดกริด
+              </p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="font-bold text-[#173b6b] text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-bell text-red-600"></i> การแจ้งเตือน & คัดแยก
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                หาก Anomaly Max Score &ge; 20.0 บอร์ดจะขับขาสัญญาณดิจิทัลเปิดรีเลย์ก้านปัดทันที เพื่อผลักชิ้นส่วนชำรุดออกจากสายพานลำเลียงโดยไม่ทำให้สายการผลิตสะดุด
+              </p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="font-bold text-[#173b6b] text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-database text-emerald-600"></i> บันทึกข้อมูล SQL
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                บันทึกวันเวลา, รหัสชิ้นส่วน, ค่าคะแนน, สถานะการตัดสิน และระยะเวลาหน่วงในการประมวลผล (Latency) ลงฐานข้อมูล SQLite บนอุปกรณ์เพื่อวิเคราะห์แนวโน้ม
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: LESSON 4 UNITS                                -->
+        <!-- ======================================================== -->
+        <section id="sec-content" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-8">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">3</span>
+            <h2 class="text-xl font-bold text-slate-900">เนื้อหาบทเรียน 4 ตอน (Course Content Units)</h2>
+          </div>
+
+          <!-- Unit 1 -->
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 1</span>
+              <h3 class="text-base font-bold text-slate-900">การกำหนดค่าและเรียกใช้มอดูล Visual Anomaly Detection Brick</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+              <p>
+                มอดูล <strong>Visual Anomaly Detection Brick</strong> บนโปรแกรม Arduino App Lab ทำหน้าที่เป็นส่วนติดต่อเชื่อมโยง (Abstraction Wrapper) ห่อหุ้มไฟล์ไบนารี .eim ทำให้ผู้พัฒนาสามารถเรียกประมวลผลภาพได้ด้วยภาษาไพทอนเพียงไม่กี่บรรทัด โดยมีขั้นตอนการทำงานภายในดังนี้:
+              </p>
+              <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <ol class="list-decimal list-inside space-y-1 text-xs text-slate-700">
+                  <li><strong>โหลดโมเดลเข้าสู่หน่วยความจำ:</strong> อ่านพาธไฟล์โมเดลจากตัวแปร <code class="font-mono text-blue-900 font-bold">EI_V_ANOMALY_DETECTION_MODEL</code> ในไฟล์ app.yaml</li>
+                  <li><strong>สร้างกระบวนการย่อยระดับระบบ (Subprocess IPC):</strong> สตาร์ตไฟล์ไบนารี .eim ขึ้นมาเป็น Background Worker ที่พร้อมรับส่งข้อมูลเทนเซอร์ตลอดเวลา</li>
+                  <li><strong>รับข้อมูลภาพและส่งคืนผลลัพธ์:</strong> รับข้อมูลเฟรมภาพและส่งคืนผลลัพธ์ในรูปแบบพจนานุกรมที่มีค่า <code class="font-mono text-blue-900 font-bold">anomaly_max_score</code> และ <code class="font-mono text-blue-900 font-bold">anomaly_mean_score</code></li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 2 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 2</span>
+              <h3 class="text-base font-bold text-slate-900">การดึงสัญญาณภาพสดจากกล้องดิจิทัล UVC และการอนุมานผลเวลาจริง</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+              <p>
+                การเชื่อมต่อกล้องเว็บแคมมาตรฐาน (USB Video Class: UVC) เข้ากับบอร์ดพัฒนา Arduino UNO Q ใช้การอ้างอิงอุปกรณ์ผ่านดัชนีกล้อง (Device Index) เช่น <code class="font-mono text-slate-800">/dev/video0</code> โดยมีข้อแนะนำในการตั้งค่าเพื่อให้ระบบมีอัตราเฟรมเรตที่เสถียรดังนี้:
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                  <div class="font-bold text-xs text-[#173b6b]">
+                    <i class="fa-solid fa-camera mr-1 text-blue-600"></i> ความละเอียดและสัดส่วนภาพ
+                  </div>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    ควรกำหนดความละเอียดการบันทึกภาพของกล้องไว้ที่ 640x480 พิกเซล (VGA) เพื่อประหยัดแบนด์วิดท์ของบัส USB และความเร็วในการแปลงสเกลภาพเข้าสู่โมเดล
+                  </p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                  <div class="font-bold text-xs text-[#173b6b]">
+                    <i class="fa-solid fa-stopwatch mr-1 text-emerald-600"></i> ระยะเวลาหน่วงในการประมวลผล (Latency)
+                  </div>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    โมเดล .eim บนบอร์ด Arduino UNO Q ใช้เวลาประมวลผลต่อหนึ่งเฟรมเพียง 20 - 35 มิลลิวินาที ทำให้ระบบสามารถตรวจสอบชิ้นงานได้มากกว่า 25-30 ชิ้นต่อวินาที
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 3 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 3</span>
+              <h3 class="text-base font-bold text-slate-900">การควบคุมอุปกรณ์แจ้งเตือนทางกายภาพ (LED Matrix & Relay Sorting Arm)</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3">
+              <p>
+                เมื่อการคำนวณคะแนนความผิดปกติเสร็จสิ้น ระบบจะเปรียบเทียบค่า <strong>Anomaly Max Score</strong> กับเกณฑ์ขีดเริ่มเปลี่ยน (Threshold = 20.0) เพื่อสั่งการฮาร์ดแวร์ภายนอก:
+              </p>
+              
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                  <thead class="bg-[#173b6b] text-white uppercase text-[11px]">
+                    <tr>
+                      <th class="py-2.5 px-3">สถานะการตัดสิน (Verdict)</th>
+                      <th class="py-2.5 px-3">เงื่อนไขทางคณิตศาสตร์</th>
+                      <th class="py-2.5 px-3">การสั่งการฮาร์ดแวร์กายภาพ</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200">
+                    <tr class="bg-white hover:bg-slate-50">
+                      <td class="py-2.5 px-3 font-bold text-emerald-600">ผ่านเกณฑ์ (PASS)</td>
+                      <td class="py-2.5 px-3 font-mono text-slate-700">max_score &lt; 20.0</td>
+                      <td class="py-2.5 px-3">แสดงสัญลักษณ์เครื่องหมายถูกสีเขียวบน LED Matrix และส่งต่อสายพาน</td>
+                    </tr>
+                    <tr class="bg-slate-50/50 hover:bg-slate-50">
+                      <td class="py-2.5 px-3 font-bold text-red-600">ไม่ผ่านเกณฑ์ (REJECT)</td>
+                      <td class="py-2.5 px-3 font-mono text-slate-700">max_score &ge; 20.0</td>
+                      <td class="py-2.5 px-3">เปิดสัญญาณเตือนสีแดง, ส่งสัญญาณ HIGH ขับรีเลย์ผลักชิ้นงานตกถังกักกัน</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unit 4 -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <div class="flex items-center gap-2 text-[#173b6b]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#173b6b] text-white">ตอนที่ 4</span>
+              <h3 class="text-base font-bold text-slate-900">การบันทึกและสืบค้นข้อมูลประวัติการตรวจสอบด้วย Database-SQL Brick</h3>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-4">
+              <p>
+                มอดูล <strong>Database-SQL Brick</strong> ทำหน้าที่บันทึกเหตุการณ์การตรวจสอบคุณภาพทุกครั้งลงในตาราง <code class="font-mono text-blue-900 font-bold">inspection_records</code> บนฐานข้อมูล SQLite ในเครื่องอย่างเป็นระบบ ทำให้สามารถสืบค้นรายงานสรุปและจัดทำแดชบอร์ดติดตามคุณภาพการผลิตได้อย่างมีประสิทธิภาพ
+              </p>
+
+              <!-- Database Inspection Dashboard Screenshot -->
+              <div class="space-y-2">
+                <div class="rounded-xl overflow-hidden border border-slate-200 shadow-md bg-slate-900">
+                  <img src="images/chapters/ch07_database_sql_logging.jpg" alt="Database-SQL Brick Inspection Dashboard" class="w-full object-cover">
+                </div>
+                <p class="text-[11px] text-slate-500 text-center italic">
+                  รูปที่ 7.2: หน้าจอแสดงผลการสืบค้นข้อมูลใน Database-SQL Brick และการสรุปรายงานสถิติอัตราผลผลิต (Yield Rate)
+                </p>
+              </div>
+
+              <div class="callout-tip p-3 rounded-lg text-xs space-y-1 text-emerald-900">
+                <div class="font-bold flex items-center gap-1.5">
+                  <i class="fa-solid fa-chart-line text-emerald-600"></i> ประโยชน์ของการเก็บประวัติแบบเรียลไทม์ในงานวิศวกรรม
+                </div>
+                <p class="text-emerald-800 leading-relaxed">
+                  การจัดเก็บประวัติผลการตรวจสอบคุณภาพพร้อมเวลาและค่าคะแนนความผิดปกติ ช่วยให้โรงงานสามารถวิเคราะห์แนวโน้มการสึกหรอของแม่พิมพ์เครื่องจักรได้ล่วงหน้า (Predictive Maintenance) หากพบว่าค่าคะแนนเฉลี่ยเริ่มสูงขึ้นเรื่อยๆ แม้จะยังไม่เกินเกณฑ์ 20.0 วิศวกรสามารถวางแผนหยุดซ่อมบำรุงได้ทันท่วงทีก่อนที่ชิ้นงานชำรุดจริงจะเกิดขึ้น
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: CODE EXAMPLES & LIVE INFERENCE                -->
+        <!-- ======================================================== -->
+        <section id="sec-code" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">4</span>
+            <h2 class="text-xl font-bold text-slate-900">ตัวอย่างโค้ดและการทดสอบระบบ (Code Implementation & Testing)</h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            ไฟล์โค้ดสำหรับบทเรียนนี้ได้รับการจัดเก็บไว้ในโฟลเดอร์ <code class="bg-slate-100 text-blue-800 px-1.5 py-0.5 rounded font-mono font-bold">code_examples/chapter07</code> ประกอบด้วยไฟล์คอนฟิกูเรชัน <code class="font-mono text-slate-800 font-bold">app.yaml</code> และสคริปต์ประมวลผลภาพสดพร้อมบันทึก SQL <code class="font-mono text-slate-800 font-bold">test_vad_live.py</code>
+          </p>
+
+          <!-- File 1: app.yaml -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-solid fa-file-code text-amber-500"></i> ไฟล์คอนฟิกูเรชันระบบ: app.yaml
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">code_examples/chapter07/app.yaml</span>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <span class="text-[11px] text-slate-400">YAML Config</span>
+              </div>
+              <div class="terminal-body">
+<pre class="text-emerald-400">name: Visual Anomaly Detection with SQL Logger
+description: "ระบบตรวจจับความผิดปกติของภาพแบบเรียลไทม์พร้อมการบันทึกประวัติลงฐานข้อมูล SQL บน Arduino UNO Q"
+ports: []
+variables: {
+  EI_V_ANOMALY_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AnomalyDetection.eim",
+  DB_SQL_PATH: "/home/arduino/.arduino-bricks/databases/production_qc.db",
+  ANOMALY_THRESHOLD: "20.0",
+  CAMERA_DEVICE_INDEX: "0",
+  LED_MATRIX_FEEDBACK: "true",
+  ACTUATOR_RELAY_PIN: "7"
+}
+bricks:
+  - id: "visual_anomaly_brick"
+    type: "visual_anomaly_detection"
+    enabled: true
+  - id: "database_sql_brick"
+    type: "database_sql"
+    enabled: true</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- File 2: test_vad_live.py -->
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-[#173b6b] flex items-center gap-1.5">
+                <i class="fa-brands fa-python text-blue-500"></i> สคริปต์ประมวลผลและบันทึกฐานข้อมูล: test_vad_live.py
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">code_examples/chapter07/test_vad_live.py</span>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <span class="text-[11px] text-slate-400">Python 3 Integrated Script</span>
+              </div>
+              <div class="terminal-body max-h-[380px]">
+<pre class="text-blue-300">class ProductionQCManager:
+    """คลาสจัดการระบบควบคุมคุณภาพและบันทึกข้อมูลลงฐานข้อมูล SQL บนบอร์ด"""
+
+    def __init__(self, db_path: str = DB_FILE_PATH):
+        self.db_path = db_path
+        self._init_database()
+
+    def _init_database(self):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS inspection_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT NOT NULL,
+                    part_id TEXT NOT NULL,
+                    anomaly_mean REAL NOT NULL,
+                    anomaly_max REAL NOT NULL,
+                    threshold REAL NOT NULL,
+                    verdict TEXT NOT NULL,
+                    latency_ms REAL NOT NULL,
+                    hardware_action TEXT
+                )
+            """)
+            conn.commit()
+
+    def log_inspection(self, part_id: str, mean_score: float, max_score: float,
+                       verdict: str, latency: float, action: str) -> int:
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO inspection_records 
+                (timestamp, part_id, anomaly_mean, anomaly_max, threshold, verdict, latency_ms, hardware_action)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (now_str, part_id, mean_score, max_score, ANOMALY_THRESHOLD, verdict, latency, action))
+            conn.commit()
+            return cursor.lastrowid</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Execution Result Terminal -->
+          <div class="space-y-2 pt-2">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-terminal text-emerald-600"></i> ผลลัพธ์การรันประมวลผลและการบันทึกข้อมูลจริงบนคอนโซล:
+            </span>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="text-[11px] text-slate-400">Terminal Output (Real-time Inspection & SQL Logging)</span>
+              </div>
+              <div class="terminal-body font-mono text-[11px]">
+<pre class="text-slate-300">$ python code_examples/chapter07/test_vad_live.py
+===========================================================================
+ บทเรียนที่ 7: ระบบตรวจสอบความผิดปกติจากภาพสดและบันทึกข้อมูล SQL
+ (Real-time Visual Anomaly Detection & Database-SQL Brick Logging)
+===========================================================================
+[*] ไฟล์ฐานข้อมูล SQLite: code_examples/chapter07/production_qc.db
+[*] เกณฑ์ขีดเริ่มเปลี่ยน (Anomaly Threshold): 20.0
+[*] เริ่มต้นกระบวนการตรวจสอบคุณภาพสายการผลิตจำลอง (5 ชิ้นงาน)...
+
+[001] PART-BRG-0001 | Mean: 1.71 | Max: 1.87  | <span class="text-emerald-400 font-bold">[PASS]</span> (21.3 ms)
+      └─ ฮาร์ดแวร์ปฏิบัติการ: CONVEYOR_NEXT: ADVANCE | LED: GREEN_READY
+[002] PART-BRG-0002 | Mean: 0.99 | Max: 3.41  | <span class="text-emerald-400 font-bold">[PASS]</span> (27.0 ms)
+      └─ ฮาร์ดแวร์ปฏิบัติการ: CONVEYOR_NEXT: ADVANCE | LED: GREEN_READY
+[003] PART-BRG-0003 | Mean: 1.17 | Max: 3.78  | <span class="text-emerald-400 font-bold">[PASS]</span> (22.8 ms)
+      └─ ฮาร์ดแวร์ปฏิบัติการ: CONVEYOR_NEXT: ADVANCE | LED: GREEN_READY
+[004] PART-BRG-0004 | Mean: 1.41 | Max: 5.64  | <span class="text-emerald-400 font-bold">[PASS]</span> (33.3 ms)
+      └─ ฮาร์ดแวร์ปฏิบัติการ: CONVEYOR_NEXT: ADVANCE | LED: GREEN_READY
+[005] PART-BRG-0005 | Mean: 8.48 | Max: 40.48 | <span class="text-red-400 font-bold">[REJECT]</span> (20.2 ms)
+      └─ ฮาร์ดแวร์ปฏิบัติการ: RELAY_TRIGGER: PUSH_DEFECT_BIN | LED: RED_ALARM
+
+===========================================================================
+ สรุปรายงานสถิติการควบคุมคุณภาพจาก Database-SQL Brick
+===========================================================================
+  ├─ จำนวนชิ้นงานที่ตรวจสอบทั้งหมด: 5 ชิ้น
+  ├─ ผ่านเกณฑ์มาตรฐาน (PASS):       4 ชิ้น
+  ├─ ไม่ผ่านเกณฑ์ (REJECT):         1 ชิ้น
+  ├─ อัตราผลผลิตสมบูรณ์ (Yield):    80.0%
+  └─ ระยะเวลาหน่วงเฉลี่ย:           24.89 มิลลิวินาที (ms)</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: PRACTICAL TASKS CHECKLIST (5 TASKS)           -->
+        <!-- ======================================================== -->
+        <section id="sec-checklist" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">5</span>
+            <h2 class="text-xl font-bold text-slate-900">ใบงานและภารกิจปฏิบัติการประจำบทเรียน (Practical Tasks)</h2>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            ให้นักเรียนปฏิบัติตามภารกิจทั้ง 5 ขั้นตอน โดยคลิกทำเครื่องหมายลงในช่องสี่เหลี่ยมเมื่อปฏิบัติภารกิจเสร็จสมบูรณ์ ระบบจะคำนวณและบันทึกความก้าวหน้าลงในหน่วยความจำของอุปกรณ์โดยอัตโนมัติ
+          </p>
+
+          <div class="space-y-3 pt-2">
+            <!-- Task 1 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 1: กำหนดค่าโมดูลในไฟล์ app.yaml</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  เปิดไฟล์ <code class="font-mono text-slate-800">app.yaml</code> ระบุพาธโมเดล AnomalyDetection.eim, พาธฐานข้อมูล SQLite และค่าขีดเริ่มเปลี่ยน <code class="font-mono text-blue-700 font-bold">ANOMALY_THRESHOLD: "20.0"</code>
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 2 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 2: เชื่อมต่อและทดสอบสัญญาณภาพจากกล้องดิจิทัล UVC</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  ต่อกล้องเว็บแคมเข้ากับพอร์ต USB ของบอร์ด Arduino UNO Q ตรวจสอบอุปกรณ์ <code class="font-mono text-slate-800">/dev/video0</code> และทดสอบรับเฟรมภาพเข้าสู่โปรแกรม
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 3 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 3: ประมวลผลภาพสดและทดสอบสัญญาณขับรีเลย์</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  นำชิ้นงานทดสอบที่มีรอยขีดข่วนผ่านหน้ากล้อง ตรวจสอบว่าระบบสามารถคำนวณ Anomaly Max Score เกินเกณฑ์ 20.0 และส่งสัญญาณขับรีเลย์คัดแยกชิ้นงานได้สำเร็จ
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 4 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 4: ตรวจสอบการบันทึกข้อมูลลงตาราง SQLite</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  ใช้คำสั่ง SQL ตรวจสอบตาราง <code class="font-mono text-slate-800">inspection_records</code> เพื่อยืนยันว่าผลการวินิจฉัยและเวลาประมวลผลถูกบันทึกอย่างสมบูรณ์
+                </span>
+              </div>
+            </label>
+
+            <!-- Task 5 -->
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
+              <input type="checkbox" class="task-checkbox mt-1 w-4 h-4 text-[#173b6b] rounded border-slate-300 focus:ring-yellow-400">
+              <div class="space-y-0.5">
+                <span class="font-bold text-xs sm:text-sm text-slate-900 block">ภารกิจที่ 5: ปฏิบัติการทดสอบสคริปต์รวม test_vad_live.py</span>
+                <span class="text-xs text-slate-600 block leading-relaxed">
+                  รันคำสั่ง <code class="font-mono text-blue-700 font-bold">python code_examples/chapter07/test_vad_live.py</code> สังเกตรายงานผลสถิติและอัตราผลผลิต (Yield Rate)
+                </span>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- SECTION 6: REVIEW QUESTIONS (3 QUESTIONS)                -->
+        <!-- ======================================================== -->
+        <section id="sec-questions" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <span class="w-8 h-8 rounded-lg bg-[#173b6b] text-[#fff200] font-black flex items-center justify-center text-sm">6</span>
+            <h2 class="text-xl font-bold text-slate-900">คำถามประเมินความเข้าใจและคิดวิเคราะห์ (Review Questions)</h2>
+          </div>
+
+          <div class="space-y-4 text-xs sm:text-sm">
+            <!-- Question 1 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                1. ในระบบตรวจสอบคุณภาพสายการผลิตจริง เหตุใดการบันทึกประวัติการตรวจจับลงในฐานข้อมูล SQL บนบอร์ดจึงมีความสำคัญกว่าการพิมพ์ผลลัพธ์ออกทางคอนโซลเพียงอย่างเดียว?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> การพิมพ์ผลลัพธ์ออกทางคอนโซลเป็นการแสดงผลชั่วคราวที่ไม่สามารถนำมาสืบค้นหรือวิเคราะห์เชิงลึกได้ เมื่อโปรแกรมปิดข้อมูลจะสูญหายทันที การบันทึกลงใน <strong>ฐานข้อมูล SQL (SQLite) บนบอร์ด</strong> ทำให้มีประวัติข้อมูลที่คงอยู่ถาวร (Persistent Storage) สามารถสืบค้นย้อนกลับได้ตามมาตรฐานการควบคุมคุณภาพทางวิศวกรรม (Traceability) เช่น ตรวจสอบว่าชิ้นงานล็อตใดมีปัญหา คำนวณอัตราผลผลิต (Yield Rate) และนำข้อมูลค่าคะแนนความผิดปกติมาวิเคราะห์แนวโน้มการเสื่อมสภาพของเครื่องจักรล่วงหน้าได้
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                2. หากระบบกล้องมีอัตราเฟรมภาพสด 30 FPS (ทุก 33 มิลลิวินาที) แต่โมเดลปัญญาประดิษฐ์ใช้เวลาประมวลผล 80 มิลลิวินาทีต่อเฟรม จะเกิดผลกระทบต่อระบบอย่างไร และวิศวกรควรมีแนวทางแก้ไขสถาปัตยกรรมอย่างไร?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> จะเกิดภาวะ <strong>เฟรมสะสมค้างในหน่วยความจำ (Frame Buffer Overflow)</strong> หรือการหน่วงสะสม ทำให้ภาพที่นำมาวิเคราะห์ไม่ใช่ตำแหน่งปัจจุบันของชิ้นงานบนสายพาน แนวทางแก้ไขทางสถาปัตยกรรมคือ:
+                  <br>1. <strong>ใช้กลไก Frame Dropping:</strong> ประมวลผลเฉพาะเฟรมล่าสุด (Latest Frame) และทิ้งเฟรมที่ค้างในคิว
+                  <br>2. <strong>การกระตุ้นด้วยเซนเซอร์ตรวจจับ (Sensor Triggering):</strong> ไม่ต้องประมวลผลวิดีโอตลอดเวลา แต่ใช้เซนเซอร์แสง (Photoelectric Sensor) ตรวจจับเมื่อมีชิ้นงานเข้ามาตรงตำแหน่งกล้อง แล้วสั่งถ่ายภาพเดี่ยวเพื่อนำมาประมวลผลเพียงภาพเดียว ซึ่งช่วยประหยัดพลังงานและความร้อนของระบบ
+                </div>
+              </details>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <div class="font-bold text-slate-900">
+                3. ในกรณีที่ต้องการสรุปรายงานยอดชิ้นงานที่ผ่านเกณฑ์ (PASS) และไม่ผ่านเกณฑ์ (REJECT) ประจำกะการทำงาน ควรเขียนคำสั่งภาษา SQL ในรูปแบบใด?
+              </div>
+              <details class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 cursor-pointer">
+                <summary class="font-bold text-[#173b6b] hover:text-yellow-600 transition">คลิกเพื่อดูแนวคำตอบ</summary>
+                <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-100 pt-2">
+                  <strong>แนวคำตอบ:</strong> สามารถใช้คำสั่งจัดกลุ่มและนับจำนวน (GROUP BY & COUNT) เช่น:
+                  <div class="font-mono text-xs bg-slate-100 p-2 rounded mt-1 text-blue-900 overflow-x-auto">
+                    SELECT verdict, COUNT(*) AS total_count, AVG(anomaly_max) AS avg_score, AVG(latency_ms) AS avg_latency FROM inspection_records GROUP BY verdict;
+                  </div>
+                  คำสั่งนี้จะสรุปจำนวนชิ้นงาน ค่าคะแนนความผิดปกติสูงสุดเฉลี่ย และระยะเวลาหน่วงเฉลี่ย โดยแยกตามกลุ่ม PASS และ REJECT ได้อย่างรวดเร็ว
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================================== -->
+                <!-- Quiz Callout Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg border border-yellow-400/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <i class="fa-solid fa-graduation-cap"></i> แบบประเมินผลการเรียนรู้ประจำบทเรียน
+            </div>
+            <h4 class="text-lg font-black text-white">แบบทดสอบท้ายบทเรียนที่ 7 (ปรนัย 10 ข้อ)</h4>
+            <p class="text-xs text-slate-200">ทดสอบความรู้ความเข้าใจตามเกณฑ์มาตรฐานตัวชี้วัดสาระเทคโนโลยี พร้อมเฉลยและบันทึกคะแนนอัตโนมัติ</p>
+          </div>
+          <a href="index.html?chapter=7#section-quizzes" class="btn-depa-yellow px-6 py-3 rounded-xl text-xs sm:text-sm font-black shadow-xl flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-pen-to-square"></i> เข้าทำแบบทดสอบ
+          </a>
+        </div>
+
+        <!-- CHAPTER FOOTER & NAVIGATION PAGER                        -->
+        <!-- ======================================================== -->
+        <div class="bg-gradient-to-r from-[#0d2342] to-[#173b6b] rounded-2xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border-t-2 border-[#fff200]">
+          <div class="flex-1 min-w-0 pr-0 md:pr-4">
+            <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block">บทเรียนถัดไป</span>
+            <h3 class="text-base sm:text-lg font-black mt-1 leading-snug break-words">บทเรียนที่ 8: การฝึกสอนโมเดลตรวจจับวัตถุด้วยสถาปัตยกรรม FOMO (Object Detection)</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">ก้าวสู่การตรวจจับวัตถุหลายชิ้นพร้อมระบุพิกัดตำแหน่ง (Bounding Box / Centroid) ด้วยโมเดลความเร็วสูง</p>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0 w-full md:w-auto justify-start md:justify-end">
+            <a href="chapter06.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i> <span>บทที่ 6</span>
+            </a>
+            <a href="index.html#section-lessons" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition whitespace-nowrap flex-shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-list"></i> <span>สารบัญ</span>
+            </a>
+            <a href="chapter08.html" class="btn-depa-yellow px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+              <span>เข้าสู่บทเรียนที่ 8</span> <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 5. FOOTER (depa & KT-Edu OFFICIAL DESIGN)                      -->
+  <!-- ============================================================== -->
+  <footer class="bg-[#0d2342] text-slate-300 text-xs py-8 mt-16 border-t-4 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="images/logo/logo_kt_edu.png" alt="KT-Edu" class="h-10 w-10 object-contain rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-white text-sm">KT-Edu Learning Platform</div>
+          <div class="text-[11px] text-yellow-300 font-medium">รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI)</div>
+        </div>
+      </div>
+      <div class="text-center sm:text-right space-y-0.5">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 text-[10px] font-bold tracking-wider uppercase border border-yellow-400/20">
+          <i class="fa-solid fa-award"></i> Curriculum & Instruction
+        </span>
+        <div class="text-xs font-bold text-slate-100 tracking-wider">
+          TEACHER PANITTHA BOONYONG
+        </div>
+        <div class="text-[10px] text-slate-400">
+          Embedded Artificial Intelligence Program
+        </div>
+        <div class="pt-2 flex items-center justify-center sm:justify-end gap-2 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px]">ช่องทางติดตาม:</span>
+          <a href="https://www.facebook.com/profile.php?id=61595550414518" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1877f2] text-white transition text-[11px] font-semibold" title="เพจ Facebook ของฉัน"><i class="fa-brands fa-facebook-f"></i> เพจของฉัน</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Font Switcher (Google Noto, Prompt, Sarabun)
+    function setFontStyle(style) {
+      const root = document.documentElement;
+      root.classList.remove('font-style-noto', 'font-style-prompt', 'font-style-sarabun');
+      root.classList.add(`font-style-${style}`);
+      localStorage.setItem('edgeai_font_style', style);
+
+      ['noto', 'prompt', 'sarabun'].forEach(s => {
+        const btn = document.getElementById(`fontBtn-${s}`);
+        if (btn) {
+          if (s === style) {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff200] text-[#173b6b] shadow transition';
+          } else {
+            btn.className = 'px-2 py-0.5 rounded text-[11px] text-slate-300 hover:text-white hover:bg-white/10 transition';
+          }
+        }
+      });
+    }
+
+    // Font resizer
+    function changeFontSize(delta) {
+      const root = document.documentElement;
+      let current = parseFloat(window.getComputedStyle(root).fontSize);
+      if (delta === 0) current = 16;
+      else current = Math.min(20, Math.max(13, current + delta * 1.5));
+      root.style.fontSize = current + 'px';
+    }
+
+    // Initialize saved font immediately on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedFont = localStorage.getItem('edgeai_font_style') || 'noto';
+      setFontStyle(savedFont);
+    });
+
+    // ScrollSpy for TOC links
+    window.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.toc-link');
+      const sections = Array.from(links).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+      window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollY = window.pageYOffset + 140;
+
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            current = '#' + section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+  <!-- Learning Enhancements: Video Modal, Syntax Highlighting & Copy Button -->
+  <script src="js/learning-enhancements.js?v=20261017b"></script>
+</body>
+</html>

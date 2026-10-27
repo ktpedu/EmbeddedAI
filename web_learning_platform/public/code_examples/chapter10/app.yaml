@@ -1,0 +1,16 @@
+# ==============================================================================
+# โครงสร้างคอนฟิกูเรชันแอปพลิเคชัน Arduino App Lab
+# รายวิชา: การพัฒนาปัญญาประดิษฐ์บนอุปกรณ์ขอบ (Edge AI Development)
+# บทที่ 10: การพัฒนาและประมวลผลโมเดลจำแนกประเภทภาพ (Image Classification)
+# ==============================================================================
+name: "Webcam Image Classification App"
+description: "ระบบจำแนกประเภทชิ้นงานจากกล้องเว็บแคมด้วยโมเดล MobileNetV2 และคัดกรองฉากหลังว่างเปล่า"
+ports:
+  - 7000:7000
+
+bricks:
+  - arduino:image_classification:
+      variables:
+        EI_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/image_classifier.eim"
+        CONFIDENCE_THRESHOLD: "0.80"
+  - arduino:web_ui: {}

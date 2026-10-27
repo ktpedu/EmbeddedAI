@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ใบงานปฏิบัติการที่ 6: การนำโมเดล .eim ไปใช้งานและการกำหนดค่าไฟล์ app.yaml บนบอร์ดพัฒนา Arduino UNO Q | KT-Edu Edge AI</title>
+  <!-- Google Fonts: Sarabun & Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --depa-blue: #173b6b;
+      --depa-gold: #f59e0b;
+      --depa-light: #f8fafc;
+      --depa-dark: #0f172a;
+      --border-color: #cbd5e1;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1e293b;
+      background-color: #f1f5f9;
+      padding: 20px 0;
+    }
+    
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Prompt', sans-serif;
+      font-weight: 700;
+      color: var(--depa-blue);
+    }
+    
+    /* Toolbar on Screen */
+    .screen-toolbar {
+      max-width: 210mm;
+      margin: 0 auto 16px auto;
+      background: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Prompt', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: var(--depa-blue);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #0f284a;
+    }
+    
+    .btn-success {
+      background: #059669;
+      color: #ffffff;
+    }
+    .btn-success:hover {
+      background: #047857;
+    }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #94a3b8;
+      color: #475569;
+    }
+    .btn-outline:hover {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+    
+    /* A4 Page Container */
+    .page-container {
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20mm 18mm;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-radius: 4px;
+    }
+    
+    /* Academic Header */
+    .academic-header {
+      border-bottom: 2px solid var(--depa-blue);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header-text {
+      text-align: center;
+      flex-grow: 1;
+    }
+    
+    .course-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--depa-blue);
+      letter-spacing: -0.2px;
+    }
+    
+    .sub-course-title {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    
+    .worksheet-title-banner {
+      background: #f8fafc;
+      border-left: 4px solid var(--depa-blue);
+      border-right: 1px solid var(--border-color);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+    
+    .badge-unit {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+    
+    .ws-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--depa-blue);
+      margin-bottom: 2px;
+    }
+    
+    .ws-eng-name {
+      font-size: 12px;
+      color: #64748b;
+      font-style: italic;
+    }
+    
+    .ws-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: #475569;
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 6px;
+    }
+    
+    /* Student Fill-in Info Box */
+    .student-info-box {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      background: #ffffff;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 10px;
+      font-size: 12px;
+    }
+    
+    .field-label {
+      font-weight: 600;
+      color: #334155;
+    }
+    
+    .field-line {
+      border-bottom: 1px dotted #94a3b8;
+      display: inline-block;
+      min-width: 60px;
+    }
+    
+    /* Section Styles */
+    .section-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--depa-blue);
+      margin-bottom: 6px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 4px;
+    }
+    
+    .bullet-list {
+      margin-left: 20px;
+      margin-bottom: 10px;
+      font-size: 12.5px;
+    }
+    
+    .bullet-list li {
+      margin-bottom: 4px;
+    }
+    
+    .procedure-step {
+      margin-bottom: 8px;
+      font-size: 12.5px;
+    }
+    
+    .step-num {
+      font-weight: 700;
+      color: var(--depa-blue);
+    }
+    
+    /* Tables */
+    .lab-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px 0;
+      font-size: 12px;
+    }
+    
+    .lab-table th {
+      background: #f1f5f9;
+      color: var(--depa-blue);
+      font-family: 'Prompt', sans-serif;
+      font-weight: 700;
+      border: 1px solid var(--border-color);
+      padding: 6px 8px;
+      text-align: center;
+    }
+    
+    .lab-table td {
+      border: 1px solid var(--border-color);
+      padding: 6px 8px;
+    }
+    
+    .lab-table td:nth-child(1) {
+      font-weight: 500;
+    }
+    
+    .lab-table .code-font {
+      font-family: monospace;
+      font-size: 11px;
+      color: #0369a1;
+    }
+    
+    /* Post lab questions */
+    .question-block {
+      margin-bottom: 12px;
+      font-size: 12.5px;
+    }
+    
+    .question-text {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+    
+    .answer-lines {
+      height: 38px;
+      border-bottom: 1px dotted #cbd5e1;
+      margin-top: 4px;
+    }
+    
+    /* Sign & Score Evaluation Box */
+    .evaluation-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+      page-break-inside: avoid;
+    }
+    
+    .rubric-box {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11.5px;
+      background: #fafafa;
+    }
+    
+    .signature-box {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11.5px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .score-badge {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--depa-blue);
+      border: 2px solid var(--depa-blue);
+      border-radius: 8px;
+      padding: 4px 10px;
+      display: inline-block;
+      margin: 4px 0;
+    }
+    
+    /* PRINT STYLES */
+    @media print {
+      body {
+        background-color: #ffffff;
+        padding: 0;
+      }
+      .screen-toolbar {
+        display: none !important;
+      }
+      .page-container {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+        min-height: auto;
+      }
+      @page {
+        size: A4;
+        margin: 15mm 15mm 15mm 15mm;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Toolbar -->
+  <div class="screen-toolbar">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-weight: 700; color: #173b6b; font-family: 'Prompt', sans-serif;">
+        <i class="fa-solid fa-file-lines text-blue-600"></i> ใบงานปฏิบัติการที่ 6
+      </span>
+      <span style="font-size: 12px; color: #64748b;">(สอดคล้องกับ Chapter 06)</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button onclick="window.print()" class="btn btn-primary" title="สั่งพิมพ์เป็นเอกสารกระดาษ หรือบันทึกเป็น PDF">
+        <i class="fa-solid fa-print"></i> พิมพ์ / บันทึก PDF
+      </button>
+      <a href="/worksheets/Lab_Worksheet_06.pdf" download="Lab_Worksheet_06.pdf" class="btn btn-success" title="ดาวน์โหลดไฟล์ PDF โดยตรง">
+        <i class="fa-solid fa-download"></i> ดาวน์โหลด PDF
+      </a>
+      <a href="/chapter06.html" class="btn btn-outline" title="เปิดอ่านเนื้อหาคู่มือบทเรียน">
+        <i class="fa-solid fa-book-open"></i> กลับสู่บทเรียน
+      </a>
+    </div>
+  </div>
+
+  <!-- A4 Worksheet Document -->
+  <div class="page-container">
+    
+    <!-- Academic Header -->
+    <div class="academic-header">
+      <div class="header-text">
+        <div class="course-title">เอกสารใบงานปฏิบัติการ (LABORATORY WORKSHEET)</div>
+        <div class="sub-course-title">รายวิชาเพิ่มเติม: ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded Artificial Intelligence) | depa & KT-Edu Platform</div>
+      </div>
+    </div>
+
+    <!-- Title Banner -->
+    <div class="worksheet-title-banner">
+      <span class="badge-unit">หน่วยปฏิบัติการที่ 6</span>
+      <h1 class="ws-name">ใบงานปฏิบัติการที่ 6: การนำโมเดล .eim ไปใช้งานและการกำหนดค่าไฟล์ app.yaml บนบอร์ดพัฒนา Arduino UNO Q</h1>
+      <div class="ws-eng-name">Deploying Native .eim Models & Configuring app.yaml</div>
+      <div class="ws-meta">
+        <span><i class="fa-regular fa-clock"></i> ระยะเวลาปฏิบัติการ: <strong>60 นาที</strong></span>
+        <span><i class="fa-solid fa-code"></i> สคริปต์อ้างอิง: <strong><code>code_examples/chapter06/fix_app_yaml.py</code></strong></span>
+        <span><i class="fa-solid fa-award"></i> คะแนนเต็ม: <strong>10 คะแนน</strong></span>
+      </div>
+    </div>
+
+    <!-- Student Information Fill-in -->
+    <div class="student-info-box">
+      <div><span class="field-label">ชื่อ-นามสกุล:</span> ............................................................................</div>
+      <div><span class="field-label">เลขที่:</span> ...............</div>
+      <div><span class="field-label">ชั้น:</span> ม. ...........................</div>
+      <div><span class="field-label">รหัสประจำตัว:</span> ....................................................</div>
+      <div><span class="field-label">กลุ่มที่:</span> ...............</div>
+      <div><span class="field-label">วันที่:</span> ......./......./...........</div>
+    </div>
+
+    <!-- Section 1: Objectives -->
+    <div class="section-title">
+      <i class="fa-solid fa-bullseye"></i> 1. สาระสำคัญและจุดประสงค์การเรียนรู้ (Objectives)
+    </div>
+    <ul class="bullet-list">
+      <li>สามารถคอมไพล์และดาวน์โหลดไฟล์โมเดลไบนารี .eim (Linux AArch64) จาก Edge Impulse Studio ได้</li>
+      <li>สามารถถ่ายโอนไฟล์ไปยังไดเรกทอรีที่ถูกต้องและกำหนดสิทธิ์รัน (chmod +x) ได้อย่างถูกต้อง</li>
+      <li>สามารถเขียนและแก้ไขโครงสร้างไฟล์ app.yaml ตามมาตรฐานของ Arduino App Lab ได้อย่างสมบูรณ์</li>
+    </ul>
+
+    <!-- Section 2: Equipment -->
+    <div class="section-title">
+      <i class="fa-solid fa-screwdriver-wrench"></i> 2. รายการอุปกรณ์และเครื่องมือซอฟต์แวร์ (Equipment & Tools)
+    </div>
+    <ul class="bullet-list">
+      <li>บอร์ดพัฒนา Arduino UNO Q</li>
+      <li>ไฟล์โมเดลไบนารี .eim สำหรับสถาปัตยกรรม Linux AArch64</li>
+      <li>โปรแกรม Arduino App Lab และ VS Code Terminal</li>
+      <li>ไฟล์สคริปต์ตรวจสอบโครงแบบ fix_app_yaml.py</li>
+    </ul>
+
+    <!-- Section 3: Procedures -->
+    <div class="section-title">
+      <i class="fa-solid fa-list-ol"></i> 3. ลำดับขั้นตอนการปฏิบัติการ (Laboratory Procedures)
+    </div>
+    
+    <div class="procedure-step">
+      <span class="step-num">1. การคอมไพล์และดาวน์โหลดไฟล์ไบนารี .eim:</span> เข้าสู่แท็บ Deployment บน Edge Impulse Studio เลือกเป้าหมาย Linux (AArch64) กด Build และดาวน์โหลดไฟล์ผลลัพธ์
+    </div>
+    
+    <div class="procedure-step">
+      <span class="step-num">2. การจัดวางไฟล์และตั้งค่าสิทธิ์ Execution:</span> ย้ายไฟล์ .eim เข้าสู่โฟลเดอร์ /home/arduino/.arduino-bricks/ei-models/ เปลี่ยนชื่อเป็น AnomalyDetection.eim และป้อนคำสั่ง chmod +x เพื่อเปิดสิทธิ์การรัน
+    </div>
+    
+    <div class="procedure-step">
+      <span class="step-num">3. การเขียนและตรวจสอบไฟล์ app.yaml (fix_app_yaml.py):</span> เปิดไฟล์ app.yaml ตรวจสอบบล็อก services, bricks, dependencies รันสคริปต์ fix_app_yaml.py ตรวจสอบไวยากรณ์และทดสอบเปิดบริการ
+    </div>
+    
+
+    <!-- Section 4: Data & Observation Table -->
+    <div class="section-title">
+      <i class="fa-solid fa-table"></i> 4. ตารางบันทึกผลการปฏิบัติการและการสังเกตการณ์ (Data & Results)
+    </div>
+    <table class="lab-table">
+      <thead>
+        <tr>
+          <th style="width: 28%; text-align: left;">รายการตรวจสอบการ Deploy</th><th style="width: 25%;">คำสั่ง / การตั้งค่าที่ใช้</th><th style="width: 23%;">ผลลัพธ์ที่ตรวจพบ</th><th style="width: 23%;">สถานะ</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>ตำแหน่งไฟล์โมเดล .eim</td>
+          <td class="code-font">ls -l /home/arduino/.../ei-models/</td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;"></td>
+        </tr>
+        
+        <tr>
+          <td>สิทธิ์การรันไฟล์ (-rwxr-xr-x)</td>
+          <td class="code-font">chmod +x AnomalyDetection.eim</td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;"></td>
+        </tr>
+        
+        <tr>
+          <td>ทดสอบรันโมเดลตรงผ่าน Terminal</td>
+          <td class="code-font">./AnomalyDetection.eim /dev/video0</td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;"></td>
+        </tr>
+        
+        <tr>
+          <td>ความเร็วการประมวลผล (Inference Latency)</td>
+          <td class="code-font">วัดเวลาต่อเฟรม (ms)</td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;"></td>
+        </tr>
+        
+        <tr>
+          <td>ผลการตรวจสอบไวยากรณ์ app.yaml</td>
+          <td class="code-font">python fix_app_yaml.py</td>
+          <td style="background: #fafafa;"></td>
+          <td style="text-align: center; background: #fafafa;"></td>
+        </tr>
+        
+      </tbody>
+    </table>
+
+    <!-- Section 5: Analytical Questions -->
+    <div class="section-title">
+      <i class="fa-solid fa-circle-question"></i> 5. คำถามท้ายบทปฏิบัติการเพื่อการคิดวิเคราะห์ (Analytical Questions)
+    </div>
+    
+    <div class="question-block">
+      <div class="question-text">1. เพราะเหตุใดจึงต้องป้อนคำสั่ง chmod +x ให้แก่ไฟล์โมเดล .eim ก่อนนำไปใช้งานในระบบลีนุกซ์?</div>
+      <div class="answer-lines"></div>
+      <div class="answer-lines"></div>
+    </div>
+    
+    <div class="question-block">
+      <div class="question-text">2. หากในไฟล์ app.yaml มีการเยื้องช่องว่าง (Indentation) ไม่ถูกต้อง จะส่งผลกระทบต่อบริการของ Arduino App Lab อย่างไร?</div>
+      <div class="answer-lines"></div>
+      <div class="answer-lines"></div>
+    </div>
+    
+    <div class="question-block">
+      <div class="question-text">3. อธิบายบทบาทของฟิลด์ dependencies ในไฟล์ app.yaml ว่ามีความสำคัญต่อการรันโปรเจกต์อย่างไร</div>
+      <div class="answer-lines"></div>
+      <div class="answer-lines"></div>
+    </div>
+    
+
+    <!-- Section 6 & 7: Rubrics and Signatures -->
+    <div class="evaluation-grid">
+      <div class="rubric-box">
+        <div style="font-weight: 700; color: var(--depa-blue); margin-bottom: 4px;">
+          <i class="fa-solid fa-list-check"></i> เกณฑ์การประเมินรูบริก (Rubrics 10 คะแนน):
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>• การดาวน์โหลดและติดตั้งไฟล์โมเดลพร้อมกำหนดสิทธิ์อย่างถูกต้อง</span>
+          <span style="font-weight: 600; color: #173b6b;">3 คะแนน</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>• การเขียนโครงสร้าง app.yaml ที่ถูกต้องและผ่านการตรวจสอบ</span>
+          <span style="font-weight: 600; color: #173b6b;">4 คะแนน</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>• การทดสอบรันโมเดลและการบันทึกเวลาตอบสนอง (Latency)</span>
+          <span style="font-weight: 600; color: #173b6b;">3 คะแนน</span>
+        </div>
+        
+      </div>
+
+      <div class="signature-box">
+        <div>
+          <div>คะแนนที่ได้</div>
+          <div class="score-badge">........ / 10</div>
+        </div>
+        <div style="margin-top: 6px;">
+          <div>ลงชื่อ .................................................... ผู้ประเมิน</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;">(....................................................) ครูผู้สอน</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

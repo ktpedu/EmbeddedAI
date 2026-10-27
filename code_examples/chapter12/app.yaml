@@ -1,0 +1,30 @@
+# ==============================================================================
+# โครงสร้างคอนฟิกูเรชันแอปพลิเคชัน Arduino App Lab
+# รายวิชา: การพัฒนาปัญญาประดิษฐ์บนอุปกรณ์ขอบ (Edge AI Development)
+# บทที่ 12: การจำแนกเสียงเฉพาะทางและการบูรณาการระบบ Edge AI เชิงวิศวกรรม
+# ==============================================================================
+name: "Industrial Multi-Modal Edge AI System"
+description: "ระบบบูรณาการปัญญาประดิษฐ์พหุโมดอล ตรวจจับภาพและเสียงผิดปกติ พร้อมบันทึกฐานข้อมูล SQLite"
+ports:
+  - 7000:7000
+  - 8080:8080
+
+variables:
+  EI_AUDIO_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/machine_sound.eim"
+  EI_OBJ_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/fomo_sorter.eim"
+  AUDIO_CONFIDENCE_THRESHOLD: "0.80"
+  VISION_CONFIDENCE_THRESHOLD: "0.65"
+  DB_PATH: "/home/arduino/data/edge_factory.db"
+
+bricks:
+  - arduino:audio_classification: {}
+  - arduino:video_object_detection: {}
+  - arduino:database_sql:
+      variables:
+        DB_PATH: "/home/arduino/data/edge_factory.db"
+  - arduino:web_ui: {}
+  - arduino:relay_control:
+      variables:
+        ALARM_BUZZER_PIN: "6"
+        EMERGENCY_STOP_PIN: "7"
+        STATUS_LED_PIN: "8"

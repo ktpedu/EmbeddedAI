@@ -1,0 +1,23 @@
+lsblk
+sudo blkid /dev/sda1
+sudo mkdir -p /media/usb
+sudo mount /dev/sda1 /media/usb
+df -h
+
+ls -l /home/arduino/.arduino-bricks/ei-models/
+
+ถ้ายังใช้คำสั่ง
+mkdir -p /home/arduino/.arduino-bricks/ei-models/
+
+cp /media/usb/AC_model.eim /home/arduino/.arduino-bricks/ei-models/
+
+ls -l /home/arduino/.arduino-bricks/ei-models/
+
+nano /home/arduino/ArduinoApps/ac_testing/app.yaml
+
+variables: {
+  EI_AUDIO_CLASSIFICATION_MODEL: "/home/arduino/.arduino-bricks/ei-models/AC_model.eim"
+}
+
+
+sudo umount /media/usb 

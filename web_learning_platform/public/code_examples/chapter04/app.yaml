@@ -1,0 +1,16 @@
+# Arduino App Lab Configuration
+# Chapter 4: Data Acquisition & Data Pipeline Design on Edge Impulse
+# การจัดเตรียมชุดข้อมูลและการออกแบบขั้นตอนการประมวลผล (Data Pipeline) บน Edge Impulse
+
+name: data-pipeline-validator
+version: 1.0.0
+description: ชุดคำสั่งตรวจสอบความสมบูรณ์และสัดส่วนของชุดข้อมูล (Train/Test Split 80:20) ก่อนนำเข้า Edge Impulse Studio
+
+variables: {
+  DATASET_DIR: "./dataset",
+  TRAIN_RATIO: "0.80",
+  TEST_RATIO: "0.20",
+  TARGET_WIDTH: "96",
+  TARGET_HEIGHT: "96",
+  COLOR_MODE: "RGB"
+}

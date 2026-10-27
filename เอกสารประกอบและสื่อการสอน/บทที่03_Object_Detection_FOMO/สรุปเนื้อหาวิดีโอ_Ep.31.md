@@ -1,0 +1,14 @@
+# สื่อวิดีโอการสอน: Arduino UNO Q (Ep.31) การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick)
+
+- **รหัสตอน:** Ep.31
+- **ลิงก์รับชมผ่าน YouTube:** [Arduino UNO Q (Ep.31) การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick)](https://www.youtube.com/watch?v=glQx9GTLEUI&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=30)
+- **วิทยากร:** นายธนา อุดมศรีไพบูลย์
+- **แพลตฟอร์มและบอร์ดที่ใช้:** Arduino UNO Q (Qualcomm Dragonwing QRB2210 / Linux AArch64) & Edge Impulse Studio
+
+## สาระสำคัญประจำคลิปวิดีโอ
+การตรวจจับวัตถุ (Object Detection), การตีกรอบ Bounding Box ใน Labeling Queue, สถาปัตยกรรมโมเดล FOMO บน Edge Impulse, และการประเมินสถิติ F1-Score และ Confusion Matrix
+
+## รายการเอกสารและสื่อที่แนบในโฟลเดอร์นี้
+- `EIM.pdf`
+- `ชุดข้อมูลภาพ_PicsTest`
+- `วิดีโอสอน_Ep.31.url`

@@ -1,0 +1,21 @@
+# ==============================================================================
+# โครงการสื่อการเรียนรู้ปัญญาประดิษฐ์บนระบบสมองกลฝังตัว (Embedded AI Learning Platform)
+# ไฟล์คอนฟิกูเรชัน: app.yaml
+# บทเรียนที่ 8: การฝึกสอนโมเดลตรวจจับวัตถุด้วยสถาปัตยกรรม FOMO (Object Detection)
+# ==============================================================================
+
+name: FOMO Object Detection Evaluator
+description: "การตรวจจับวัตถุหลายชิ้นและนับจำนวนด้วยโมเดล FOMO บน Arduino UNO Q"
+ports: []
+variables: {
+  EI_OBJ_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/fomo_object_detection.eim",
+  CONFIDENCE_THRESHOLD: "0.60",
+  INPUT_WIDTH: "96",
+  INPUT_HEIGHT: "96",
+  TARGET_CLASSES: "bolt,nut,bearing",
+  MAX_DETECTIONS: "20"
+}
+bricks:
+  - id: "object_detection_brick"
+    type: "fomo_object_detection"
+    enabled: true

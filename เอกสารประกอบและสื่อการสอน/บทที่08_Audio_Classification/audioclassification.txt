@@ -1,0 +1,20 @@
+from arduino.app_bricks.audio_classification import AudioClassification
+from arduino.app_utils import App
+
+classifier = AudioClassification()
+
+def print_kws_model_info(classifier):
+    info = classifier.get_model_info()
+    if info is None:
+        print("ยังไม่สามารถดึงข้อมูลโมเดลได้")
+        return
+
+    # ดู attribute ทั้งหมดของ object
+    print("=== ดู attribute ทั้งหมดของ object ===")
+    for attr in dir(info):
+        # กรอง method และ private attribute
+        if not attr.startswith("_") and not callable(getattr(info, attr)):
+            print(f"{attr}: {getattr(info, attr)}")
+
+
+print_kws_model_info(classifier)

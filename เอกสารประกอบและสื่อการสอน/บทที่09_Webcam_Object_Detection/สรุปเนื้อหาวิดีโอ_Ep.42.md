@@ -1,0 +1,12 @@
+# สื่อวิดีโอการสอน: Arduino UNO Q (Ep.42) การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick) ผ่านกล้องเว็ปแคม
+
+- **รหัสตอน:** Ep.42
+- **ลิงก์รับชมผ่าน YouTube:** [Arduino UNO Q (Ep.42) การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick) ผ่านกล้องเว็ปแคม](https://www.youtube.com/watch?v=6DlVYQzgrEw&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=41)
+- **วิทยากร:** นายธนา อุดมศรีไพบูลย์
+- **แพลตฟอร์มและบอร์ดที่ใช้:** Arduino UNO Q (Qualcomm Dragonwing QRB2210 / Linux AArch64) & Edge Impulse Studio
+
+## สาระสำคัญประจำคลิปวิดีโอ
+การเก็บข้อมูลภาพสดผ่านกล้องเว็บแคม USB บน Edge Impulse, การเชื่อมต่อกล้องเข้ากับบอร์ด Arduino UNO Q, การทำงานร่วมกันระหว่างโมดูล video_object_detection และ web_ui บนพอร์ต 7000 และการคำนวณ FPS
+
+## รายการเอกสารและสื่อที่แนบในโฟลเดอร์นี้
+- `วิดีโอสอน_Ep.42.url`

@@ -1,0 +1,602 @@
+[
+  {
+    "index": 1,
+    "videoId": "N-tZirbAWCE",
+    "title": "Arduino UNO Q (Ep.16) รู้จักกับ \"Database-SQL Brick\" บน Arduino App Lab",
+    "duration": "30:58"
+  },
+  {
+    "index": 2,
+    "videoId": "MekwqhTuTzc",
+    "title": "Arduino UNO Q (Ep.17) รู้จักกับ \"Database-Time Series Brick\" บน Arduino App Lab",
+    "duration": "54:41"
+  },
+  {
+    "index": 3,
+    "videoId": "eQf-VzyiC0c",
+    "title": "Arduino UNO Q (Ep.15) รู้จักกับ Brick \"Weather Forecast\" บน Arduino App Lab",
+    "duration": "32:13"
+  },
+  {
+    "index": 4,
+    "videoId": "36Z_RYn6pQI",
+    "title": "Arduino UNO Q (Ep.10) สร้าง App เพื่อใช้ควบคุมบอร์ด LED บนบอร์ด Arduino UNO Q ตอนที่ 2",
+    "duration": "16:41"
+  },
+  {
+    "index": 5,
+    "videoId": "7JBtwM5m-YI",
+    "title": "Arduino UNO Q (Ep.9) สร้าง App เพื่อใช้ควบคุมบอร์ด LED บนบอร์ด Arduino UNO Q ตอนที่ 1",
+    "duration": "16:06"
+  },
+  {
+    "index": 6,
+    "videoId": "pcw_iF02Ros",
+    "title": "Arduino UNO Q (Ep.8) เริ่มต้นสร้าง App เพื่อใช้งานแสดงข้อความบนคอนโซล",
+    "duration": "18:55"
+  },
+  {
+    "index": 7,
+    "videoId": "zu6CBc-GZpM",
+    "title": "Arduino UNO Q (Ep.7) การโปรแกรมบอร์ดในโหมดเครือข่ายไร้สาย (Network Mode) และการสั่งงาน Command Line",
+    "duration": "16:06"
+  },
+  {
+    "index": 8,
+    "videoId": "DVCrb6t5dls",
+    "title": "Arduino UNO Q (Ep.6) การโปรแกรมบอร์ดในโหมด Single-board Computer และ การเยี่ยมชมเดสก์ท็อป Linux",
+    "duration": "21:51"
+  },
+  {
+    "index": 9,
+    "videoId": "g4sF5nnsSeY",
+    "title": "Arduino UNO Q (Ep. 5) การทำงานของ App.run()",
+    "duration": "12:59"
+  },
+  {
+    "index": 10,
+    "videoId": "nO3FicIusQs",
+    "title": "Arduino UNO Q (Ep.4) เริ่มต้นใช้งาน Arduino App Lab เพื่อสร้าง App เพื่อใช้งานบอร์ด Arduino UNO Q",
+    "duration": "16:23"
+  },
+  {
+    "index": 11,
+    "videoId": "cRO5jjGtE_k",
+    "title": "Arduino UNO Q (Ep.3) การตั้งค่าเริ่มต้นให้กับบอร์ด Arduino UNO Q เพื่อใช้งาน Arduino App Lab",
+    "duration": "17:05"
+  },
+  {
+    "index": 12,
+    "videoId": "IUrO0bfUvc0",
+    "title": "Arduino UNO Q (Ep.2) การติดตั้งระบบปฏิบัติการ Debian Linux ให้กับ Arduino UNO Q",
+    "duration": "19:55"
+  },
+  {
+    "index": 13,
+    "videoId": "oVg57hOrU4s",
+    "title": "Arduino UNO Q (Ep.1) การติดตั้ง Arduino App Lab บนเครื่องคอมพิวเตอร์",
+    "duration": "5:13"
+  },
+  {
+    "index": 14,
+    "videoId": "Mv5vmJjFuL4",
+    "title": "รีวิว Arduino UNO Q (Unboxing)",
+    "duration": "52:14"
+  },
+  {
+    "index": 15,
+    "videoId": "mkmYqMgfaUw",
+    "title": "Arduino UNO Q (Ep.18) รู้จักกับ “Object Detection Brick” บน Arduino App Lab ตอนที่ 1/4",
+    "duration": "5:02"
+  },
+  {
+    "index": 16,
+    "videoId": "Xr_tqjaO7YQ",
+    "title": "Arduino UNO Q (Ep.20) รู้จักกับ “Object Detection Brick” บน Arduino App Lab ตอนที่ 3/4",
+    "duration": "16:37"
+  },
+  {
+    "index": 17,
+    "videoId": "Pp1KHbi3cM0",
+    "title": "Arduino UNO Q (Ep.19) รู้จักกับ “Object Detection Brick” บน Arduino App Lab ตอนที่ 2/4",
+    "duration": "6:26"
+  },
+  {
+    "index": 18,
+    "videoId": "AzJSWr7Li2o",
+    "title": "Arduino UNO Q (Ep.21) รู้จักกับ “Object Detection Brick” บน Arduino App Lab ตอนที่ 4/4",
+    "duration": "34:12"
+  },
+  {
+    "index": 19,
+    "videoId": "0NTmvabaYAc",
+    "title": "Arduino UNO Q - Thailand",
+    "duration": "0:55"
+  },
+  {
+    "index": 20,
+    "videoId": "g77FWcGqu3Q",
+    "title": "เปิดตัวเฟสบุ้ค Arduino UNO Q - Thailand",
+    "duration": "4:34"
+  },
+  {
+    "index": 21,
+    "videoId": "Zko45PRVAZ4",
+    "title": "Arduino UNO Q (Ep.23) รู้จักกับ “Video Image Classification Brick” บน Arduino App Lab",
+    "duration": "24:43"
+  },
+  {
+    "index": 22,
+    "videoId": "Hwm797kDhbE",
+    "title": "Arduino UNO Q (Ep.22) รู้จักกับ “Image Classification Brick” บน Arduino App Lab",
+    "duration": "31:36"
+  },
+  {
+    "index": 23,
+    "videoId": "NL2Jve2Sdyc",
+    "title": "Arduino UNO Q (Ep.24) รู้จักกับ “Video Object Detection Brick” บน Arduino App Lab",
+    "duration": "28:16"
+  },
+  {
+    "index": 24,
+    "videoId": "pEJZ7fGELSg",
+    "title": "Arduino UNO Q (Ep.25) รู้จักกับ “Mood Detection Brick” บน Arduino App Lab",
+    "duration": "12:42"
+  },
+  {
+    "index": 25,
+    "videoId": "lESCJonR2eU",
+    "title": "Arduino UNO Q (Ep.26) รู้จักกับ “Camera Code Detection Brick” บน Arduino App Lab ตอนที่ 1/3",
+    "duration": "8:01"
+  },
+  {
+    "index": 26,
+    "videoId": "pr1ReA39Rkk",
+    "title": "Arduino UNO Q (Ep.27) รู้จักกับ “Camera Code Detection Brick” บน Arduino App Lab ตอนที่ 2/3",
+    "duration": "38:54"
+  },
+  {
+    "index": 27,
+    "videoId": "f1RlFCxBGF0",
+    "title": "Arduino UNO Q (Ep.28) รู้จักกับ “Camera Code Detection Brick” บน Arduino App Lab ตอนที่ 3/3",
+    "duration": "11:17"
+  },
+  {
+    "index": 28,
+    "videoId": "-X8y_aeMAFY",
+    "title": "Arduino UNO Q (Ep.29) เริ่มต้นใช้งาน Edge Impulse เพื่อเทรนโมเดล AI",
+    "duration": "4:38"
+  },
+  {
+    "index": 29,
+    "videoId": "1yEMEJnsrUY",
+    "title": "Arduino UNO Q (Ep.30) การเทรนโมเดล AI ให้ใช้กับงาน Visual Anomaly Detection (Brick)",
+    "duration": "31:12"
+  },
+  {
+    "index": 30,
+    "videoId": "glQx9GTLEUI",
+    "title": "Arduino UNO Q (Ep.31) การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick)",
+    "duration": "33:26"
+  },
+  {
+    "index": 31,
+    "videoId": "3mAwLsQjv6U",
+    "title": "Arduino UNO Q (Ep.33) กระบวนการ Deploy ไฟล์โมเดล (.eim) สู่บอร์ด Arduino UNO Q",
+    "duration": "15:44"
+  },
+  {
+    "index": 32,
+    "videoId": "3EmkC1QBZK0",
+    "title": "Arduino UNO Q (Ep.32) การเทรนโมเดล AI ให้ใช้กับงาน Image Classification (Brick)",
+    "duration": "17:17"
+  },
+  {
+    "index": 33,
+    "videoId": "5Xiz_W53yU0",
+    "title": "Arduino UNO Q (Ep.34) รู้จักกับ “Visual Anomaly Detection  Brick” บน Arduino App Lab",
+    "duration": "51:47"
+  },
+  {
+    "index": 34,
+    "videoId": "0g2F-s-7O2U",
+    "title": "Arduino UNO Q (Ep.35) ถ่ายซ่อมคลิป Ep.33",
+    "duration": "4:46"
+  },
+  {
+    "index": 35,
+    "videoId": "Lt5RQeWXZBA",
+    "title": "Arduino UNO Q (Ep.36) การเทรนโมเดล AI ให้ใช้กับงาน Keyword Spotting (Brick)",
+    "duration": "40:33"
+  },
+  {
+    "index": 36,
+    "videoId": "Ty9b9Zs9h-o",
+    "title": "Arduino UNO Q (Ep.37) รู้จักกับ “Keyword Spotting Brick” บน Arduino App Lab ตอนที่ 1/2",
+    "duration": "11:56"
+  },
+  {
+    "index": 37,
+    "videoId": "ZACq4l-vx74",
+    "title": "Arduino UNO Q (Ep.38) รู้จักกับ “Keyword Spotting Brick” บน Arduino App Lab ตอนที่ 2/2",
+    "duration": "28:07"
+  },
+  {
+    "index": 38,
+    "videoId": "9R-vpS6F4jA",
+    "title": "Arduino UNO Q (Ep.39) การเทรนโมเดล AI ให้ใช้กับงาน Audio Classification (Brick)",
+    "duration": "42:17"
+  },
+  {
+    "index": 39,
+    "videoId": "6xLtYZOkvfA",
+    "title": "Arduino UNO Q (Ep.40) รู้จักกับ “Audio Classification Brick” บน Arduino App Lab ตอนที่ 1/2",
+    "duration": "10:22"
+  },
+  {
+    "index": 40,
+    "videoId": "HqOx4WU428E",
+    "title": "Arduino UNO Q (Ep.41) รู้จักกับ “Audio Classification Brick” บน Arduino App Lab ตอนที่ 2/2",
+    "duration": "20:40"
+  },
+  {
+    "index": 41,
+    "videoId": "6DlVYQzgrEw",
+    "title": "Arduino UNO Q (Ep.42) การเทรนโมเดล AI ให้ใช้กับงาน Object Detection (Brick) ผ่านกล้องเว็ปแคม",
+    "duration": "50:37"
+  },
+  {
+    "index": 42,
+    "videoId": "bLw9BH5RrFo",
+    "title": "Arduino UNO Q (Ep.43) การเทรนโมเดล AI ให้ใช้กับงาน Image Classification (Brick) ผ่านกล้องเว็ปแคม",
+    "duration": "51:28"
+  },
+  {
+    "index": 43,
+    "videoId": "CRpBHlDRh60",
+    "title": "Arduino UNO Q (Ep.44) การเทรนโมเดล AI ให้ใช้กับงาน Keyword Spotting (Brick) ผ่านไมโครโฟน (คำสั่งไทย)",
+    "duration": "54:07"
+  },
+  {
+    "index": 44,
+    "videoId": "OSzculUyvaY",
+    "title": "Arduino UNO Q (Ep.45) การเทรนโมเดล AI ให้ใช้กับงาน Audio Classification (Brick) ผ่านไมโครโฟน",
+    "duration": "1:03:08"
+  },
+  {
+    "index": 45,
+    "videoId": "r4-Vmv9LHZE",
+    "title": "Arduino UNO Q (Ep.46) รู้จักกับ “Vibration Anomaly Detection Brick” (ณ วันที่ 1 ธค 2568)",
+    "duration": "51:27"
+  },
+  {
+    "index": 46,
+    "videoId": "C62BORzSSEY",
+    "title": "Arduino UNO Q (Ep.47) รู้จักกับ “Motion Detection Brick” (ณ วันที่ 2 ธค 2568)",
+    "duration": "29:21"
+  },
+  {
+    "index": 47,
+    "videoId": "RclRru6ohec",
+    "title": "Arduino UNO Q (Ep.49) รู้จักกับ “WebUI-HTML Brick”",
+    "duration": "2:08:47"
+  },
+  {
+    "index": 48,
+    "videoId": "s70u8fYkQA8",
+    "title": "Arduino UNO Q (Ep.50) รู้จักกับ “WebUI-Streamlit Brick” (ณ วันที่ 12 ธค 2568)",
+    "duration": "59:07"
+  },
+  {
+    "index": 49,
+    "videoId": "yanHFpiUA20",
+    "title": "Arduino UNO Q (Ep.51) รู้จักกับ “Cloud LLM Brick”",
+    "duration": "41:38"
+  },
+  {
+    "index": 50,
+    "videoId": "kPGOCj2npaM",
+    "title": "Arduino UNO Q (Ep.52) รู้จักกับ “Wave Generator Brick”",
+    "duration": "59:36"
+  },
+  {
+    "index": 51,
+    "videoId": "IxgPs_PqRmo",
+    "title": "Arduino UNO Q (Ep.53) รู้จักกับ “Arduino Cloud Brick”",
+    "duration": "2:17:38"
+  },
+  {
+    "index": 52,
+    "videoId": "eIXaXIk-JGI",
+    "title": "Arduino UNO Q (Ep.54) Arduino UNO Q คืออะไร?",
+    "duration": "20:12"
+  },
+  {
+    "index": 53,
+    "videoId": "mS1vsmAswWw",
+    "title": "Arduino UNO Q (Ep.55) รีวิว Arduino App Lab เวอร์ชั่น 0.3.2",
+    "duration": "17:06"
+  },
+  {
+    "index": 54,
+    "videoId": "Djqb49pRl5k",
+    "title": "Arduino UNO Q (Ep.56) Bricks คืออะไร?",
+    "duration": "36:19"
+  },
+  {
+    "index": 55,
+    "videoId": "slpZsZJ6qeM",
+    "title": "Arduino UNO Q (Ep.57) Bridge คืออะไร?",
+    "duration": "1:32:45"
+  },
+  {
+    "index": 56,
+    "videoId": "-_UToe0wYlU",
+    "title": "Arduino UNO Q (Ep.58) รู้จักกับ Arduino Router",
+    "duration": "33:01"
+  },
+  {
+    "index": 57,
+    "videoId": "AEFamEai8b8",
+    "title": "Arduino UNO Q (Ep.59) การคัดลอกไฟล์และโฟล์เดอร์จาก PC/Mac ไปยัง Arduino UNO Q ด้วยวิธีการ scp",
+    "duration": "32:30"
+  },
+  {
+    "index": 58,
+    "videoId": "wcr7XTWh3OU",
+    "title": "UNOQ iMake Ch_0 Ep_0 หลักสูตรการใช้งานเริ่มต้น Arduino UNO Q",
+    "duration": "11:36"
+  },
+  {
+    "index": 59,
+    "videoId": "-f_lVwBEJjY",
+    "title": "Arduino UNO Q (Ep.60) การใช้งาน git และ GitHub บน Arduino UNO Q",
+    "duration": "41:20"
+  },
+  {
+    "index": 60,
+    "videoId": "NA3QNIuuXTc",
+    "title": "Arduino UNO Q (Ep.61) การใช้งาน LED Matrix บน Arduino UNO Q",
+    "duration": "57:22"
+  },
+  {
+    "index": 61,
+    "videoId": "qlYcC3sfsjc",
+    "title": "Arduino UNO Q (Ep.62) การตั้งค่า App ให้ Run at Startup บน Arduino UNO Q",
+    "duration": "9:36"
+  },
+  {
+    "index": 62,
+    "videoId": "ZGAv4NEGRkc",
+    "title": "Arduino UNO Q (Ep.63) รู้จักกับ Arduino App CLI ตอนที่ 1/2",
+    "duration": "1:33:08"
+  },
+  {
+    "index": 63,
+    "videoId": "Kxo_WY7gDM8",
+    "title": "Arduino UNO Q (Ep.64) รู้จักกับ Arduino App CLI  ตอนที่ 2/2",
+    "duration": "29:31"
+  },
+  {
+    "index": 64,
+    "videoId": "YCu6Fbywmxk",
+    "title": "รีวิว Arduino UNO Q 4GB!!!!! (Unboxing) และเปรียบเทียบ 2GB vs 4GB",
+    "duration": "24:10"
+  },
+  {
+    "index": 65,
+    "videoId": "QcGJ8wIpYPQ",
+    "title": "Arduino UNO Q (Ep.65) พื้นฐานการใช้งาน Debian Linux บน Arduino UNO Q ในส่วนของ CLI",
+    "duration": "2:39:17"
+  },
+  {
+    "index": 66,
+    "videoId": "E5JWX6o1420",
+    "title": "Arduino UNO Q (Ep.66) Arduino App Lab เวอร์ชั่น 0.4.0 มีอะไรใหม่บ้าง!!!!!!",
+    "duration": "25:35"
+  },
+  {
+    "index": 67,
+    "videoId": "YJwSsmCM6Ck",
+    "title": "Arduino UNO Q (Ep.67) ทบทวนการใช้งาน Arduino C++",
+    "duration": "3:27:51"
+  },
+  {
+    "index": 68,
+    "videoId": "zY3H73j8eoA",
+    "title": "Arduino UNO Q (Ep.68) พื้นฐานการใช้งานภาษา Python บน Arduino UNO Q",
+    "duration": "2:18:48"
+  },
+  {
+    "index": 69,
+    "videoId": "Qx-8_sKc8LA",
+    "title": "Arduino UNO Q (Ep.69) ทบทวนการใช้งาน GPIO เพื่อควบคุมฮาร์ดแวร์บน UNO Q",
+    "duration": "2:31:38"
+  },
+  {
+    "index": 70,
+    "videoId": "2iIQRDdTYtI",
+    "title": "Arduino UNO Q (Ep.70) การใช้งานโมดูลเซ็นเซอร์ Modulino® สำหรับ UNO Q (ตอนที่ 1/2)",
+    "duration": "2:09:28"
+  },
+  {
+    "index": 71,
+    "videoId": "lMZiCyQQWJc",
+    "title": "Arduino UNO Q (Ep.72) การใช้งาน RpcCall",
+    "duration": "21:44"
+  },
+  {
+    "index": 72,
+    "videoId": "_FUrS6HIR3Y",
+    "title": "Arduino UNO Q (Ep.73) พอร์ตสื่อสาร UART สำหรับการดีบักระดับฮาร์ดแวร์ (Hardware Debug UART Interface)",
+    "duration": "26:39"
+  },
+  {
+    "index": 73,
+    "videoId": "OXF1MSnDYmw",
+    "title": "Arduino UNO Q (Ep.74) รีวิวการใช้งาน Arduino App Lab เวอร์ชั่น 0.5.0",
+    "duration": "1:02:45"
+  },
+  {
+    "index": 74,
+    "videoId": "kkIA28Zkda4",
+    "title": "Arduino UNO Q (Ep.71) การใช้งานโมดูลเซ็นเซอร์ Modulino® สำหรับ UNO Q (ตอนที่ 2/2)",
+    "duration": "1:29:08"
+  },
+  {
+    "index": 75,
+    "videoId": "JHFn9_ecGUk",
+    "title": "Arduino UNO Q (Ep.75) การใช้งาน Unix Socket บน Arduino UNO Q",
+    "duration": "1:10:58"
+  },
+  {
+    "index": 76,
+    "videoId": "hos28R_yHmU",
+    "title": "Arduino UNO Q (Ep.76) รีวิวการใช้งาน Arduino App Lab เวอร์ชั่น 0.6.0",
+    "duration": "17:08"
+  },
+  {
+    "index": 77,
+    "videoId": "ulph3oqqekU",
+    "title": "Arduino UNO Q (Ep.77) การติดตั้ง Debian Linux บน UNO Q สำหรับ Arduino App Lab เวอร์ชั่น 0.6.0",
+    "duration": "16:25"
+  },
+  {
+    "index": 78,
+    "videoId": "ZegtzpNpD08",
+    "title": "Arduino UNO Q (Ep.78) รู้จักกับ “Sound Generator Brick”",
+    "duration": "1:13:05"
+  },
+  {
+    "index": 79,
+    "videoId": "68VrNOQOyA8",
+    "title": "Arduino UNO Q (Ep.79) รู้จักกับ “Telegram Bot Brick”",
+    "duration": "1:16:03"
+  },
+  {
+    "index": 80,
+    "videoId": "sg8fCKGuh-M",
+    "title": "Arduino UNO Q (Ep.80) รู้จักกับ “Cloud ASR Brick”",
+    "duration": "34:35"
+  },
+  {
+    "index": 81,
+    "videoId": "ZPr1f_lRaSM",
+    "title": "Arduino UNO Q (Ep.81) การติดต่อสื่อสารแบบ UART บน Arduino UNO Q",
+    "duration": "43:23"
+  },
+  {
+    "index": 82,
+    "videoId": "3EX194q3IXw",
+    "title": "Arduino UNO Q (Ep.82) การติดต่อสื่อสารแบบ I2C บน Arduino UNO Q",
+    "duration": "1:00:21"
+  },
+  {
+    "index": 83,
+    "videoId": "XHG1b4SD1og",
+    "title": "Arduino UNO Q (Ep.83) การติดต่อสื่อสารแบบ SPI บน Arduino UNO Q",
+    "duration": "1:09:21"
+  },
+  {
+    "index": 84,
+    "videoId": "GRjMD-dykVk",
+    "title": "Arduino UNO Q (Ep.84) แนะนำการใช้งาน Modulino® LED Matrix บน UNO Q",
+    "duration": "2:21:14"
+  },
+  {
+    "index": 85,
+    "videoId": "Z7eCVponakg",
+    "title": "Arduino UNO Q (Ep.85) แนะนำการใช้งาน Arduino BugHopper บน UNO Q",
+    "duration": "21:38"
+  },
+  {
+    "index": 86,
+    "videoId": "Hesq-XfbgZc",
+    "title": "Arduino UNO Q (Ep.86) แนะนำสาย Arduino USB C Cable",
+    "duration": "7:39"
+  },
+  {
+    "index": 87,
+    "videoId": "vYEPi3fLVEA",
+    "title": "Arduino UNO Q (Ep.87) แนะนำ Arduino USB C Power Supply",
+    "duration": "9:56"
+  },
+  {
+    "index": 88,
+    "videoId": "oNSnAtHzVS0",
+    "title": "Arduino UNO Q (Ep.88) อัพเดตฟีเจอร์ใหม่บน Arduino App Lab เวอร์ชั่น 0.7.0",
+    "duration": "7:56"
+  },
+  {
+    "index": 89,
+    "videoId": "xnO43-3M1dM",
+    "title": "Arduino UNO Q (Ep.89) พื้นฐานการสร้าง Brick เพื่อใช้งานบน Arduino App Lab (Custom Bricks)",
+    "duration": "48:10"
+  },
+  {
+    "index": 90,
+    "videoId": "gEWzXNZDFHQ",
+    "title": "Arduino UNO Q (Ep.90) แนะนำ Arduino® USB-C Hub (8 in 1)",
+    "duration": "15:57"
+  },
+  {
+    "index": 91,
+    "videoId": "bEYT895MUqU",
+    "title": "Arduino UNO Q (Ep.91) แนะนำการใช้งาน Modulino® Hub บน UNO Q (ตอน 1/2)",
+    "duration": "1:22:28"
+  },
+  {
+    "index": 92,
+    "videoId": "j15JdoIzpec",
+    "title": "Arduino UNO Q (Ep.92) แนะนำการใช้งาน Modulino® Hub บน UNO Q (ตอน 2/2)",
+    "duration": "27:44"
+  },
+  {
+    "index": 93,
+    "videoId": "2Ovq6d-aegI",
+    "title": "Arduino UNO Q (Ep.93) แนะนำการใช้งาน Modulino® Extender",
+    "duration": "15:34"
+  },
+  {
+    "index": 94,
+    "videoId": "7m2N_UPThlA",
+    "title": "Arduino UNO Q (Ep.94) แนะนำการใช้งาน Modulino® Motors",
+    "duration": "2:03:35"
+  },
+  {
+    "index": 95,
+    "videoId": "l617NbNk15k",
+    "title": "Arduino UNO Q (Ep.95) อัพเดตฟีเจอร์ใหม่บน Arduino App Lab เวอร์ชั่น 0.9.0",
+    "duration": "15:51"
+  },
+  {
+    "index": 96,
+    "videoId": "K1qSAywQkIQ",
+    "title": "Arduino UNO Q (Ep.96) รู้จักกับ “Air Quality Monitoring Brick”",
+    "duration": "52:07"
+  },
+  {
+    "index": 97,
+    "videoId": "m4emrzr1QNU",
+    "title": "Arduino UNO Q (Ep.97) รู้จักกับ “Large Language Model (LLM) Brick”",
+    "duration": "1:20:21"
+  },
+  {
+    "index": 98,
+    "videoId": "2HkI1AXfzR4",
+    "title": "Arduino UNO Q (Ep.98) การใช้งานโมดูล LCD บน Arduino UNO Q ผ่านพอร์ต I2C",
+    "duration": "1:33:39"
+  },
+  {
+    "index": 99,
+    "videoId": "nh-uLUXSu_A",
+    "title": "Arduino UNO Q (Ep.99) Remote เข้า UNO Q จากทุกที่ ด้วย Tailscale, xrdp และ RustDesk",
+    "duration": "57:49"
+  },
+  {
+    "index": 100,
+    "videoId": "5KSi_NcMcmo",
+    "title": "Arduino UNO Q (Ep.100) การใช้งาน Agentic AI บน Arduino UNO Q",
+    "duration": "57:15"
+  }
+]

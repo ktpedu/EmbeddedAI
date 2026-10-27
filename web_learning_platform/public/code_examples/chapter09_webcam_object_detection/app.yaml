@@ -1,0 +1,10 @@
+name: Webcam Object Detection App
+description: "แอปพลิเคชันตรวจจับวัตถุผ่านกล้องเว็บแคมและสตรีมมิงบน Web UI (พอร์ต 7000)"
+ports: []
+bricks:
+- arduino:video_object_detection: {
+    variables: {
+      EI_OBJ_DETECTION_MODEL: "/home/arduino/.arduino-bricks/ei-models/webcam_obj.eim"
+    }
+  }
+- arduino:web_ui: {}
