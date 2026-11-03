@@ -163,11 +163,15 @@ function startRealTimeSyncLoop() {
   }, 30000);
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function bootApp() {
   try { initFontStyle(); } catch (e) { console.warn('initFontStyle err:', e); }
   try { initStudentProfile(); } catch (e) { console.warn('initStudentProfile err:', e); }
 
-  await fetchAllData();
+  try {
+    await fetchAllData();
+  } catch (err) {
+    console.warn('fetchAllData top-level error:', err);
+  }
 
   try { applyRoleUI(); } catch (e) { console.warn('applyRoleUI err:', e); }
   try { renderAllViews(); } catch (e) { console.error('renderAllViews err:', e); }
@@ -176,7 +180,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   try { handleUrlDeepLinking(); } catch (e) { console.warn('handleUrlDeepLinking err:', e); }
   try { initSupabaseRealtime(); } catch (e) { console.warn('initSupabaseRealtime err:', e); }
   try { startRealTimeSyncLoop(); } catch (e) { console.warn('startRealTimeSyncLoop err:', e); }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootApp);
+} else {
+  bootApp();
+}
 
 async function fetchAllData() {
   try {
@@ -1752,68 +1762,69 @@ async function handleStudentSubmitLab(e) {
   }
 
   try {
-    const res = await fetch('/api/submissions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        student_id: user.student_id,
-        student_name: user.name,
-        chapter_id,
-        task_type,
-        report_url,
-        notes
-      })
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (json.status === 'success') {
-        showToast(json.message || 'ส่งงานเรียบร้อยแล้ว!', 'success');
-        closeModal('studentSubmissionModal');
-        await fetchAllData();
-        renderPracticalTasks();
-        renderWorksheets();
-        if (state.currentRole === 'admin') {
-          renderAdminSubmissions();
-        }
-        return;
-      }
-    }
-  } catch (err) {
-    console.log('[API submission offline]: Saving directly to Supabase');
-  }
-
-  // Fallback: บันทึกตรงไปยัง Supabase Cloud Database (สำหรับ GitHub Pages)
-  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
     try {
-      const submissionRow = {
-        student_id: String(user.student_id).trim(),
-        student_name: user.name,
-        chapter_id: parseInt(chapter_id) || 1,
-        task_type: task_type || 'practical',
-        report_url: report_url || '',
-        notes: notes || '',
-        status: 'pending',
-        submitted_at: new Date().toISOString()
-      };
-      const { error } = await supabaseClient.from('submissions').insert([submissionRow]);
-      if (!error) {
-        showToast('ส่งงานเรียบร้อยแล้ว! (บันทึกลงฐานข้อมูล Supabase สำเร็จ)', 'success');
-        closeModal('studentSubmissionModal');
-        await fetchAllData();
-        renderPracticalTasks();
-        renderWorksheets();
-        if (state.currentRole === 'admin') renderAdminSubmissions();
-        return;
-      } else {
-        console.warn('Supabase submission insert error:', error);
+      const res = await fetch('/api/submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_id: user.student_id,
+          student_name: user.name,
+          chapter_id,
+          task_type,
+          report_url,
+          notes
+        })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'success') {
+          showToast(json.message || 'ส่งงานเรียบร้อยแล้ว!', 'success');
+          closeModal('studentSubmissionModal');
+          await fetchAllData();
+          renderPracticalTasks();
+          renderWorksheets();
+          if (state.currentRole === 'admin') {
+            renderAdminSubmissions();
+          }
+          return;
+        }
       }
-    } catch (supaErr) {
-      console.warn('Supabase submission exception:', supaErr);
+    } catch (err) {
+      console.log('[API submission offline]: Saving directly to Supabase');
     }
-  }
 
-  showToast('เกิดข้อผิดพลาดในการส่งงาน', 'error');
-} finally {
+    // Fallback: บันทึกตรงไปยัง Supabase Cloud Database (สำหรับ GitHub Pages)
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+      try {
+        const submissionRow = {
+          student_id: String(user.student_id).trim(),
+          student_name: user.name,
+          chapter_id: parseInt(chapter_id) || 1,
+          task_type: task_type || 'practical',
+          report_url: report_url || '',
+          notes: notes || '',
+          status: 'pending',
+          submitted_at: new Date().toISOString()
+        };
+        const { error } = await supabaseClient.from('submissions').insert([submissionRow]);
+        if (!error) {
+          showToast('ส่งงานเรียบร้อยแล้ว! (บันทึกลงฐานข้อมูล Supabase สำเร็จ)', 'success');
+          closeModal('studentSubmissionModal');
+          await fetchAllData();
+          renderPracticalTasks();
+          renderWorksheets();
+          if (state.currentRole === 'admin') renderAdminSubmissions();
+          return;
+        } else {
+          console.warn('Supabase submission insert error:', error);
+        }
+      } catch (supaErr) {
+        console.warn('Supabase submission exception:', supaErr);
+      }
+    }
+
+    showToast('เกิดข้อผิดพลาดในการส่งงาน', 'error');
+  } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
