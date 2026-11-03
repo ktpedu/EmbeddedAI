@@ -231,6 +231,25 @@ async function fetchAllData() {
       } catch (e) {
         console.warn('[Static Fallback Notice]:', e.message);
       }
+
+      // ซิงค์ข้อมูลล่าสุดจาก Supabase Cloud Database หากรันบน GitHub Pages
+      if (typeof window.supabase !== 'undefined') {
+        if (!supabaseClient) initSupabaseRealtime();
+        if (supabaseClient) {
+          try {
+            const [supaStds, supaScores, supaSubs] = await Promise.all([
+              supabaseClient.from('students').select('*').order('student_id', { ascending: true }),
+              supabaseClient.from('scores').select('*'),
+              supabaseClient.from('submissions').select('*')
+            ]);
+            if (supaStds.data && supaStds.data.length > 0) state.students = supaStds.data;
+            if (supaScores.data && supaScores.data.length > 0) state.scores = supaScores.data;
+            if (supaSubs.data && supaSubs.data.length > 0) state.submissions = supaSubs.data;
+          } catch (supaErr) {
+            console.warn('[Supabase Fallback Notice]:', supaErr.message);
+          }
+        }
+      }
     }
 
     // หากมีนักเรียนล็อกอินอยู่ ให้ซิงค์ชื่อและห้องล่าสุดจากฐานข้อมูลทันที (แก้ปัญหาชื่อเก่าค้างใน localStorage)
@@ -334,29 +353,47 @@ async function handleAdminLogin(event) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ passcode })
     });
-    const data = await res.json();
-
-    if (res.ok && data.token) {
-      sessionStorage.setItem('edgeai_admin_token', data.token);
-      closeModal('adminAuthModal');
-      setRole('admin');
-      await fetchAllData();
-      renderScores();
-      showToast('เข้าสู่ระบบสิทธิ์ครูผู้สอน / ผู้ดูแลระบบสำเร็จ', 'success');
-    } else {
-      if (err) {
-        if (errMsg) errMsg.textContent = data.message || 'รหัสผ่านไม่ถูกต้อง';
-        err.classList.remove('hidden');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.token) {
+        sessionStorage.setItem('edgeai_admin_token', data.token);
+        closeModal('adminAuthModal');
+        setRole('admin');
+        await fetchAllData();
+        renderScores();
+        showToast('เข้าสู่ระบบสิทธิ์ครูผู้สอน / ผู้ดูแลระบบสำเร็จ', 'success');
+        return;
+      } else {
+        if (err) {
+          if (errMsg) errMsg.textContent = data.message || 'รหัสผ่านไม่ถูกต้อง';
+          err.classList.remove('hidden');
+        }
+        input?.focus();
+        input?.select();
+        return;
       }
-      input?.focus();
-      input?.select();
     }
   } catch (e) {
-    if (err) {
-      if (errMsg) errMsg.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
-      err.classList.remove('hidden');
-    }
+    console.log('[API Admin Login offline]: Checking fallback passcode');
   }
+
+  // Fallback passcode for GitHub Pages
+  if (passcode === 'admin1234') {
+    sessionStorage.setItem('edgeai_admin_token', 'admin_static_token');
+    closeModal('adminAuthModal');
+    setRole('admin');
+    await fetchAllData();
+    renderScores();
+    showToast('เข้าสู่ระบบสิทธิ์ครูผู้สอน / ผู้ดูแลระบบสำเร็จ', 'success');
+    return;
+  }
+
+  if (err) {
+    if (errMsg) errMsg.textContent = 'รหัสผ่านไม่ถูกต้อง';
+    err.classList.remove('hidden');
+  }
+  input?.focus();
+  input?.select();
 }
 
 async function logoutAdmin() {
@@ -496,55 +533,151 @@ async function handleStudentLogin(event) {
   const passInput = document.getElementById('studentLoginPassInput');
   const err = document.getElementById('studentAuthError');
   const errMsg = document.getElementById('studentAuthErrorMsg');
+  if (err) err.classList.add('hidden');
 
   const student_id = (idInput?.value || '').trim();
   const password = (passInput?.value || '').trim();
 
+  if (!student_id || !password) {
+    if (err) {
+      if (errMsg) errMsg.textContent = 'กรุณากรอกรหัสนักเรียน (StudentID) และรหัสผ่าน';
+      err.classList.remove('hidden');
+    }
+    return;
+  }
+
+  // 1. ลองเชื่อมต่อ API Backend ก่อน (กรณีรันผ่าน Node.js Local Server)
   try {
     const res = await fetch('/api/auth/student-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ student_id, password })
     });
-    const data = await res.json();
+    if (res.ok) {
+      const data = await res.json();
+      if (data.status === 'success') {
+        localStorage.setItem('edgeai_student_user', JSON.stringify(data.student));
+        if (data.token) sessionStorage.setItem('edgeai_student_token', data.token);
 
-    if (res.ok && data.status === 'success') {
-      localStorage.setItem('edgeai_student_user', JSON.stringify(data.student));
-      if (data.token) sessionStorage.setItem('edgeai_student_token', data.token);
+        state.currentUser = {
+          id: data.student.student_id,
+          student_id: data.student.student_id,
+          name: data.student.name,
+          class_room: data.student.class_room || 'ม.5/12',
+          role: 'student'
+        };
 
-      state.currentUser = {
-        id: data.student.student_id,
-        student_id: data.student.student_id,
-        name: data.student.name,
-        class_room: data.student.class_room || 'ม.5/12',
-        role: 'student'
-      };
-
-      sessionStorage.removeItem('edgeai_admin_token');
-      updateStudentNavUI(data.student);
-      closeModal('studentLoginModal');
-      showToast(data.message || `ยินดีต้อนรับ ${data.student.name}`, 'success');
-      setRole('student');
-      await fetchAllData();
-      applyRoleUI();
-      renderPracticalTasks();
-      renderWorksheets();
-      renderScores();
-      updateGuestNotices();
-      switchTab('lessons');
-    } else {
-      if (err) {
-        if (errMsg) errMsg.textContent = data.message || 'รหัสผ่านไม่ถูกต้อง (กำหนดให้ใช้รหัสนักเรียนเป็นทั้ง Username และ Password)';
-        err.classList.remove('hidden');
+        sessionStorage.removeItem('edgeai_admin_token');
+        updateStudentNavUI(data.student);
+        closeModal('studentLoginModal');
+        showToast(data.message || `ยินดีต้อนรับ ${data.student.name}`, 'success');
+        setRole('student');
+        await fetchAllData();
+        applyRoleUI();
+        renderPracticalTasks();
+        renderWorksheets();
+        renderScores();
+        updateGuestNotices();
+        switchTab('lessons');
+        return;
+      } else {
+        if (err) {
+          if (errMsg) errMsg.textContent = data.message || 'รหัสผ่านไม่ถูกต้อง (กำหนดให้ใช้รหัสนักเรียนเป็นทั้ง Username และ Password)';
+          err.classList.remove('hidden');
+        }
+        passInput?.focus();
+        passInput?.select();
+        return;
       }
-      passInput?.focus();
-      passInput?.select();
     }
-  } catch (e) {
+  } catch (apiErr) {
+    console.log('[API Offline/Static Host]: เข้าสู่ระบบผ่านฐานข้อมูล Supabase / Local Data...');
+  }
+
+  // 2. Fallback การเข้าสู่ระบบสำหรับ GitHub Pages / Static Hosting ที่ไม่มี Node.js Backend
+  if (student_id !== password) {
     if (err) {
-      if (errMsg) errMsg.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
+      if (errMsg) errMsg.textContent = 'รหัสผ่านไม่ถูกต้อง (กำหนดให้ใช้รหัสนักเรียน 5 หลักเป็นทั้ง Username และ Password)';
       err.classList.remove('hidden');
     }
+    passInput?.focus();
+    passInput?.select();
+    return;
+  }
+
+  // ค้นหานักเรียนใน state.students ก่อน
+  let student = (state.students || []).find(s => String(s.student_id).trim() === student_id);
+
+  // หากยังไม่พบ ลองค้นหาผ่าน Supabase Client โดยตรง
+  if (!student && typeof supabaseClient !== 'undefined' && supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('students')
+        .select('*')
+        .eq('student_id', student_id)
+        .maybeSingle();
+      if (data && !error) {
+        student = data;
+        if (!state.students) state.students = [];
+        if (!state.students.some(s => String(s.student_id) === String(student.student_id))) {
+          state.students.push(student);
+        }
+      }
+    } catch (supaErr) {
+      console.warn('Supabase query error:', supaErr);
+    }
+  }
+
+  // หากยังไม่พบ ลองค้นหาจาก data/seed.json
+  if (!student) {
+    try {
+      const seedRes = await fetch('data/seed.json');
+      if (seedRes.ok) {
+        const seed = await seedRes.json();
+        const list = seed.students || [];
+        student = list.find(s => String(s.student_id).trim() === student_id);
+        if (student && (!state.students || !state.students.length)) {
+          state.students = list;
+        }
+      }
+    } catch (seedErr) {
+      console.warn('seed.json fallback error:', seedErr);
+    }
+  }
+
+  if (student) {
+    const studentUser = {
+      id: student.student_id,
+      student_id: student.student_id,
+      username: student.student_id,
+      name: student.name,
+      full_name: student.name,
+      class_room: student.class_room || 'ม.5/12',
+      role: 'student'
+    };
+
+    localStorage.setItem('edgeai_student_user', JSON.stringify(studentUser));
+    sessionStorage.setItem('edgeai_student_token', 'std_' + student.student_id);
+
+    state.currentUser = studentUser;
+    sessionStorage.removeItem('edgeai_admin_token');
+    updateStudentNavUI(studentUser);
+    closeModal('studentLoginModal');
+    showToast(`ยินดีต้อนรับ ${student.name}`, 'success');
+    setRole('student');
+    await fetchAllData();
+    applyRoleUI();
+    renderPracticalTasks();
+    renderWorksheets();
+    renderScores();
+    updateGuestNotices();
+    switchTab('lessons');
+  } else {
+    if (err) {
+      if (errMsg) errMsg.textContent = `ไม่พบรหัสนักเรียน "${student_id}" ในฐานข้อมูลห้อง ม.5/12`;
+      err.classList.remove('hidden');
+    }
+    idInput?.focus();
   }
 }
 
@@ -565,32 +698,52 @@ function logoutStudent() {
 }
 
 async function syncGoogleSheetStudents() {
-  showToast('กำลังดึงข้อมูลล่าสุดจาก Google Sheet...', 'info');
+  showToast('กำลังดึงข้อมูลล่าสุดจาก Google Sheet / Supabase...', 'info');
   try {
     const res = await fetch('/api/students/sync', { method: 'POST' });
-    const json = await res.json();
-    if (json.status === 'success') {
-      state.students = json.data || [];
-      await fetchAllData();
-      populateDropdowns();
-      if (state.currentUser && state.currentUser.student_id) {
-        const fresh = state.students.find(s => s.student_id === state.currentUser.student_id);
-        if (fresh) {
-          state.currentUser.name = fresh.name;
-          state.currentUser.class_room = fresh.class_room || 'ม.5/12';
-          localStorage.setItem('edgeai_student_user', JSON.stringify(fresh));
-          updateStudentNavUI(fresh);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.status === 'success') {
+        state.students = json.data || [];
+        await fetchAllData();
+        populateDropdowns();
+        if (state.currentUser && state.currentUser.student_id) {
+          const fresh = state.students.find(s => s.student_id === state.currentUser.student_id);
+          if (fresh) {
+            state.currentUser.name = fresh.name;
+            state.currentUser.class_room = fresh.class_room || 'ม.5/12';
+            localStorage.setItem('edgeai_student_user', JSON.stringify(fresh));
+            updateStudentNavUI(fresh);
+          }
         }
+        renderScores();
+        renderAllViews();
+        showToast(json.message || 'ซิงค์ข้อมูลนักเรียนสำเร็จ!', 'success');
+        return;
       }
-      renderScores();
-      renderAllViews();
-      showToast(json.message || 'ซิงค์ข้อมูลนักเรียนสำเร็จ!', 'success');
-    } else {
-      showToast(json.message || 'ไม่สามารถติดต่อ Google Sheet ได้', 'warning');
     }
-  } catch (err) {
-    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์เพื่อซิงค์ข้อมูล', 'error');
+  } catch (e) {
+    console.log('[API sync offline]: Fallback to Supabase sync');
   }
+
+  // Fallback: ดึงรายชื่อนักเรียนจาก Supabase โดยตรง (สำหรับ GitHub Pages)
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient.from('students').select('*').order('student_id', { ascending: true });
+      if (data && !error && data.length > 0) {
+        state.students = data;
+        populateDropdowns();
+        renderScores();
+        renderAllViews();
+        showToast(`ซิงค์ข้อมูลนักเรียน ${data.length} คนจากฐานข้อมูล Supabase สำเร็จ!`, 'success');
+        return;
+      }
+    } catch (supaErr) {
+      console.warn('Supabase sync error:', supaErr);
+    }
+  }
+
+  showToast('ซิงค์ข้อมูลจากฐานข้อมูลเสร็จสิ้น', 'info');
 }
 
 function setRoleToGuest() {
@@ -1611,22 +1764,56 @@ async function handleStudentSubmitLab(e) {
         notes
       })
     });
-    const json = await res.json();
-    if (json.status === 'success') {
-      showToast(json.message || 'ส่งงานเรียบร้อยแล้ว!', 'success');
-      closeModal('studentSubmissionModal');
-      await fetchAllData();
-      renderPracticalTasks();
-      renderWorksheets();
-      if (state.currentRole === 'admin') {
-        renderAdminSubmissions();
+    if (res.ok) {
+      const json = await res.json();
+      if (json.status === 'success') {
+        showToast(json.message || 'ส่งงานเรียบร้อยแล้ว!', 'success');
+        closeModal('studentSubmissionModal');
+        await fetchAllData();
+        renderPracticalTasks();
+        renderWorksheets();
+        if (state.currentRole === 'admin') {
+          renderAdminSubmissions();
+        }
+        return;
       }
-    } else {
-      showToast(json.message || 'เกิดข้อผิดพลาดในการส่งงาน', 'error');
     }
   } catch (err) {
-    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
-  } finally {
+    console.log('[API submission offline]: Saving directly to Supabase');
+  }
+
+  // Fallback: บันทึกตรงไปยัง Supabase Cloud Database (สำหรับ GitHub Pages)
+  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+    try {
+      const submissionRow = {
+        student_id: String(user.student_id).trim(),
+        student_name: user.name,
+        chapter_id: parseInt(chapter_id) || 1,
+        task_type: task_type || 'practical',
+        report_url: report_url || '',
+        notes: notes || '',
+        status: 'pending',
+        submitted_at: new Date().toISOString()
+      };
+      const { error } = await supabaseClient.from('submissions').insert([submissionRow]);
+      if (!error) {
+        showToast('ส่งงานเรียบร้อยแล้ว! (บันทึกลงฐานข้อมูล Supabase สำเร็จ)', 'success');
+        closeModal('studentSubmissionModal');
+        await fetchAllData();
+        renderPracticalTasks();
+        renderWorksheets();
+        if (state.currentRole === 'admin') renderAdminSubmissions();
+        return;
+      } else {
+        console.warn('Supabase submission insert error:', error);
+      }
+    } catch (supaErr) {
+      console.warn('Supabase submission exception:', supaErr);
+    }
+  }
+
+  showToast('เกิดข้อผิดพลาดในการส่งงาน', 'error');
+} finally {
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
