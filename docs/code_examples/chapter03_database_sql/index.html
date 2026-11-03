@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คลังโค้ดตัวอย่าง: chapter03_database_sql | KT-Edu Edge AI</title>
+  <link rel="icon" type="image/png" href="../../images/logo/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <style>
+    body { font-family: 'Noto Sans Thai', sans-serif; }
+    h1, h2, h3, .font-heading { font-family: 'Prompt', sans-serif; }
+    code, pre, .font-mono { font-family: 'JetBrains Mono', Consolas, monospace; }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-[#173b6b] text-white shadow-md sticky top-0 z-40 border-b-2 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="../../index.html" class="flex items-center space-x-2.5">
+          <img src="../../images/logo/logo_kt_edu.png" alt="Logo" class="h-10 w-10 rounded-full border border-[#fff200] bg-black p-0.5">
+          <div>
+            <div class="font-bold text-sm tracking-wide text-white">KT-Edu Edge AI Platform</div>
+            <div class="text-[10px] text-yellow-300 font-mono">Embedded Artificial Intelligence</div>
+          </div>
+        </a>
+      </div>
+      <div class="flex items-center space-x-3">
+        <a href="../../chapter03.html" class="text-xs bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-arrow-left text-yellow-300"></i> กลับสู่บทเรียน
+        </a>
+        <a href="https://github.com/ktpedu/EmbeddedAI/tree/main/docs/code_examples/chapter03_database_sql" target="_blank" class="text-xs bg-[#fff200] text-[#173b6b] hover:bg-yellow-300 px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition shadow">
+          <i class="fa-brands fa-github"></i> เปิดบน GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <div class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 text-xs text-slate-500 flex items-center space-x-2">
+      <a href="../../index.html" class="hover:text-[#173b6b] flex items-center gap-1"><i class="fa-solid fa-house"></i> หน้าหลัก</a>
+      <span>/</span>
+      <a href="../../index.html#section-code" class="hover:text-[#173b6b]">คลังโค้ด</a>
+      <span>/</span>
+      <a href="../../chapter03.html" class="hover:text-[#173b6b]">chapter03_database_sql</a>
+      <span>/</span>
+      <span class="text-slate-800 font-bold">ซอร์สโค้ดและคอนฟิก</span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-6">
+
+    <!-- Title Card -->
+    <div class="bg-gradient-to-r from-[#173b6b] to-[#0d2342] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b-4 border-[#fff200]">
+      <div class="space-y-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-xs font-bold border border-yellow-400/30">
+          <i class="fa-solid fa-code"></i> Source Code Repository
+        </span>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-white">chapter03_database_sql</h1>
+        <p class="text-xs sm:text-sm text-slate-300 font-mono">ไดเรกทอรี: code_examples/chapter03_database_sql/</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="copyCurrentCode()" class="px-4 py-2 bg-[#fff200] hover:bg-yellow-300 text-[#173b6b] font-bold text-xs rounded-xl shadow flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-copy"></i> คัดลอกโค้ด
+        </button>
+        <a id="btnDownloadFile" href="#" download class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-download"></i> ดาวน์โหลดไฟล์
+        </a>
+      </div>
+    </div>
+
+    <!-- File Selector Tabs -->
+    <div class="flex items-center space-x-2 border-b border-slate-300 pb-2 overflow-x-auto" id="fileTabsContainer">
+      <!-- Injected by JS -->
+    </div>
+
+    <!-- Code Display Area -->
+    <div class="bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-slate-800 flex flex-col">
+      <div class="bg-slate-800 px-5 py-3 border-b border-slate-700 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+          <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+          <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+          <span id="displayFileName" class="text-xs font-mono font-bold text-yellow-300 ml-2">loading...</span>
+          <span id="displayFileSize" class="text-[11px] font-mono text-slate-400"></span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="copyCurrentCode()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition">
+            <i class="fa-regular fa-copy text-yellow-300"></i> คัดลอก
+          </button>
+        </div>
+      </div>
+      <div class="p-4 overflow-x-auto">
+        <pre class="line-numbers text-xs leading-relaxed"><code id="codeBlock" class="language-python"># กำลังโหลดโค้ด...</code></pre>
+      </div>
+    </div>
+
+    <!-- Instructions / Run Guide -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-3">
+      <h3 class="font-bold text-sm text-[#173b6b] flex items-center gap-2">
+        <i class="fa-solid fa-terminal text-yellow-500"></i> วิธีการรันโปรแกรมบนบอร์ด Arduino UNO Q / คอมพิวเตอร์
+      </h3>
+      <ol class="list-decimal list-inside text-xs text-slate-600 space-y-1.5 leading-relaxed">
+        <li>คัดลอกหรือดาวน์โหลดไฟล์สคริปต์ไปยังไดเรกทอรีโปรเจกต์ของคุณ</li>
+        <li>เปิด Terminal หรือ SSH ไปยังบอร์ด Arduino UNO Q (User: <code>arduino</code>)</li>
+        <li>รันคำสั่ง: <code class="bg-slate-100 text-[#173b6b] px-2 py-0.5 rounded font-mono font-bold" id="runCommandText">python3 script.py</code></li>
+      </ol>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#0d2342] text-slate-400 text-xs py-6 border-t-2 border-[#fff200] mt-12 text-center space-y-1">
+    <div>© 2569 KT-Edu Learning Platform • Embedded Artificial Intelligence Program</div>
+    <div class="text-[11px] text-slate-500">โรงเรียนวังน้ำเย็นวิทยาคม • สพม.สระแก้ว</div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-[#173b6b] text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl border border-yellow-300 transition-opacity duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-yellow-300"></i> <span id="toastMsg">คัดลอกเรียบร้อยแล้ว</span>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script>
+    const FILES = [{"name": "app.yaml", "is_text": true, "content": "# Arduino App Lab Configuration\n# Chapter 3: Database-SQL Brick & Inference Event Logging\n# \u0e2d\u0e49\u0e32\u0e07\u0e2d\u0e34\u0e07\u0e04\u0e25\u0e34\u0e1b Arduino UNO Q \u0e23\u0e39\u0e49\u0e08\u0e31\u0e01\u0e01\u0e31\u0e1a \"Database-SQL Brick\" \u0e1a\u0e19 Arduino App Lab\n\nname: database-sql-logger\nversion: 1.0.0\ndescription: \u0e23\u0e30\u0e1a\u0e1a\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e10\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25 SQL \u0e17\u0e49\u0e2d\u0e07\u0e16\u0e34\u0e48\u0e19\u0e1a\u0e19 Arduino UNO Q \u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1b\u0e23\u0e30\u0e27\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23\u0e15\u0e23\u0e27\u0e08\u0e08\u0e31\u0e1a\u0e02\u0e2d\u0e07 AI\n\nvariables: {\n  DB_FILE_PATH: \"/home/arduino/.arduino-bricks/data/edgeai_records.db\",\n  TABLE_NAME: \"ai_inference_logs\",\n  LOG_RETENTION_DAYS: \"30\"\n}\n", "size": 637}, {"name": "db_logger.py", "is_text": true, "content": "#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\"\"\"\n\u0e23\u0e30\u0e1a\u0e1a\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e10\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25 SQL \u0e1a\u0e19\u0e1a\u0e2d\u0e23\u0e4c\u0e14 Arduino UNO Q (Database-SQL Brick)\n\u0e2d\u0e49\u0e32\u0e07\u0e2d\u0e34\u0e07\u0e04\u0e25\u0e34\u0e1b Arduino UNO Q \u0e23\u0e39\u0e49\u0e08\u0e31\u0e01\u0e01\u0e31\u0e1a \"Database-SQL Brick\" \u0e1a\u0e19 Arduino App Lab\n\n\u0e17\u0e33\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48:\n1. \u0e2a\u0e23\u0e49\u0e32\u0e07\u0e10\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25 SQLite \u0e43\u0e19\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07 (/home/arduino/.arduino-bricks/data/edgeai_records.db)\n2. \u0e2a\u0e23\u0e49\u0e32\u0e07\u0e15\u0e32\u0e23\u0e32\u0e07\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1c\u0e25\u0e01\u0e32\u0e23\u0e15\u0e23\u0e27\u0e08\u0e08\u0e31\u0e1a AI (ai_inference_logs)\n3. \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1c\u0e25\u0e01\u0e32\u0e23\u0e17\u0e33\u0e19\u0e32\u0e22\u0e42\u0e21\u0e40\u0e14\u0e25 (Inference Logging): Anomaly Score, FOMO Object Coordinates, KWS Commands\n4. \u0e14\u0e36\u0e07\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19\u0e2a\u0e16\u0e34\u0e15\u0e34\u0e22\u0e49\u0e2d\u0e19\u0e2b\u0e25\u0e31\u0e07 (Query Summary) \u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e23\u0e30\u0e1a\u0e1a\u0e2d\u0e38\u0e15\u0e2a\u0e32\u0e2b\u0e01\u0e23\u0e23\u0e21\u0e2d\u0e31\u0e15\u0e42\u0e19\u0e21\u0e31\u0e15\u0e34\n\"\"\"\n\nimport os\nimport sys\nimport sqlite3\nimport datetime\n\n# \u0e1a\u0e31\u0e07\u0e04\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e41\u0e2a\u0e14\u0e07\u0e1c\u0e25\u0e20\u0e32\u0e29\u0e32\u0e44\u0e17\u0e22\u0e1a\u0e19\u0e04\u0e2d\u0e19\u0e42\u0e0b\u0e25\u0e43\u0e2b\u0e49\u0e16\u0e39\u0e01\u0e15\u0e49\u0e2d\u0e07\nif sys.platform.startswith('win'):\n    sys.stdout.reconfigure(encoding='utf-8')\n\n# \u0e01\u0e33\u0e2b\u0e19\u0e14\u0e1e\u0e32\u0e18\u0e10\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e15\u0e32\u0e21\u0e04\u0e2d\u0e19\u0e1f\u0e34\u0e01\u0e39\u0e40\u0e23\u0e0a\u0e31\u0e19 app.yaml\nDB_PATH = os.environ.get(\"DB_FILE_PATH\", \"edgeai_records.db\")\n\ndef init_database():\n    \"\"\"\u0e2a\u0e23\u0e49\u0e32\u0e07\u0e15\u0e32\u0e23\u0e32\u0e07\u0e43\u0e19\u0e10\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e2b\u0e32\u0e01\u0e22\u0e31\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\"\"\"\n    os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)\n    conn = sqlite3.connect(DB_PATH)\n    cursor = conn.cursor()\n    \n    # 1. \u0e15\u0e32\u0e23\u0e32\u0e07\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1b\u0e23\u0e30\u0e27\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23\u0e15\u0e23\u0e27\u0e08\u0e08\u0e31\u0e1a\u0e04\u0e27\u0e32\u0e21\u0e1c\u0e34\u0e14\u0e1b\u0e01\u0e15\u0e34 (Visual Anomaly Detection)\n    cursor.execute('''\n        CREATE TABLE IF NOT EXISTS anomaly_logs (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,\n            model_name TEXT NOT NULL,\n            anomaly_mean_score REAL,\n            anomaly_max_score REAL,\n            status TEXT NOT NULL,\n            alert_triggered INTEGER DEFAULT 0\n        )\n    ''')\n    \n    # 2. \u0e15\u0e32\u0e23\u0e32\u0e07\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1b\u0e23\u0e30\u0e27\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23\u0e15\u0e23\u0e27\u0e08\u0e08\u0e31\u0e1a\u0e27\u0e31\u0e15\u0e16\u0e38 (FOMO Object Detection)\n    cursor.execute('''\n        CREATE TABLE IF NOT EXISTS object_detection_logs (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,\n            label TEXT NOT NULL,\n            confidence REAL NOT NULL,\n            pos_x INTEGER NOT NULL,\n            pos_y INTEGER NOT NULL,\n            width INTEGER,\n            height INTEGER\n        )\n    ''')\n\n    # 3. \u0e15\u0e32\u0e23\u0e32\u0e07\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1b\u0e23\u0e30\u0e27\u0e31\u0e15\u0e34\u0e04\u0e33\u0e2a\u0e31\u0e48\u0e07\u0e40\u0e2a\u0e35\u0e22\u0e07 (Keyword Spotting)\n    cursor.execute('''\n        CREATE TABLE IF NOT EXISTS kws_logs (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,\n            keyword TEXT NOT NULL,\n            confidence REAL NOT NULL,\n            action_executed TEXT\n        )\n    ''')\n\n    conn.commit()\n    conn.close()\n    print(f\"[Database-SQL Brick] \u0e40\u0e23\u0e34\u0e48\u0e21\u0e15\u0e49\u0e19\u0e42\u0e04\u0e23\u0e07\u0e2a\u0e23\u0e49\u0e32\u0e07\u0e15\u0e32\u0e23\u0e32\u0e07\u0e10\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08: {DB_PATH}\")\n\ndef log_anomaly_event(model_name, mean_score, max_score, threshold=15.0):\n    \"\"\"\u0e1f\u0e31\u0e07\u0e01\u0e4c\u0e0a\u0e31\u0e19\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1c\u0e25\u0e01\u0e32\u0e23\u0e15\u0e23\u0e27\u0e08\u0e08\u0e31\u0e1a\u0e04\u0e27\u0e32\u0e21\u0e1c\u0e34\u0e14\u0e1b\u0e01\u0e15\u0e34\u0e08\u0e32\u0e01 Edge Impulse \u0e42\u0e21\u0e40\u0e14\u0e25\"\"\"\n    status = \"DEFECT\" if max_score > threshold else \"NORMAL\"\n    alert = 1 if status == \"DEFECT\" else 0\n    \n    conn = sqlite3.connect(DB_PATH)\n    cursor = conn.cursor()\n    cursor.execute('''\n        INSERT INTO anomaly_logs (model_name, anomaly_mean_score, anomaly_max_score, status, alert_triggered)\n        VALUES (?, ?, ?, ?, ?)\n    ''', (model_name, mean_score, max_score, status, alert))\n    conn.commit()\n    conn.close()\n    print(f\"[SQL Log] \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e40\u0e2b\u0e15\u0e38\u0e01\u0e32\u0e23\u0e13\u0e4c Anomaly: {status} (Max Score: {max_score:.2f}, Alert: {alert})\")\n\ndef log_fomo_event(label, conf, x, y, w=16, h=16):\n    \"\"\"\u0e1f\u0e31\u0e07\u0e01\u0e4c\u0e0a\u0e31\u0e19\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1e\u0e34\u0e01\u0e31\u0e14\u0e27\u0e31\u0e15\u0e16\u0e38\u0e17\u0e35\u0e48\u0e15\u0e23\u0e27\u0e08\u0e1e\u0e1a\u0e42\u0e14\u0e22\u0e42\u0e21\u0e40\u0e14\u0e25 FOMO\"\"\"\n    conn = sqlite3.connect(DB_PATH)\n    cursor = conn.cursor()\n    cursor.execute('''\n        INSERT INTO object_detection_logs (label, confidence, pos_x, pos_y, width, height)\n        VALUES (?, ?, ?, ?, ?, ?)\n    ''', (label, conf, x, y, w, h))\n    conn.commit()\n    conn.close()\n    print(f\"[SQL Log] \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e27\u0e31\u0e15\u0e16\u0e38 FOMO: '{label}' \u0e17\u0e35\u0e48\u0e1e\u0e34\u0e01\u0e31\u0e14 ({x}, {y}) \u0e04\u0e27\u0e32\u0e21\u0e21\u0e31\u0e48\u0e19\u0e43\u0e08 {conf*100:.1f}%\")\n\ndef query_daily_summary():\n    \"\"\"\u0e14\u0e36\u0e07\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19\u0e2a\u0e23\u0e38\u0e1b\u0e2a\u0e16\u0e34\u0e15\u0e34\u0e1b\u0e23\u0e30\u0e08\u0e33\u0e27\u0e31\u0e19\"\"\"\n    conn = sqlite3.connect(DB_PATH)\n    cursor = conn.cursor()\n    \n    cursor.execute('''\n        SELECT status, COUNT(*) \n        FROM anomaly_logs \n        GROUP BY status\n    ''')\n    rows = cursor.fetchall()\n    \n    print(\"\\n--- \u0e2a\u0e23\u0e38\u0e1b\u0e2a\u0e16\u0e34\u0e15\u0e34\u0e1c\u0e25\u0e01\u0e32\u0e23\u0e15\u0e23\u0e27\u0e08\u0e08\u0e31\u0e1a\u0e0a\u0e34\u0e49\u0e19\u0e07\u0e32\u0e19 (Daily Inspection Report) ---\")\n    for status, count in rows:\n        print(f\" \u0e2a\u0e16\u0e32\u0e19\u0e30 {status}: {count} \u0e04\u0e23\u0e31\u0e49\u0e07\")\n    conn.close()\n\nif __name__ == \"__main__\":\n    print(\"==================================================\")\n    print(\" \u0e17\u0e14\u0e2a\u0e2d\u0e1a\u0e01\u0e32\u0e23\u0e17\u0e33\u0e07\u0e32\u0e19\u0e02\u0e2d\u0e07 Database-SQL Brick \u0e1a\u0e19 Arduino UNO Q\")\n    print(\"==================================================\")\n    init_database()\n    \n    # \u0e08\u0e33\u0e25\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e2a\u0e48\u0e07\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e08\u0e32\u0e01\u0e42\u0e21\u0e40\u0e14\u0e25 AI \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e25\u0e07\u0e10\u0e32\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\n    print(\"\\n[\u0e01\u0e32\u0e23\u0e08\u0e33\u0e25\u0e2d\u0e07] 1. \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1c\u0e25\u0e0a\u0e34\u0e49\u0e19\u0e07\u0e32\u0e19\u0e1b\u0e01\u0e15\u0e34:\")\n    log_anomaly_event(\"vad_model.eim\", mean_score=1.2, max_score=3.4)\n    \n    print(\"\\n[\u0e01\u0e32\u0e23\u0e08\u0e33\u0e25\u0e2d\u0e07] 2. \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e1c\u0e25\u0e0a\u0e34\u0e49\u0e19\u0e07\u0e32\u0e19\u0e1e\u0e1a\u0e23\u0e2d\u0e22\u0e41\u0e15\u0e01\u0e23\u0e49\u0e32\u0e27 (Defect):\")\n    log_anomaly_event(\"vad_model.eim\", mean_score=18.5, max_score=42.1)\n    \n    print(\"\\n[\u0e01\u0e32\u0e23\u0e08\u0e33\u0e25\u0e2d\u0e07] 3. \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e01\u0e32\u0e23\u0e15\u0e23\u0e27\u0e08\u0e1e\u0e1a\u0e27\u0e31\u0e15\u0e16\u0e38\u0e14\u0e49\u0e27\u0e22 FOMO:\")\n    log_fomo_event(\"brick_red\", conf=0.92, x=48, y=52)\n\n    # \u0e14\u0e36\u0e07\u0e2a\u0e16\u0e34\u0e15\u0e34\n    query_daily_summary()\n    print(\"==================================================\")\n", "size": 6554}];
+    let activeFileIndex = 0;
+
+    function renderTabs() {
+      const container = document.getElementById('fileTabsContainer');
+      container.innerHTML = FILES.map((f, idx) => {
+        const isActive = idx === activeFileIndex;
+        const icon = f.name.endsWith('.py') ? 'fa-brands fa-python text-yellow-400' : (f.name.endsWith('.yaml') || f.name.endsWith('.yml') ? 'fa-solid fa-gears text-blue-400' : 'fa-regular fa-file-code text-slate-400');
+        const activeClass = isActive ? 'bg-[#173b6b] text-white font-bold shadow' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200';
+        return `<button onclick="switchFile(${idx})" class="px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-2 transition ${activeClass}">
+          <i class="${icon}"></i> ${f.name}
+        </button>`;
+      }).join('');
+    }
+
+    function switchFile(idx) {
+      activeFileIndex = idx;
+      renderTabs();
+      displayActiveFile();
+    }
+
+    function displayActiveFile() {
+      const cur = FILES[activeFileIndex];
+      if (!cur) return;
+
+      document.getElementById('displayFileName').textContent = cur.name;
+      document.getElementById('displayFileSize').textContent = `(${(cur.size / 1024).toFixed(1)} KB)`;
+      
+      const btnDownload = document.getElementById('btnDownloadFile');
+      btnDownload.href = cur.name;
+      btnDownload.download = cur.name;
+
+      const runCmd = document.getElementById('runCommandText');
+      if (cur.name.endsWith('.py')) {
+        runCmd.textContent = `python3 ${cur.name}`;
+      } else if (cur.name.endsWith('.yaml')) {
+        runCmd.textContent = `cat ${cur.name}`;
+      } else {
+        runCmd.textContent = `./${cur.name}`;
+      }
+
+      const codeBlock = document.getElementById('codeBlock');
+      if (cur.is_text) {
+        codeBlock.className = cur.name.endsWith('.yaml') || cur.name.endsWith('.yml') ? 'language-yaml' : 'language-python';
+        codeBlock.textContent = cur.content;
+      } else {
+        codeBlock.className = 'language-none';
+        codeBlock.textContent = `[ไฟล์ไบนารีขนาด ${(cur.size / 1024).toFixed(1)} KB กรุณากดดาวน์โหลดเพื่อเปิดใช้งาน]`;
+      }
+      Prism.highlightElement(codeBlock);
+    }
+
+    function copyCurrentCode() {
+      const cur = FILES[activeFileIndex];
+      if (!cur || !cur.is_text) return;
+      navigator.clipboard.writeText(cur.content).then(() => {
+        showToast(`คัดลอกโค้ด ${cur.name} สำเร็จแล้ว!`);
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        t.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTabs();
+      displayActiveFile();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คลังโค้ดตัวอย่าง รายวิชาปัญญาประดิษฐ์บนระบบสมองกลฝังตัว | KT-Edu</title>
+  <link rel="icon" type="image/png" href="../images/logo/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 min-h-screen flex flex-col font-sans">
+  <header class="bg-[#173b6b] text-white shadow-md sticky top-0 z-40 border-b-2 border-[#fff200]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="../index.html" class="flex items-center space-x-2.5">
+        <img src="../images/logo/logo_kt_edu.png" alt="Logo" class="h-10 w-10 rounded-full border border-[#fff200] bg-black p-0.5">
+        <div>
+          <div class="font-bold text-sm tracking-wide text-white">KT-Edu Edge AI Platform</div>
+          <div class="text-[10px] text-yellow-300 font-mono">Embedded Artificial Intelligence Code Library</div>
+        </div>
+      </a>
+      <a href="../index.html" class="text-xs bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-arrow-left text-yellow-300"></i> กลับหน้าหลัก
+      </a>
+    </div>
+  </header>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-6">
+    <div class="bg-gradient-to-r from-[#173b6b] to-[#0d2342] text-white p-8 rounded-3xl shadow-xl space-y-2 border-b-4 border-[#fff200]">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 text-xs font-bold border border-yellow-400/30">
+        <i class="fa-solid fa-code"></i> All Code Examples
+      </span>
+      <h1 class="text-2xl font-extrabold">สารบบคลังโค้ดตัวอย่าง แยกรายบทเรียน (Chapter 0–12)</h1>
+      <p class="text-xs text-slate-300">คลิกเลือกบทเรียนเพื่อเปิดดูซอร์สโค้ด คำอธิบาย และดาวน์โหลดไฟล์สคริปต์</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <a href="chapter00_simulation/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter00_simulation</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">โหมดจำลอง (PC/Notebook Webcam Simulator)</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter01/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter01</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 1: การเตรียมความพร้อมระบบและบอร์ดพัฒนา Arduino UNO Q</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter01_env_check/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter01_env_check</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter01_env_check</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter02/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter02</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 2: สถาปัตยกรรมซอฟต์แวร์แบบมอดูล (Modular Brick) และการควบคุมฮาร์ดแวร์</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter02_visual_anomaly/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter02_visual_anomaly</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter02_visual_anomaly</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter03/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter03</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 3: ระบบจัดการฐานข้อมูลขอบและการบันทึกประวัติผ่าน Database-SQL Brick</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter03_database_sql/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter03_database_sql</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter03_database_sql</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter03_object_detection/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter03_object_detection</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter03_object_detection</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter04/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter04</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 4: การรวบรวมและเตรียมชุดข้อมูลผ่าน Edge Impulse Studio</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter04_image_classification/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter04_image_classification</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter04_image_classification</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter05/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter05</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 5: การฝึกสอนและปรับแต่งโมเดลตรวจจับความผิดปกติ (Visual Anomaly Detection)</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter05_eim_deployment/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter05_eim_deployment</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter05_eim_deployment</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter06/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter06</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 6: การคอมไพล์และการติดตั้งโมเดล .eim บนบอร์ดพัฒนา Arduino UNO Q</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter06_visual_anomaly_brick/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter06_visual_anomaly_brick</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter06_visual_anomaly_brick</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter07/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter07</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 7: การพัฒนาแอปพลิเคชัน Edge AI ตรวจสอบผลิตภัณฑ์ในสายการผลิต</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter07_keyword_spotting/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter07_keyword_spotting</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter07_keyword_spotting</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter08/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter08</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 8: การพัฒนาโมเดลตรวจจับวัตถุความเร็วสูงด้วยเทคนิค FOMO</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter08_audio_classification/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter08_audio_classification</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter08_audio_classification</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter09/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter09</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 9: การประยุกต์ใช้โมเดล FOMO ตรวจสอบชิ้นงานร่วมกับระบบขับเคลื่อน</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter09_webcam_object_detection/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter09_webcam_object_detection</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter09_webcam_object_detection</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter10/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter10</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 10: การพัฒนาโมเดลจำแนกประเภทภาพด้วยเทคนิคการเรียนรู้แบบถ่ายโอน (Transfer Learning)</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter10_webcam_image_classification/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter10_webcam_image_classification</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter10_webcam_image_classification</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter11/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter11</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 11: การประมวลผลสัญญาณเสียงดิจิทัลและการรู้จำคำสั่งเสียงภาษาไทย (Thai KWS)</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter11_thai_kws_microphone/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter11_thai_kws_microphone</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter11_thai_kws_microphone</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter12/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter12</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">บทที่ 12: การบูรณาการระบบปัญญาประดิษฐ์พหุโมดอล (Multi-Modal AI) และการสรุปผลเชิงวิศวกรรม</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+      <a href="chapter12_mic_audio_classification/index.html" class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:border-[#173b6b] hover:shadow-md transition flex flex-col justify-between group">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-50 text-[#173b6b] font-mono">chapter12_mic_audio_classification</span>
+            <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-[#173b6b] group-hover:translate-x-1 transition-all"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 group-hover:text-[#173b6b] transition">chapter12_mic_audio_classification</h3>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-folder-open text-yellow-500"></i> เปิดโฟลเดอร์ไฟล์โค้ด
+        </div>
+      </a>
+    </div>
+  </main>
+  <footer class="bg-[#0d2342] text-slate-400 text-xs py-6 border-t-2 border-[#fff200] mt-12 text-center">
+    © 2569 KT-Edu Learning Platform • Embedded Artificial Intelligence Program
+  </footer>
+</body>
+</html>
