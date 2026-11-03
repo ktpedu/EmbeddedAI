@@ -1530,8 +1530,10 @@ function renderWorksheets() {
     const chNum = w.chapter_number;
     const chNumStr = String(chNum).padStart(2, '0');
     const chFile = `chapter${chNumStr}.html`;
-    const pdfUrl = w.file_url || `/worksheets/Lab_Worksheet_${chNumStr}.pdf`;
-    const viewUrl = w.view_url || `/worksheets/worksheet${chNumStr}.html`;
+    const rawPdf = w.file_url || `worksheets/Lab_Worksheet_${chNumStr}.pdf`;
+    const pdfUrl = rawPdf.replace(/^\//, '');
+    const rawView = w.view_url || `worksheets/worksheet${chNumStr}.html`;
+    const viewUrl = rawView.replace(/^\//, '');
     const pdfName = w.file_name || `Lab_Worksheet_${chNumStr}.pdf`;
 
     const mySub = currentStudentId ? (state.submissions || []).find(s => s.student_id === currentStudentId && s.chapter_id === w.chapter_id && s.task_type === 'worksheet') : null;
@@ -1553,7 +1555,7 @@ function renderWorksheets() {
             <a href="${pdfUrl}" download="${pdfName}" class="text-xs btn-depa-blue px-3 py-1.5 rounded-lg font-bold shadow-sm whitespace-nowrap flex items-center gap-1" title="ดาวน์โหลดไฟล์ใบงาน PDF ตรงตามบทเรียน">
               <i class="fa-solid fa-download text-[10px]"></i> ดาวน์โหลด
             </a>
-            <a href="${viewUrl}" target="_blank" class="text-xs bg-white hover:bg-yellow-100 text-[#173b6b] border border-slate-300 px-2.5 py-1.5 rounded-lg font-bold shadow-sm whitespace-nowrap flex items-center gap-1" title="เปิดดูใบงานฉบับเต็ม / สั่งพิมพ์ A4">
+            <a href="${viewUrl}?print=true" target="_blank" class="text-xs bg-white hover:bg-yellow-100 text-[#173b6b] border border-slate-300 px-2.5 py-1.5 rounded-lg font-bold shadow-sm whitespace-nowrap flex items-center gap-1" title="เปิดดูใบงานฉบับเต็ม / สั่งพิมพ์ A4">
               <i class="fa-solid fa-print text-[10px]"></i> พิมพ์
             </a>
           </div>

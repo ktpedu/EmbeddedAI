@@ -369,10 +369,10 @@
       <button onclick="window.print()" class="btn btn-primary" title="สั่งพิมพ์เป็นเอกสารกระดาษ หรือบันทึกเป็น PDF">
         <i class="fa-solid fa-print"></i> พิมพ์ / บันทึก PDF
       </button>
-      <a href="/worksheets/Lab_Worksheet_06.pdf" download="Lab_Worksheet_06.pdf" class="btn btn-success" title="ดาวน์โหลดไฟล์ PDF โดยตรง">
+      <a href="Lab_Worksheet_06.pdf" download="Lab_Worksheet_06.pdf" class="btn btn-success" title="ดาวน์โหลดไฟล์ PDF โดยตรง">
         <i class="fa-solid fa-download"></i> ดาวน์โหลด PDF
       </a>
-      <a href="/chapter06.html" class="btn btn-outline" title="เปิดอ่านเนื้อหาคู่มือบทเรียน">
+      <a href="../chapter06.html" class="btn btn-outline" title="เปิดอ่านเนื้อหาคู่มือบทเรียน">
         <i class="fa-solid fa-book-open"></i> กลับสู่บทเรียน
       </a>
     </div>
@@ -562,5 +562,10 @@
 
   </div>
 
+  <script>
+    if (new URLSearchParams(window.location.search).get('print') === 'true') {
+      window.addEventListener('load', () => setTimeout(() => window.print(), 350));
+    }
+  </script>
 </body>
 </html>
