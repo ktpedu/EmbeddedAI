@@ -428,7 +428,7 @@
         "แปลผลค่าคะแนนความผิดปกติ (Anomaly Mean Score และ Anomaly Max Score) ได้อย่างถูกต้องแม่นยำ"
       ],
       "video_url": "https://www.youtube.com/watch?v=1yEMEJnsrUY",
-      "slide_url": "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu",
+      "slide_url": "https://docs.google.com/presentation/d/1fZu1yrHdW4zMMs1Y6g4eD-zKZxslmdzm/edit?usp=sharing&ouid=103816855237293811302&rtpof=true&sd=true",
       "code_filename": "vad_test.py",
       "duration_hours": 3,
       "pdf_url": "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu",
@@ -4189,6 +4189,13 @@
       "type": "slide",
       "title": "สไลด์บรรยาย: การจำแนกเสียงเฉพาะทางและการบูรณาการระบบ Edge AI",
       "url": "https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu"
+    },
+    {
+      "id": "mat_05_slides",
+      "chapter_id": "ch05",
+      "type": "slide",
+      "title": "สไลด์ประกอบการสอน: Edge Impulse Visual Anomaly Detection (Google Slides)",
+      "url": "https://docs.google.com/presentation/d/1fZu1yrHdW4zMMs1Y6g4eD-zKZxslmdzm/edit?usp=sharing&ouid=103816855237293811302&rtpof=true&sd=true"
     }
   ],
   "scores": [

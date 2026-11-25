@@ -211,6 +211,7 @@ $$\text{Collect Images/Audio} \longrightarrow \text{Label Data} \longrightarrow 
 * **สื่ออ้างอิงประจำบท:**
   * ตอนที่ 1: [Arduino UNO Q (Ep.33) กระบวนการ Deploy ไฟล์โมเดล (.eim) สู่บอร์ด Arduino UNO Q](https://www.youtube.com/watch?v=3mAwLsQjv6U&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=31)
   * ตอนที่ 2 (การแก้ไขไวยากรณ์ในไฟล์ `app.yaml`): [Arduino UNO Q (Ep.35) ถ่ายซ่อมคลิป Ep.33](https://www.youtube.com/watch?v=0g2F-s-7O2U&list=PL_P41WM_1HxGmyUuNPQQsDa-ItaDu5VyU&index=34)
+* **สไลด์ประกอบการสอน (Google Slides):** [Edge Impulse Visual Anomaly Detection](https://docs.google.com/presentation/d/1fZu1yrHdW4zMMs1Y6g4eD-zKZxslmdzm/edit?usp=sharing&ouid=103816855237293811302&rtpof=true&sd=true)
 * **เอกสารประกอบ:** [เอกสาร `Deploy_eim_2_UNOQ.pdf`](https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu)
 * **มาตรฐานการเรียนรู้และตัวชี้วัด:** ว 4.1 (ตัวชี้วัดที่ 1) และ ว 4.2 (ตัวชี้วัดที่ 1)
 

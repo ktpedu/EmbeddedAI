@@ -106,6 +106,7 @@ flowchart TD
 
 ### 📘 บทที่ 5: การฝึกสอนโมเดลตรวจจับความผิดปกติจากภาพ (Visual Anomaly Detection)
 * **ชื่อภาษาอังกฤษ:** Training Visual Anomaly Detection (FOMO-AD) Models
+* **สไลด์ประกอบการสอน (Google Slides):** [Edge Impulse Visual Anomaly Detection](https://docs.google.com/presentation/d/1fZu1yrHdW4zMMs1Y6g4eD-zKZxslmdzm/edit?usp=sharing&ouid=103816855237293811302&rtpof=true&sd=true)
 * **คลิปอาจารย์ธนาที่ต้องดู:**
   - **Ep.30:** [Arduino UNO Q (Ep.30) การเทรนโมเดล AI ให้ใช้กับงาน Visual Anomaly Detection (Brick)](https://www.youtube.com/watch?v=1yEMEJnsrUY)
 * **สาระสำคัญ:** หลักการ One-Class Learning โดยใช้เฉพาะชิ้นงานปกติสมบูรณ์ในการเทรน, การเลือกใช้บล็อกการเรียนรู้ FOMO-AD, การตรวจสอบ 3D Feature Explorer, และการตัดเกณฑ์ค่า Anomaly Score (ปกติ 0-5, ผิดปกติ >20)

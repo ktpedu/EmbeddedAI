@@ -53,6 +53,7 @@ CHAPTER_DATA = {
         'yt': 'https://www.youtube.com/watch?v=1yEMEJnsrUY',
         'pdf': 'https://app.box.com/s/3gl7jnelf5uj39csjocopzsphuc8i0pu',
         'pdf_title': 'เอกสารประกอบการบรรยาย (Box: Visual Anomaly Detection FOMO-AD)',
+        'slide_url': 'https://docs.google.com/presentation/d/1fZu1yrHdW4zMMs1Y6g4eD-zKZxslmdzm/edit?usp=sharing&ouid=103816855237293811302&rtpof=true&sd=true',
         'episodes': [
             {"ep": "Ep.30", "title": "การฝึกสอนโมเดล Visual Anomaly Detection (FOMO-AD)", "video_url": "https://www.youtube.com/watch?v=1yEMEJnsrUY"}
         ]
